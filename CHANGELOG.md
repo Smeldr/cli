@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.3.0] — 2026-05-04
+
+### Added
+
+- `forge-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]`
+  Bootstrap a new Forge instance: validates reachability (`/_health`), creates
+  a named admin token via the bootstrap token, writes `.forge-cli.env`
+  (`FORGE_URL` + `FORGE_TOKEN`), and verifies the new token. Use `--force` to
+  overwrite an existing env file.
+
+---
+
 ## [0.2.1] — 2026-05-02
 
 Patch release — no code changes. Re-tag to refresh module proxy cache after

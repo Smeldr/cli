@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.1.0"
+const cliVersion = "0.3.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -32,6 +32,8 @@ func main() {
 		printUsage(os.Stdout)
 	case "-v", "--version", "version":
 		fmt.Fprintln(os.Stdout, "forge-cli v"+cliVersion)
+	case "init":
+		runInit(os.Args[2:])
 	case "status":
 		runStatus(os.Args[2:])
 	case "token":
@@ -47,9 +49,10 @@ func printUsage(w *os.File) {
 	fmt.Fprintf(w, `forge-cli v%s — Forge operator CLI
 
 Usage:
-  forge-cli <type> <verb> [slug] [flags]   content operations
-  forge-cli token <verb> [args]            token management
-  forge-cli status                         connectivity check
+  forge-cli init [--url URL] [--bootstrap-token TOKEN]   bootstrap a new instance
+  forge-cli <type> <verb> [slug] [flags]                 content operations
+  forge-cli token <verb> [args]                          token management
+  forge-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
   create    --from <file>                  create a new draft
