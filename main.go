@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.8.0"
+const cliVersion = "0.9.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -46,6 +46,8 @@ func main() {
 		runPreviewCommand(os.Args[2:])
 	case "social":
 		runSocialCommand(os.Args[2:])
+	case "audit":
+		runAuditCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -61,6 +63,7 @@ Usage:
   forge-cli webhook <verb> [args]                        webhook management
   forge-cli preview <prefix> <slug>                      generate draft preview URL
   forge-cli social <subcommand> [args]                   forge-social post, credential, and platform management
+  forge-cli audit <subcommand> [args]                    audit trail (Editor role required)
   forge-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
@@ -103,6 +106,9 @@ Social subcommands:
   credential get <id>
   credential delete <id>
   platform configure --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
+
+Audit subcommands (Editor role required):
+  list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]
 
 Environment variables:
   FORGE_URL      base URL of the running Forge instance (required)
