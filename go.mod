@@ -1,3 +1,3 @@
-module forge-cms.dev/forge-cli
+module smeldr.dev/cli
 
 go 1.26.2
