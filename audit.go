@@ -44,7 +44,7 @@ The audit endpoint (GET /_audit) is called directly (not via MCP).
 `)
 }
 
-// auditRecord mirrors forge.AuditRecord for JSON decoding.
+// auditRecord mirrors smeldr.AuditRecord for JSON decoding.
 type auditRecord struct {
 	ID            string    `json:"id"`
 	Timestamp     time.Time `json:"timestamp"`
