@@ -48,6 +48,8 @@ func main() {
 		runSocialCommand(os.Args[2:])
 	case "audit":
 		runAuditCommand(os.Args[2:])
+	case "oauth":
+		runOAuthCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -109,6 +111,9 @@ Social subcommands:
 
 Audit subcommands (Editor role required):
   list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]
+
+OAuth subcommands:
+  revoke <token>                           revoke an OAuth refresh token (RFC 7009)
 
 Environment variables:
   FORGE_URL      base URL of the running Forge instance (required)
