@@ -205,6 +205,38 @@ Each credential may have at most one schedule.
 
 ---
 
+## Block commands
+
+The `block` group manages the block system (T32) over MCP, mirroring the block MCP
+tools. Blocks are addressed by **ID** (no slug).
+
+```bash
+# Nodes (Author role)
+forge-cli block node create --type hero --field Headline="Welcome" --field Subtext="Intro"
+forge-cli block node create --type content_block --fields '{"Title":"Hi","Body":"**bold**"}'
+forge-cli block node update <id> --field Title="New title"
+forge-cli block node get <id>
+forge-cli block node list --type hero --status published      # aligned table
+forge-cli block node list --json                              # raw JSON
+forge-cli block node publish <id>
+forge-cli block node archive <id>
+
+# Composition (Editor role)
+forge-cli block section add <page_id> <block_id>
+forge-cli block section reorder <page_id> <id1,id2,id3>
+forge-cli block section remove <page_id> <block_id>
+forge-cli block item add <collection_id> <block_id>
+forge-cli block item reorder <collection_id> <id1,id2>
+forge-cli block item remove <collection_id> <block_id>
+```
+
+**Field keys are case-sensitive — use PascalCase** (`Title`, `Body`, `Headline`) to
+match the block templates. `--field K=V` preserves the key's case exactly; use
+`--fields '<json>'` for typed or nested values (e.g. a `Link` object). `block node
+list` prints a table by default; add `--json` for raw output.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

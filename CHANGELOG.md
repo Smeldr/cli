@@ -7,6 +7,29 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.10.0] — 2026-06-01
+
+Block-system commands (T32 component 6, Amendment A119) + T77 table output.
+
+> Note: the `0.9.0`–`0.9.3` entries are absent from this CHANGELOG, and the
+> `cliVersion` const had lagged at `0.9.0` despite tags shipping through `0.9.3`
+> (audit list, oauth revoke, etc.). This release resyncs the const to `0.10.0`;
+> the missing 0.9.x entries are a pre-existing gap to backfill separately.
+
+### Added
+
+- `block` command group mirroring the 12 block MCP tools (T32 component 3):
+  - `block node create|update|get|list|publish|archive` (Author role).
+  - `block section add|reorder|remove` and `block item add|reorder|remove` (Editor role).
+- `block node list` prints an aligned table (columns ID, type_name, status, slug);
+  `--json` switches to raw JSON.
+- Block `Fields` keys are case-sensitive PascalCase; `--field K=V` preserves casing
+  (and `--fields <json>` passes an object through verbatim).
+
+### Changed
+
+- `cliVersion` resynced `0.9.0` → `0.10.0`.
+
 ## [0.8.0] — 2026-05-14
 
 forge-social CLI parity — credential get/delete, platform configure, X support.

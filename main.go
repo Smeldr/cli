@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.9.0"
+const cliVersion = "0.10.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -46,6 +46,8 @@ func main() {
 		runPreviewCommand(os.Args[2:])
 	case "social":
 		runSocialCommand(os.Args[2:])
+	case "block":
+		runBlockCommand(os.Args[2:])
 	case "audit":
 		runAuditCommand(os.Args[2:])
 	case "oauth":
@@ -65,6 +67,7 @@ Usage:
   forge-cli webhook <verb> [args]                        webhook management
   forge-cli preview <prefix> <slug>                      generate draft preview URL
   forge-cli social <subcommand> [args]                   forge-social post, credential, and platform management
+  forge-cli block <node|section|item> <verb> [args]      block system: nodes + composition (T32)
   forge-cli audit <subcommand> [args]                    audit trail (Editor role required)
   forge-cli status                                       connectivity check
 
@@ -108,6 +111,16 @@ Social subcommands:
   credential get <id>
   credential delete <id>
   platform configure --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
+
+Block subcommands (T32 — Fields keys are case-sensitive PascalCase):
+  node create  --type <type_name> [--field K=V ...] [--fields <json>]   (Author)
+  node update <id> [--field K=V ...] [--fields <json>]                  (Author)
+  node get|publish|archive <id>                                         (Author)
+  node list [--type <type_name>] [--status <s>] [--json]                (Author)
+  section add|remove <parent_id> <child_id>                             (Editor)
+  section reorder <parent_id> <child_id1,child_id2,...>                 (Editor)
+  item add|remove <parent_id> <child_id>                               (Editor)
+  item reorder <parent_id> <child_id1,child_id2,...>                   (Editor)
 
 Audit subcommands (Editor role required):
   list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]
