@@ -121,9 +121,9 @@ func mockMCP(t *testing.T, result map[string]any, fn func()) (tool string, args 
 	}))
 	t.Cleanup(srv.Close)
 
-	t.Setenv("FORGE_URL", srv.URL)
-	t.Setenv("FORGE_TOKEN", "test-token")
-	t.Setenv("FORGE_MCP_URL", srv.URL)
+	t.Setenv("SMELDR_URL", srv.URL)
+	t.Setenv("SMELDR_TOKEN", "test-token")
+	t.Setenv("SMELDR_MCP_URL", srv.URL)
 
 	stdout = captureStdout(t, fn)
 	return tool, args, stdout

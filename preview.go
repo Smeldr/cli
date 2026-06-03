@@ -71,6 +71,6 @@ Examples:
   forge-cli preview /posts my-draft-post
   forge-cli preview /docs getting-started-draft
 
-The MCP endpoint is used for this operation (FORGE_MCP_URL).
+The MCP endpoint is used for this operation (SMELDR_MCP_URL).
 `)
 }

@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-// runInit bootstraps a new Forge instance by using a bootstrap token to create
-// a named admin token, then writes .forge-cli.env for subsequent CLI use.
+// runInit bootstraps a new Smeldr instance by using a bootstrap token to create
+// a named admin token, then writes .smeldr-cli.env for subsequent CLI use.
 //
 // Usage:
 //
@@ -21,7 +21,7 @@ func runInit(args []string) {
 	bootstrapToken := fs.String("bootstrap-token", "", "Bootstrap token from startup log (required)")
 	name := fs.String("name", "operator", "Name for the created admin token")
 	days := fs.Int("days", 365, "Token TTL in days")
-	force := fs.Bool("force", false, "Overwrite existing .forge-cli.env")
+	force := fs.Bool("force", false, "Overwrite existing .smeldr-cli.env")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: forge-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]")
 		fs.PrintDefaults()
@@ -44,7 +44,7 @@ func runInit(args []string) {
 	}
 	resp.Body.Close()
 	if resp.StatusCode >= 400 {
-		fatal("/_health returned %d — is the Forge instance running at %s?", resp.StatusCode, instanceURL)
+		fatal("/_health returned %d — is the Smeldr instance running at %s?", resp.StatusCode, instanceURL)
 	}
 	fmt.Printf("OK  connected to %s\n", instanceURL)
 
@@ -75,13 +75,13 @@ func runInit(args []string) {
 	fmt.Printf("OK  token %q created (admin, %d days)\n", *name, *days)
 
 	// Step 4: guard against overwriting an existing env file.
-	const envFile = ".forge-cli.env"
+	const envFile = ".smeldr-cli.env"
 	if _, err := os.Stat(envFile); err == nil && !*force {
 		fatal("%s already exists — use --force to overwrite", envFile)
 	}
 
-	// Step 5: write .forge-cli.env.
-	content := fmt.Sprintf("FORGE_URL=%s\nFORGE_TOKEN=%s\n", instanceURL, newToken)
+	// Step 5: write .smeldr-cli.env with the new SMELDR_* variable names (T86).
+	content := fmt.Sprintf("SMELDR_URL=%s\nSMELDR_TOKEN=%s\n", instanceURL, newToken)
 	if err := os.WriteFile(envFile, []byte(content), 0o600); err != nil {
 		fatal("write %s: %v", envFile, err)
 	}

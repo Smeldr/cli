@@ -269,7 +269,7 @@ Subcommands:
   delete    Permanently delete a media record by ID.
 
 Environment:
-  FORGE_URL    base URL of the running Forge instance (required)
-  FORGE_TOKEN  bearer token with Editor or Admin role (required)
+  SMELDR_URL    base URL of the running Smeldr instance (required)
+  SMELDR_TOKEN  bearer token with Editor or Admin role (required)
 `)
 }

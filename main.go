@@ -1,12 +1,14 @@
 // Package main is the forge-cli operator tool. It provides a terminal interface
-// for managing content and tokens on a running Forge instance over HTTP.
+// for managing content and tokens on a running Smeldr instance over HTTP.
 //
 // Configuration is loaded from environment variables, falling back to a
-// .forge-cli.env file in the working directory:
+// .smeldr-cli.env file in the working directory (legacy: .forge-cli.env):
 //
-//	FORGE_URL     — base URL of the running Forge instance (required)
-//	FORGE_TOKEN   — bearer token with appropriate role (required)
-//	FORGE_MCP_URL — MCP message endpoint (default: FORGE_URL/mcp/message)
+//	SMELDR_URL     — base URL of the running Smeldr instance (required)
+//	SMELDR_TOKEN   — bearer token with appropriate role (required)
+//	SMELDR_MCP_URL — MCP message endpoint (default: SMELDR_URL/mcp/message)
+//
+// Legacy FORGE_URL / FORGE_TOKEN / FORGE_MCP_URL are still accepted as fallbacks.
 //
 // Usage:
 //
@@ -20,7 +22,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.10.0"
+const cliVersion = "0.11.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -129,10 +131,13 @@ OAuth subcommands:
   revoke <token>                           revoke an OAuth refresh token (RFC 7009)
 
 Environment variables:
-  FORGE_URL      base URL of the running Forge instance (required)
-  FORGE_TOKEN    bearer token with appropriate role (required)
-  FORGE_MCP_URL  MCP message endpoint (default: FORGE_URL/mcp/message)
+  SMELDR_URL      base URL of the running Smeldr instance (required)
+  SMELDR_TOKEN    bearer token with appropriate role (required)
+  SMELDR_MCP_URL  MCP message endpoint (default: SMELDR_URL/mcp/message)
 
-Configuration can also be stored in .forge-cli.env in the working directory.
+  Legacy FORGE_URL / FORGE_TOKEN / FORGE_MCP_URL are still accepted as fallbacks.
+
+Configuration can also be stored in .smeldr-cli.env in the working directory
+(legacy: .forge-cli.env is still read if present).
 `, cliVersion)
 }

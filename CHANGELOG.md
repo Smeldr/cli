@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.0] — 2026-06-03
+
+### Changed (additive, non-breaking)
+
+- **`SMELDR_*` env vars preferred (Amendment A123, T86 / T78):** `loadConfig` now
+  reads `SMELDR_URL`, `SMELDR_TOKEN`, `SMELDR_MCP_URL` first, falling back to
+  `FORGE_URL`, `FORGE_TOKEN`, `FORGE_MCP_URL` when unset. Both `.smeldr-cli.env`
+  and `.forge-cli.env` are read (`.smeldr-cli.env` loaded first). `forge-cli init`
+  now writes `.smeldr-cli.env` with `SMELDR_*` variable names. Closes T78.
+
+---
+
 ## [0.10.0] — 2026-06-01
 
 Block-system commands (T32 component 6, Amendment A119) + T77 table output.

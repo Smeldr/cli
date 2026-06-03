@@ -50,6 +50,6 @@ Section / item verbs (Editor role):
 Block Fields keys are CASE-SENSITIVE — use PascalCase (Title, Body, Headline)
 to match block templates. Blocks are addressed by ID (no slug).
 
-Operations are sent to the MCP endpoint (FORGE_MCP_URL).
+Operations are sent to the MCP endpoint (SMELDR_MCP_URL).
 `)
 }

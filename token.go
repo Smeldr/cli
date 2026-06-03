@@ -39,7 +39,7 @@ Verbs:
   list                               list all tokens (incl. revoked/expired)
   revoke <id>                        revoke a token by fingerprint ID
 
-The MCP endpoint is used for token operations (FORGE_MCP_URL).
+The MCP endpoint is used for token operations (SMELDR_MCP_URL).
 `)
 }
 

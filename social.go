@@ -64,7 +64,7 @@ Schedule verbs:
 Platform verbs:
   configure  --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
 
-The MCP endpoint is used for all social operations (FORGE_MCP_URL).
+The MCP endpoint is used for all social operations (SMELDR_MCP_URL).
 `)
 }
 

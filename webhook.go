@@ -44,7 +44,7 @@ Verbs:
 Event names follow the pattern <type>.<lifecycle>, e.g.:
   post.created  post.updated  post.published  post.archived  post.deleted
 
-The MCP endpoint is used for webhook operations (FORGE_MCP_URL).
+The MCP endpoint is used for webhook operations (SMELDR_MCP_URL).
 `)
 }
 

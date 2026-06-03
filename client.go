@@ -13,32 +13,45 @@ import (
 
 // Config holds the runtime configuration for forge-cli.
 type Config struct {
-	ForgeURL string // FORGE_URL — base URL of the Forge instance
-	Token    string // FORGE_TOKEN — bearer token
-	MCPURL   string // FORGE_MCP_URL — MCP message endpoint
+	ForgeURL string // SMELDR_URL (or legacy FORGE_URL) — base URL of the Smeldr instance
+	Token    string // SMELDR_TOKEN (or legacy FORGE_TOKEN) — bearer token
+	MCPURL   string // SMELDR_MCP_URL (or legacy FORGE_MCP_URL) — MCP message endpoint
 }
 
-// loadConfig reads FORGE_URL, FORGE_TOKEN, and FORGE_MCP_URL from the
-// environment, falling back to a .forge-cli.env file in the working directory.
-// FORGE_URL and FORGE_TOKEN must be non-empty or an error is returned.
+// loadConfig reads SMELDR_URL, SMELDR_TOKEN, and SMELDR_MCP_URL from the
+// environment, falling back to the legacy FORGE_* names when the SMELDR_*
+// name is unset (dual-read, T86). Env files are loaded in preference order:
+// .smeldr-cli.env first, then .forge-cli.env (legacy).
+// SMELDR_URL (or FORGE_URL) and SMELDR_TOKEN (or FORGE_TOKEN) must be non-empty.
 func loadConfig() (Config, error) {
-	loadEnvFile(".forge-cli.env")
+	loadEnvFile(".smeldr-cli.env") // preferred (T86)
+	loadEnvFile(".forge-cli.env")  // legacy fallback (still read if present)
 
 	cfg := Config{
-		ForgeURL: strings.TrimRight(os.Getenv("FORGE_URL"), "/"),
-		Token:    os.Getenv("FORGE_TOKEN"),
-		MCPURL:   os.Getenv("FORGE_MCP_URL"),
+		ForgeURL: strings.TrimRight(firstNonEmpty(os.Getenv("SMELDR_URL"), os.Getenv("FORGE_URL")), "/"),
+		Token:    firstNonEmpty(os.Getenv("SMELDR_TOKEN"), os.Getenv("FORGE_TOKEN")),
+		MCPURL:   firstNonEmpty(os.Getenv("SMELDR_MCP_URL"), os.Getenv("FORGE_MCP_URL")),
 	}
 	if cfg.ForgeURL == "" {
-		return Config{}, fmt.Errorf("FORGE_URL is not set")
+		return Config{}, fmt.Errorf("SMELDR_URL (or legacy FORGE_URL) is not set")
 	}
 	if cfg.Token == "" {
-		return Config{}, fmt.Errorf("FORGE_TOKEN is not set")
+		return Config{}, fmt.Errorf("SMELDR_TOKEN (or legacy FORGE_TOKEN) is not set")
 	}
 	if cfg.MCPURL == "" {
 		cfg.MCPURL = cfg.ForgeURL + "/mcp/message"
 	}
 	return cfg, nil
+}
+
+// firstNonEmpty returns the first non-empty string from vals, or "".
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // loadEnvFile reads key=value lines from path and sets environment variables
