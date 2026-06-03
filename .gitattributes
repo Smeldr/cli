@@ -1,0 +1,3 @@
+# Normalize line endings on check-in; check out as LF.
+* text=auto eol=lf
+*.exe binary
