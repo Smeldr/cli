@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.12.0] — 2026-06-04
+
+### Added
+
+- **`redirect` command group (Amendment A125, T30):** three Editor-role commands
+  for runtime redirect management (requires `app.Redirects(db)` on the server):
+  - `redirect list` — aligned table output (FROM, TO, CODE, PREFIX); `--json` for raw.
+  - `redirect create --from <path> --to <path> [--code 301|302|410] [--prefix]`
+  - `redirect delete <from-path>`
+
+---
+
 ## [0.11.0] — 2026-06-03
 
 ### Changed (additive, non-breaking)
