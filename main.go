@@ -22,7 +22,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.12.0"
+const cliVersion = "0.13.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -50,6 +50,8 @@ func main() {
 		runSocialCommand(os.Args[2:])
 	case "block":
 		runBlockCommand(os.Args[2:])
+	case "nav":
+		runNavCommand(os.Args[2:])
 	case "redirect":
 		runRedirectCommand(os.Args[2:])
 	case "audit":
@@ -72,6 +74,7 @@ Usage:
   forge-cli preview <prefix> <slug>                      generate draft preview URL
   forge-cli social <subcommand> [args]                   forge-social post, credential, and platform management
   forge-cli block <node|section|item> <verb> [args]      block system: nodes + composition (T32)
+  forge-cli nav <verb> [args]                            navigation tree management (Editor role required)
   forge-cli redirect <verb> [args]                       redirect rule management (Editor role required)
   forge-cli audit <subcommand> [args]                    audit trail (Editor role required)
   forge-cli status                                       connectivity check

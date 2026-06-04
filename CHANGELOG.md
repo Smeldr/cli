@@ -7,6 +7,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.13.0] — 2026-06-04
+
+### Added
+
+- **`nav` command group (Amendment A127, T18):** four Editor-role commands
+  for navigation tree management (requires `app.Nav(...)` on the server):
+  - `nav list` — aligned table output (ID, LABEL, PATH, PARENT, HIDDEN, GHOST, SORT); `--json` for raw.
+  - `nav create --label <label> [--path <path>] [--parent-id <id>] [--module <module>] [--hidden] [--ghost] [--sort-order <n>]`
+  - `nav update <id> [same flags]` — absent fields preserved from stored item.
+  - `nav delete <id>` — deletes item and all its descendants.
+
+---
+
 ## [0.12.0] — 2026-06-04
 
 ### Added

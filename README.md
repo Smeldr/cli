@@ -237,6 +237,41 @@ list` prints a table by default; add `--json` for raw output.
 
 ---
 
+## Nav commands
+
+The `nav` group manages the navigation tree over MCP. Requires Editor role and
+a server configured with DB nav mode (`app.Nav(...)`).
+
+```bash
+# List navigation items (aligned table)
+forge-cli nav list
+
+# List as raw JSON
+forge-cli nav list --json
+
+# Create a navigation item
+forge-cli nav create --label "Learn" --path /learn [--parent-id <id>] [--module <module>] [--hidden] [--ghost] [--sort-order <n>]
+
+# Update a navigation item (absent flags preserve stored values)
+forge-cli nav update <id> [--label <text>] [--path <path>] [--parent-id <id>] [--module <module>] [--hidden] [--ghost] [--sort-order <n>]
+
+# Delete a navigation item and all its descendants
+forge-cli nav delete <id>
+```
+
+`nav list` prints a table with columns: ID, LABEL, PATH, PARENT, HIDDEN, GHOST,
+SORT. Use `--json` for the full raw response including the `module` field.
+
+`nav create` requires `--label`. All other flags are optional. `--hidden` and
+`--ghost` are boolean switches (no value). `--sort-order` takes an integer
+(lower = earlier within the same parent level).
+
+Writes (`create`, `update`, `delete`) require the server to be in DB nav mode;
+`nav list` works in any nav mode. If writes are attempted against a non-DB
+instance the server returns an error that forge-cli surfaces directly.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
