@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// runStatus calls /_health on the configured Forge instance and prints the
+// runStatus calls /_health on the configured Smeldr instance and prints the
 // response. Exits with code 1 if the instance is unreachable or unhealthy.
 func runStatus(args []string) {
 	fs := flag.NewFlagSet("status", flag.ExitOnError)

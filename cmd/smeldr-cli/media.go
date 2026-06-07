@@ -261,7 +261,7 @@ Usage:
   smeldr-cli media delete <id>
 
 Subcommands:
-  upload    Upload a file to the Forge media library.
+  upload    Upload a file to the Smeldr media library.
             --description / -d is required for image files (WCAG 1.1.1).
             Prints the URL of the uploaded file on success.
   list      List all media records. Optional --type / -t filter.

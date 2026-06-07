@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.14.1] — 2026-06-07
+
+### Changed
+
+- Brand-prose sweep (T101, A135): flag description, help text, and comments updated
+  "Forge" → "Smeldr" (init.go, media.go, status.go). Test env-var identifiers
+  `TEST_FORGE_CLI_*` → `TEST_SMELDR_CLI_*`, `__nonexistent_forge_cli_env__` →
+  `__nonexistent_smeldr_cli_env__`. Preserved: `ForgeURL`, FORGE_* fallback docs,
+  README migration note, fixture values. No exported-symbol or behaviour change.
+
+---
+
 ## [0.14.0] — 2026-06-07
 
 ### Breaking

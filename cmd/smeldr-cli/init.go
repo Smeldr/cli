@@ -17,7 +17,7 @@ import (
 //	smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]
 func runInit(args []string) {
 	fs := flag.NewFlagSet("init", flag.ExitOnError)
-	url := fs.String("url", "http://localhost:8080", "Base URL of the Forge instance")
+	url := fs.String("url", "http://localhost:8080", "Base URL of the Smeldr instance")
 	bootstrapToken := fs.String("bootstrap-token", "", "Bootstrap token from startup log (required)")
 	name := fs.String("name", "operator", "Name for the created admin token")
 	days := fs.Int("days", 365, "Token TTL in days")

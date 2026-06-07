@@ -160,19 +160,19 @@ func TestLoadEnvFile_setsUnsetVars(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("TEST_FORGE_CLI_X=hello\n# comment line\nTEST_FORGE_CLI_Y=world\n")
+	f.WriteString("TEST_SMELDR_CLI_X=hello\n# comment line\nTEST_SMELDR_CLI_Y=world\n")
 	f.Close()
 
-	os.Unsetenv("TEST_FORGE_CLI_X")
-	os.Unsetenv("TEST_FORGE_CLI_Y")
+	os.Unsetenv("TEST_SMELDR_CLI_X")
+	os.Unsetenv("TEST_SMELDR_CLI_Y")
 
 	loadEnvFile(f.Name())
 
-	if got := os.Getenv("TEST_FORGE_CLI_X"); got != "hello" {
-		t.Errorf("TEST_FORGE_CLI_X = %q, want %q", got, "hello")
+	if got := os.Getenv("TEST_SMELDR_CLI_X"); got != "hello" {
+		t.Errorf("TEST_SMELDR_CLI_X = %q, want %q", got, "hello")
 	}
-	if got := os.Getenv("TEST_FORGE_CLI_Y"); got != "world" {
-		t.Errorf("TEST_FORGE_CLI_Y = %q, want %q", got, "world")
+	if got := os.Getenv("TEST_SMELDR_CLI_Y"); got != "world" {
+		t.Errorf("TEST_SMELDR_CLI_Y = %q, want %q", got, "world")
 	}
 }
 
@@ -182,20 +182,20 @@ func TestLoadEnvFile_doesNotOverrideSet(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("TEST_FORGE_CLI_Z=from-file\n")
+	f.WriteString("TEST_SMELDR_CLI_Z=from-file\n")
 	f.Close()
 
-	os.Setenv("TEST_FORGE_CLI_Z", "already-set")
-	defer os.Unsetenv("TEST_FORGE_CLI_Z")
+	os.Setenv("TEST_SMELDR_CLI_Z", "already-set")
+	defer os.Unsetenv("TEST_SMELDR_CLI_Z")
 
 	loadEnvFile(f.Name())
 
-	if got := os.Getenv("TEST_FORGE_CLI_Z"); got != "already-set" {
-		t.Errorf("TEST_FORGE_CLI_Z = %q, want %q", got, "already-set")
+	if got := os.Getenv("TEST_SMELDR_CLI_Z"); got != "already-set" {
+		t.Errorf("TEST_SMELDR_CLI_Z = %q, want %q", got, "already-set")
 	}
 }
 
 func TestLoadEnvFile_missingFile(t *testing.T) {
 	// Must not panic or error when the file does not exist.
-	loadEnvFile("__nonexistent_forge_cli_env__")
+	loadEnvFile("__nonexistent_smeldr_cli_env__")
 }
