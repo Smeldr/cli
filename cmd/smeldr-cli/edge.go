@@ -10,7 +10,7 @@ import (
 // (kind="section") or collection items (kind="item"). args begins with the verb.
 func runEdgeCommand(kind string, args []string) {
 	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli block %s <add|reorder|remove> [args]\n", kind)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli block %s <add|reorder|remove> [args]\n", kind)
 		os.Exit(1)
 	}
 	switch args[0] {

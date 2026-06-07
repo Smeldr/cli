@@ -253,12 +253,12 @@ func runMediaDelete(cfg Config, args []string) {
 // ─── usage ────────────────────────────────────────────────────────────────────
 
 func printMediaUsage(w *os.File) {
-	fmt.Fprintf(w, `forge-cli media — file upload, listing, and deletion
+	fmt.Fprintf(w, `smeldr-cli media — file upload, listing, and deletion
 
 Usage:
-  forge-cli media upload <file> [--description <text>]
-  forge-cli media list [--type image|document|video|audio|other]
-  forge-cli media delete <id>
+  smeldr-cli media upload <file> [--description <text>]
+  smeldr-cli media list [--type image|document|video|audio|other]
+  smeldr-cli media delete <id>
 
 Subcommands:
   upload    Upload a file to the Forge media library.

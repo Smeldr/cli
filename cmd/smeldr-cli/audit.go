@@ -29,7 +29,7 @@ func runAuditCommand(args []string) {
 }
 
 func printAuditHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli audit — audit trail (Editor role required)
+	fmt.Fprint(os.Stdout, `smeldr-cli audit — audit trail (Editor role required)
 
 Verbs:
   list [flags]   show audit records, newest first
@@ -64,7 +64,7 @@ func runAuditList(args []string) {
 	typeFlag := fs.String("type", "", "filter by content type")
 	actorFlag := fs.String("actor", "", "filter by actor ID")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli audit list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli audit list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]")
 	}
 	fs.Parse(args) //nolint:errcheck
 

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Config holds the runtime configuration for forge-cli.
+// Config holds the runtime configuration for smeldr-cli.
 type Config struct {
 	ForgeURL string // SMELDR_URL (or legacy FORGE_URL) — base URL of the Smeldr instance
 	Token    string // SMELDR_TOKEN (or legacy FORGE_TOKEN) — bearer token
@@ -167,6 +167,6 @@ func printJSON(raw []byte) error {
 
 // fatal prints a formatted error message to stderr and exits with code 1.
 func fatal(format string, args ...any) {
-	fmt.Fprintf(os.Stderr, "forge-cli: "+format+"\n", args...)
+	fmt.Fprintf(os.Stderr, "smeldr-cli: "+format+"\n", args...)
 	os.Exit(1)
 }

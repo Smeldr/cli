@@ -30,7 +30,7 @@ func runNavCommand(args []string) {
 }
 
 func printNavHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli nav — navigation tree management (Editor role required)
+	fmt.Fprint(os.Stdout, `smeldr-cli nav — navigation tree management (Editor role required)
 
 Verbs:
   list                                         list all navigation items

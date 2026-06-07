@@ -27,7 +27,7 @@ func runBlockCommand(args []string) {
 }
 
 func printBlockHelp(w *os.File) {
-	fmt.Fprint(w, `forge-cli block — block system (T32)
+	fmt.Fprint(w, `smeldr-cli block — block system (T32)
 
 Subcommands:
   node    <verb> [args]   manage blocks (generic content nodes)

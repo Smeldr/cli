@@ -31,7 +31,7 @@ func runSocialCommand(args []string) {
 }
 
 func printSocialHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli social — forge-social management
+	fmt.Fprint(os.Stdout, `smeldr-cli social — social management
 
 Subcommands:
   post        <verb> [args]   manage scheduled social posts
@@ -98,7 +98,7 @@ func runSocialPostCommand(args []string) {
 }
 
 func printSocialPostHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli social post — scheduled post management
+	fmt.Fprint(os.Stdout, `smeldr-cli social post — scheduled post management
 
 Verbs:
   create  --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
@@ -290,7 +290,7 @@ func runSocialCredentialCommand(args []string) {
 }
 
 func printSocialCredentialHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli social credential — platform OAuth credential management
+	fmt.Fprint(os.Stdout, `smeldr-cli social credential — platform OAuth credential management
 
 Verbs:
   create  --platform mastodon|linkedin|x [--instance-url <url>]
@@ -482,7 +482,7 @@ func runSocialScheduleCommand(args []string) {
 }
 
 func printSocialScheduleHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli social schedule — publication schedule management
+	fmt.Fprint(os.Stdout, `smeldr-cli social schedule — publication schedule management
 
 Verbs:
   create  --credential <id> --slot "<weekday> HH:MM IANA/TZ" [--slot ...]
@@ -685,7 +685,7 @@ func runSocialPlatformCommand(args []string) {
 }
 
 func printSocialPlatformHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli social platform — per-platform OAuth app configuration
+	fmt.Fprint(os.Stdout, `smeldr-cli social platform — per-platform OAuth app configuration
 
 Verbs:
   configure  --platform mastodon|linkedin|x \

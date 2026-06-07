@@ -28,7 +28,7 @@ func runRedirectCommand(args []string) {
 }
 
 func printRedirectHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli redirect — runtime redirect management (Editor role required)
+	fmt.Fprint(os.Stdout, `smeldr-cli redirect — runtime redirect management (Editor role required)
 
 Verbs:
   list                                         list all redirect rules

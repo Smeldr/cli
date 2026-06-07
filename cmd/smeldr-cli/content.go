@@ -14,7 +14,7 @@ import (
 // remaining command-line arguments starting with the verb.
 func runContentCommand(typePath string, args []string) {
 	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s <verb> [args]\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s <verb> [args]\n", typePath)
 		fmt.Fprintf(os.Stderr, "Verbs: create update publish unpublish archive delete list get\n")
 		os.Exit(1)
 	}
@@ -46,7 +46,7 @@ func runContentCommand(typePath string, args []string) {
 }
 
 func printContentHelp(typePath string) {
-	fmt.Fprintf(os.Stdout, `forge-cli %s — content operations
+	fmt.Fprintf(os.Stdout, `smeldr-cli %s — content operations
 
 Verbs:
   create    --from <file>       create a new draft
@@ -65,7 +65,7 @@ func runCreate(typePath string, args []string) {
 	fs := flag.NewFlagSet("create", flag.ExitOnError)
 	from := fs.String("from", "", "frontmatter file (use - for stdin)")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s create --from <file>\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s create --from <file>\n", typePath)
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck
@@ -111,7 +111,7 @@ func runUpdate(typePath string, args []string) {
 	fs := flag.NewFlagSet("update", flag.ExitOnError)
 	from := fs.String("from", "", "frontmatter file (use - for stdin)")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s update <slug> --from <file>\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s update <slug> --from <file>\n", typePath)
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck
@@ -170,7 +170,7 @@ func runUpdate(typePath string, args []string) {
 func runLifecycle(typePath, verb string, args []string) {
 	fs := flag.NewFlagSet(verb, flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s %s <slug>\n", typePath, verb)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s %s <slug>\n", typePath, verb)
 	}
 	fs.Parse(args) //nolint:errcheck
 
@@ -223,7 +223,7 @@ func runLifecycle(typePath, verb string, args []string) {
 func runDelete(typePath string, args []string) {
 	fs := flag.NewFlagSet("delete", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s delete <slug>\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s delete <slug>\n", typePath)
 	}
 	fs.Parse(args) //nolint:errcheck
 
@@ -256,7 +256,7 @@ func runList(typePath string, args []string) {
 	fs := flag.NewFlagSet("list", flag.ExitOnError)
 	statusFilter := fs.String("status", "", "filter by status: draft|published|archived|scheduled")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s list [--status <status>]\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s list [--status <status>]\n", typePath)
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck
@@ -305,7 +305,7 @@ func runList(typePath string, args []string) {
 func runGet(typePath string, args []string) {
 	fs := flag.NewFlagSet("get", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli %s get <slug>\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s get <slug>\n", typePath)
 	}
 	fs.Parse(args) //nolint:errcheck
 

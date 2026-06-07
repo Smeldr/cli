@@ -1,9 +1,32 @@
-# Changelog — forge-cli
+# Changelog — smeldr-cli
 
-All notable changes to the `forge-cli` module are documented here.
+All notable changes to the `smeldr-cli` module are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [0.14.0] — 2026-06-07
+
+### Breaking
+
+- **Binary renamed `forge-cli` → `smeldr-cli` (T100, Amendment A133):** The
+  install path is now `go install smeldr.dev/cli/cmd/smeldr-cli@latest`. Update
+  any scripts that invoke `forge-cli` to use `smeldr-cli`.
+
+  Legacy `FORGE_*` env vars and `.forge-cli.env` are still read as fallbacks
+  (T86/T87 compatibility track — no change required for existing env files).
+
+### Added
+
+- **`smeldr-cli logs` command (T79, Amendment A133):** `GET /_logs` directly
+  (not via MCP) — prints a tabwriter table of the in-memory log ring captured by
+  `app.CaptureLogs()` (core v1.36.0+, A128). Requires Admin role.
+  - Flags: `--level LEVEL`, `--limit N`, `--since RFC3339`, `--json`.
+  - Table columns: TIMESTAMP, LEVEL, SEQ, MESSAGE (entries newest-first).
+  - Dropped-entry footer when the ring buffer has overflowed.
+  - Direct HTTP (not MCP) — works even when the MCP layer is the failing component.
 
 ---
 

@@ -31,7 +31,7 @@ func runWebhookCommand(args []string) {
 }
 
 func printWebhookHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli webhook — outbound webhook management (Admin role required)
+	fmt.Fprint(os.Stdout, `smeldr-cli webhook — outbound webhook management (Admin role required)
 
 Verbs:
   create --url <URL> --events <e1,e2,...>  register a new endpoint

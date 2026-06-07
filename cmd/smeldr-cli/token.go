@@ -13,7 +13,7 @@ import (
 // runTokenCommand dispatches token subcommands. args begins with the verb.
 func runTokenCommand(args []string) {
 	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "Usage: forge-cli token <verb> [args]\n")
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli token <verb> [args]\n")
 		fmt.Fprintf(os.Stderr, "Verbs: create list revoke\n")
 		os.Exit(1)
 	}
@@ -32,7 +32,7 @@ func runTokenCommand(args []string) {
 }
 
 func printTokenHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli token — token management (Admin role required)
+	fmt.Fprint(os.Stdout, `smeldr-cli token — token management (Admin role required)
 
 Verbs:
   create <name> <role> <ttl-days>   issue a new named token
@@ -48,7 +48,7 @@ The MCP endpoint is used for token operations (SMELDR_MCP_URL).
 func runTokenCreate(args []string) {
 	fs := flag.NewFlagSet("token create", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli token create <name> <role> <ttl-days>")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days>")
 	}
 	fs.Parse(args) //nolint:errcheck
 
@@ -86,7 +86,7 @@ func runTokenCreate(args []string) {
 func runTokenList(args []string) {
 	fs := flag.NewFlagSet("token list", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli token list")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token list")
 	}
 	fs.Parse(args) //nolint:errcheck
 
@@ -108,7 +108,7 @@ func runTokenList(args []string) {
 func runTokenRevoke(args []string) {
 	fs := flag.NewFlagSet("token revoke", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli token revoke <id>")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token revoke <id>")
 	}
 	fs.Parse(args) //nolint:errcheck
 

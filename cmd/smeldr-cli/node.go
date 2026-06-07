@@ -30,7 +30,7 @@ func (f fieldFlag) Set(v string) error {
 // runNodeCommand dispatches `block node` verbs. args begins with the verb.
 func runNodeCommand(args []string) {
 	if len(args) == 0 {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli block node <verb> [args]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node <verb> [args]")
 		fmt.Fprintln(os.Stderr, "Verbs: create update get list publish archive")
 		os.Exit(1)
 	}
@@ -77,7 +77,7 @@ func runNodeCreate(args []string) {
 	fields := fieldFlag{}
 	fs.Var(fields, "field", "a field as Key=Value, repeatable (keys are case-sensitive PascalCase)")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli block node create --type <type_name> [--field K=V ...] [--fields <json>]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node create --type <type_name> [--field K=V ...] [--fields <json>]")
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck
@@ -106,7 +106,7 @@ func runNodeCreate(args []string) {
 // first positional argument; flags follow it.
 func runNodeUpdate(args []string) {
 	if len(args) < 1 || strings.HasPrefix(args[0], "-") {
-		fatal("block node update requires <id> (forge-cli block node update <id> [--field K=V ...] [--fields <json>])")
+		fatal("block node update requires <id> (smeldr-cli block node update <id> [--field K=V ...] [--fields <json>])")
 	}
 	id := args[0]
 
@@ -115,7 +115,7 @@ func runNodeUpdate(args []string) {
 	fields := fieldFlag{}
 	fs.Var(fields, "field", "a field as Key=Value, repeatable")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli block node update <id> [--field K=V ...] [--fields <json>]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node update <id> [--field K=V ...] [--fields <json>]")
 		fs.PrintDefaults()
 	}
 	fs.Parse(args[1:]) //nolint:errcheck
@@ -167,7 +167,7 @@ func runNodeList(args []string) {
 	status := fs.String("status", "", "filter by status (draft|scheduled|published|archived)")
 	asJSON := fs.Bool("json", false, "output raw JSON instead of a table")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli block node list [--type <type_name>] [--status <s>] [--json]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node list [--type <type_name>] [--status <s>] [--json]")
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck

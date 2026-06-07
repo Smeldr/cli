@@ -11,7 +11,7 @@ import (
 //
 // Usage:
 //
-//	forge-cli preview <prefix> <slug>
+//	smeldr-cli preview <prefix> <slug>
 //
 // prefix must include the leading slash (e.g. "/posts").
 // The full preview URL is printed to stdout.
@@ -24,7 +24,7 @@ func runPreviewCommand(args []string) {
 		return
 	}
 	if len(args) < 2 {
-		fatal("preview requires <prefix> and <slug> — e.g. forge-cli preview /posts my-draft")
+		fatal("preview requires <prefix> and <slug> — e.g. smeldr-cli preview /posts my-draft")
 	}
 
 	prefix := args[0]
@@ -55,10 +55,10 @@ func runPreviewCommand(args []string) {
 }
 
 func printPreviewHelp() {
-	fmt.Fprint(os.Stdout, `forge-cli preview — generate a signed draft preview URL (Admin role required)
+	fmt.Fprint(os.Stdout, `smeldr-cli preview — generate a signed draft preview URL (Admin role required)
 
 Usage:
-  forge-cli preview <prefix> <slug>
+  smeldr-cli preview <prefix> <slug>
 
 Arguments:
   prefix   URL prefix of the content module (e.g. /posts, /docs). Must include the leading slash.
@@ -68,8 +68,8 @@ The preview URL bypasses Published-only visibility for the token lifetime (defau
 The full URL is printed to stdout and can be shared with reviewers without a login.
 
 Examples:
-  forge-cli preview /posts my-draft-post
-  forge-cli preview /docs getting-started-draft
+  smeldr-cli preview /posts my-draft-post
+  smeldr-cli preview /docs getting-started-draft
 
 The MCP endpoint is used for this operation (SMELDR_MCP_URL).
 `)

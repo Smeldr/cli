@@ -14,7 +14,7 @@ import (
 func runStatus(args []string) {
 	fs := flag.NewFlagSet("status", flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli status")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli status")
 	}
 	fs.Parse(args) //nolint:errcheck
 

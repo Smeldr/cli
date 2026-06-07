@@ -1,4 +1,4 @@
-// Package main is the forge-cli operator tool. It provides a terminal interface
+// Package main is the smeldr-cli operator tool. It provides a terminal interface
 // for managing content and tokens on a running Smeldr instance over HTTP.
 //
 // Configuration is loaded from environment variables, falling back to a
@@ -12,9 +12,9 @@
 //
 // Usage:
 //
-//	forge-cli <type> <verb> [slug] [flags]
-//	forge-cli token <verb> [args...]
-//	forge-cli status
+//	smeldr-cli <type> <verb> [slug] [flags]
+//	smeldr-cli token <verb> [args...]
+//	smeldr-cli status
 package main
 
 import (
@@ -22,7 +22,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.13.0"
+const cliVersion = "0.14.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -33,11 +33,13 @@ func main() {
 	case "-h", "--help", "help":
 		printUsage(os.Stdout)
 	case "-v", "--version", "version":
-		fmt.Fprintln(os.Stdout, "forge-cli v"+cliVersion)
+		fmt.Fprintln(os.Stdout, "smeldr-cli v"+cliVersion)
 	case "init":
 		runInit(os.Args[2:])
 	case "status":
 		runStatus(os.Args[2:])
+	case "logs":
+		runLogsCommand(os.Args[2:])
 	case "token":
 		runTokenCommand(os.Args[2:])
 	case "media":
@@ -64,20 +66,21 @@ func main() {
 }
 
 func printUsage(w *os.File) {
-	fmt.Fprintf(w, `forge-cli v%s — Forge operator CLI
+	fmt.Fprintf(w, `smeldr-cli v%s — Smeldr operator CLI
 
 Usage:
-  forge-cli init [--url URL] [--bootstrap-token TOKEN]   bootstrap a new instance
-  forge-cli <type> <verb> [slug] [flags]                 content operations
-  forge-cli token <verb> [args]                          token management
-  forge-cli webhook <verb> [args]                        webhook management
-  forge-cli preview <prefix> <slug>                      generate draft preview URL
-  forge-cli social <subcommand> [args]                   forge-social post, credential, and platform management
-  forge-cli block <node|section|item> <verb> [args]      block system: nodes + composition (T32)
-  forge-cli nav <verb> [args]                            navigation tree management (Editor role required)
-  forge-cli redirect <verb> [args]                       redirect rule management (Editor role required)
-  forge-cli audit <subcommand> [args]                    audit trail (Editor role required)
-  forge-cli status                                       connectivity check
+  smeldr-cli init [--url URL] [--bootstrap-token TOKEN]   bootstrap a new instance
+  smeldr-cli <type> <verb> [slug] [flags]                 content operations
+  smeldr-cli token <verb> [args]                          token management
+  smeldr-cli webhook <verb> [args]                        webhook management
+  smeldr-cli preview <prefix> <slug>                      generate draft preview URL
+  smeldr-cli social <subcommand> [args]                   social post, credential, and platform management
+  smeldr-cli block <node|section|item> <verb> [args]      block system: nodes + composition (T32)
+  smeldr-cli nav <verb> [args]                            navigation tree management (Editor role required)
+  smeldr-cli redirect <verb> [args]                       redirect rule management (Editor role required)
+  smeldr-cli audit <subcommand> [args]                    audit trail (Editor role required)
+  smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
+  smeldr-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
   create    --from <file>                  create a new draft

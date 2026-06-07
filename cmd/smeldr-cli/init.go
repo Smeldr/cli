@@ -14,7 +14,7 @@ import (
 //
 // Usage:
 //
-//	forge-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]
+//	smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]
 func runInit(args []string) {
 	fs := flag.NewFlagSet("init", flag.ExitOnError)
 	url := fs.String("url", "http://localhost:8080", "Base URL of the Forge instance")
@@ -23,7 +23,7 @@ func runInit(args []string) {
 	days := fs.Int("days", 365, "Token TTL in days")
 	force := fs.Bool("force", false, "Overwrite existing .smeldr-cli.env")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: forge-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]")
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck
