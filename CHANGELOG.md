@@ -7,6 +7,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.15.0] — 2026-06-10
+
+### Added
+
+- `smeldr-cli logs` — fetches and displays in-memory captured log entries
+  from a running Smeldr instance (Admin role). Flags: `--level` (min level),
+  `--limit` (most recent N), `--since` (RFC3339), `--json` (raw output).
+  Requires `app.CaptureLogs()` on the server (core v1.36.0+, A128) (T79).
+
+---
+
 ## [0.14.1] — 2026-06-07
 
 ### Changed
