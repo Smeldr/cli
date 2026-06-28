@@ -7,6 +7,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.15.1] — 2026-06-28
+
+### Added
+
+- LICENSE file (MIT). `smeldr-cli` has no AGPL linkage (does not import
+  `smeldr.dev/core`); MIT maximises adoption for an operator tool.
+  Copyright holder: Peter Ravn Thers.
+
+---
+
 ## [0.15.0] — 2026-06-10
 
 ### Added

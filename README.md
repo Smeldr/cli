@@ -314,3 +314,9 @@ instance the server returns an error that smeldr-cli surfaces directly.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
