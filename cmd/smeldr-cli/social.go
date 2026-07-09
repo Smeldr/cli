@@ -64,7 +64,8 @@ Schedule verbs:
 Platform verbs:
   configure  --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
 
-The MCP endpoint is used for all social operations (SMELDR_MCP_URL).
+Post commands use SMELDR_URL + bearer token (SMELDR_TOKEN).
+Credential/schedule/platform commands use the MCP endpoint (SMELDR_MCP_URL).
 `)
 }
 
@@ -147,24 +148,27 @@ func runSocialPostCreate(args []string) {
 		platform = "mastodon"
 	}
 
-	params := map[string]any{
+	payload := map[string]any{
 		"platform":      platform,
 		"credential_id": credential,
 		"body":          body,
 	}
 	if at != "" {
-		params["scheduled_at"] = at
+		payload["scheduled_at"] = at
 	}
 
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "create_scheduled_post", params)
+	raw, code, err := request(cfg, "POST", cfg.ForgeURL+"/social/posts", payload)
 	if err != nil {
 		fatal("%v", err)
 	}
-	if err := printJSON([]byte(text)); err != nil {
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	}
+	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
 	}
 }
@@ -178,20 +182,22 @@ func runSocialPostList(args []string) {
 		}
 	}
 
-	params := map[string]any{}
-	if status != "" {
-		params["status"] = status
-	}
-
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "list_scheduled_posts", params)
+	url := cfg.ForgeURL + "/social/posts"
+	if status != "" {
+		url += "?status=" + status
+	}
+	raw, code, err := request(cfg, "GET", url, nil)
 	if err != nil {
 		fatal("%v", err)
 	}
-	if err := printJSON([]byte(text)); err != nil {
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	}
+	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
 	}
 }
@@ -204,11 +210,14 @@ func runSocialPostGet(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "get_scheduled_post", map[string]any{"slug": args[0]})
+	raw, code, err := request(cfg, "GET", cfg.ForgeURL+"/social/posts/"+args[0], nil)
 	if err != nil {
 		fatal("%v", err)
 	}
-	if err := printJSON([]byte(text)); err != nil {
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	}
+	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
 	}
 }
@@ -221,11 +230,14 @@ func runSocialPostPublish(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "publish_scheduled_post", map[string]any{"slug": args[0]})
+	raw, code, err := request(cfg, "PUT", cfg.ForgeURL+"/social/posts/"+args[0], map[string]any{"status": "queued"})
 	if err != nil {
 		fatal("%v", err)
 	}
-	if err := printJSON([]byte(text)); err != nil {
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	}
+	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
 	}
 }
@@ -238,11 +250,14 @@ func runSocialPostArchive(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "archive_scheduled_post", map[string]any{"slug": args[0]})
+	raw, code, err := request(cfg, "PUT", cfg.ForgeURL+"/social/posts/"+args[0], map[string]any{"status": "archived"})
 	if err != nil {
 		fatal("%v", err)
 	}
-	if err := printJSON([]byte(text)); err != nil {
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	}
+	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
 	}
 }
@@ -255,14 +270,12 @@ func runSocialPostDelete(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "delete_scheduled_post", map[string]any{"slug": args[0]})
+	raw, code, err := request(cfg, "DELETE", cfg.ForgeURL+"/social/posts/"+args[0], nil)
 	if err != nil {
 		fatal("%v", err)
 	}
-	if text != "" {
-		if err := printJSON([]byte(text)); err != nil {
-			fatal("%v", err)
-		}
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
 	}
 }
 
@@ -442,7 +455,7 @@ func runSocialPostQueue(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "create_scheduled_post", map[string]any{
+	raw, code, err := request(cfg, "POST", cfg.ForgeURL+"/social/posts", map[string]any{
 		"platform":      platform,
 		"credential_id": credential,
 		"body":          body,
@@ -451,7 +464,10 @@ func runSocialPostQueue(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	if err := printJSON([]byte(text)); err != nil {
+	if code >= 400 {
+		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	}
+	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
 	}
 }

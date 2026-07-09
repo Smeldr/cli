@@ -7,6 +7,20 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.15.2] — 2026-07-09
+
+### Changed
+
+- `post create`, `post list`, `post get`, `post publish`, `post archive`,
+  `post delete`, `post queue` now call the REST API (`SMELDR_URL` with bearer
+  token `SMELDR_TOKEN`) instead of MCP tools. Endpoints: `POST /social/posts`,
+  `GET /social/posts`, `GET /social/posts/{id}`, `PUT /social/posts/{id}`,
+  `DELETE /social/posts/{id}`. Post delete returns 204 No Content (no output).
+- Help text updated to clarify: post commands use REST API (SMELDR_URL + bearer
+  token); credential, schedule, and platform commands use MCP endpoint (SMELDR_MCP_URL).
+
+---
+
 ## [0.15.1] — 2026-06-28
 
 ### Added
