@@ -2,13 +2,11 @@
 // for managing content and tokens on a running Smeldr instance over HTTP.
 //
 // Configuration is loaded from environment variables, falling back to a
-// .smeldr-cli.env file in the working directory (legacy: .forge-cli.env):
+// .smeldr-cli.env file in the working directory:
 //
 //	SMELDR_URL     — base URL of the running Smeldr instance (required)
 //	SMELDR_TOKEN   — bearer token with appropriate role (required)
 //	SMELDR_MCP_URL — MCP message endpoint (default: SMELDR_URL/mcp/message)
-//
-// Legacy FORGE_URL / FORGE_TOKEN / FORGE_MCP_URL are still accepted as fallbacks.
 //
 // Usage:
 //
@@ -144,9 +142,6 @@ Environment variables:
   SMELDR_TOKEN    bearer token with appropriate role (required)
   SMELDR_MCP_URL  MCP message endpoint (default: SMELDR_URL/mcp/message)
 
-  Legacy FORGE_URL / FORGE_TOKEN / FORGE_MCP_URL are still accepted as fallbacks.
-
-Configuration can also be stored in .smeldr-cli.env in the working directory
-(legacy: .forge-cli.env is still read if present).
+Configuration can also be stored in .smeldr-cli.env in the working directory.
 `, cliVersion)
 }

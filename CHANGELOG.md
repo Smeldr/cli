@@ -7,6 +7,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.15.3] — 2026-08-20
+
+### Removed
+- `loadConfig` no longer falls back to legacy `FORGE_URL`/`FORGE_TOKEN`/`FORGE_MCP_URL` env vars, and `.forge-cli.env` is no longer read as a fallback to `.smeldr-cli.env` — `SMELDR_*` and `.smeldr-cli.env` only now. Extends D53's reasoning (no compatibility twin for a caller that does not exist, `smeldr.dev/core`) from core's exported Go API to this repo's own env-var compatibility, per Peter's own explicit 2026-08-15 go-ahead (T87).
+
+---
+
 ## [0.15.2] — 2026-07-09
 
 ### Changed

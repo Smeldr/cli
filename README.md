@@ -29,7 +29,8 @@ The binary was renamed `forge-cli` → `smeldr-cli` in v0.14.0. Update any scrip
 that invoke `forge-cli` to use `smeldr-cli`. The install path changed to
 `go install smeldr.dev/cli/cmd/smeldr-cli@latest`.
 
-Legacy `FORGE_*` env vars and `.forge-cli.env` are still read as fallbacks.
+Legacy `FORGE_*` env vars and `.forge-cli.env` were read as fallbacks during a
+deprecation window; that window has closed — set the `SMELDR_*` names directly.
 
 ---
 
@@ -46,9 +47,6 @@ SMELDR_MCP_URL=https://mysite.com/mcp/message
 
 `SMELDR_MCP_URL` defaults to `{SMELDR_URL}/mcp/message` if not set. It is only
 required for MCP-based commands (token, block, nav, redirect, social, etc.).
-
-Legacy `FORGE_URL` / `FORGE_TOKEN` / `FORGE_MCP_URL` env vars and `.forge-cli.env`
-are still accepted as fallbacks (T86/T87 compatibility).
 
 ---
 
