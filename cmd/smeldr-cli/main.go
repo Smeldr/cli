@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.15.2"
+const cliVersion = "0.16.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -58,6 +58,8 @@ func main() {
 		runAuditCommand(os.Args[2:])
 	case "oauth":
 		runOAuthCommand(os.Args[2:])
+	case "transition":
+		runTransitionCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -77,6 +79,7 @@ Usage:
   smeldr-cli nav <verb> [args]                            navigation tree management (Editor role required)
   smeldr-cli redirect <verb> [args]                       redirect rule management (Editor role required)
   smeldr-cli audit <subcommand> [args]                    audit trail (Editor role required)
+  smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
   smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
   smeldr-cli status                                       connectivity check
 
@@ -133,6 +136,12 @@ Block subcommands (T32 — Fields keys are case-sensitive PascalCase):
 
 Audit subcommands (Editor role required):
   list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]
+
+Transition (role required by the target StateFlow's own gate):
+  transition <type_name> <slug> --to <state> [--reason <text>]
+  type_name is dynamic (snake_case, e.g. "posts") or compiled (e.g.
+  "Decision", "Task", "Signal"). Example — ratifying a Decision:
+    smeldr-cli transition Decision <slug> --to ratified
 
 OAuth subcommands:
   revoke <token>                           revoke an OAuth refresh token (RFC 7009)

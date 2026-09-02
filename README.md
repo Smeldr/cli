@@ -309,6 +309,27 @@ instance the server returns an error that smeldr-cli surfaces directly.
 
 ---
 
+## Transition command
+
+Moves an item — dynamic content or a compiled type (e.g. `Decision`, `Task`,
+`Signal`) — to a new state via its registered StateFlow, over MCP
+(`transition_item`). Role is enforced by the target transition's own gate,
+not by smeldr-cli.
+
+```bash
+smeldr-cli transition <type_name> <slug> --to <state> [--reason <text>]
+
+# Ratifying a Decision
+smeldr-cli transition Decision <slug> --to ratified
+```
+
+`type_name` is dynamic (snake_case, e.g. `posts`) or compiled (e.g.
+`Decision`). `--reason` is only required if the target transition itself
+requires one — omit it otherwise. `smeldr-cli transition` is a thin CLI
+wrapper: the server performs the same flow validation it always does.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

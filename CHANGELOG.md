@@ -7,6 +7,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.16.0] — 2026-09-02
+
+### Added
+- A new top-level `transition` command: `smeldr-cli transition <type_name> <slug> --to <state> [--reason <text>]`. Moves an item — dynamic content or a compiled type (e.g. `Decision`, `Task`, `Signal`) — to a new state via its registered StateFlow, over MCP (calling the `transition_item` tool). Role is enforced by the target transition's own gate on the server, not by smeldr-cli itself. This is the CLI's first way to reach `transition_item` at all — previously the only way to trigger a StateFlow transition on a compiled type (e.g. ratifying a Decision) was a hand-built raw HTTP request to the MCP endpoint. Example: `smeldr-cli transition Decision <slug> --to ratified`.
+
+### Fixed
+- The `smeldr-cli --version` / `smeldr-cli version` output (the `cliVersion` constant in `main.go`) had been stuck at `0.15.2` since the `v0.15.3` release shipped — the binary's own version output was lying about itself for that whole release. Now correctly reports the version being shipped.
+
+---
+
 ## [0.15.3] — 2026-08-20
 
 ### Removed
