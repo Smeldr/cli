@@ -7,6 +7,13 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.17.0] — 2026-09-03
+
+### Added
+- Two list commands now render an aligned table by default instead of raw JSON: `smeldr-cli <type> list` (e.g. `smeldr-cli posts list`) displays SLUG, STATUS, CREATEDAT, UPDATEDAT; `smeldr-cli social post list` displays ID, PLATFORM, STATUS, SCHEDULED_AT. Both commands gained `--json` (restore raw-JSON output) and `--fields <comma,separated,keys>` (custom columns, case-insensitive key matching). A new shared `keyedTable` helper reuses existing `renderTable`, `findKeyIn`, and `asString` helpers instead of duplicating table logic.
+
+---
+
 ## [0.16.0] — 2026-09-02
 
 ### Added

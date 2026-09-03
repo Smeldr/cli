@@ -272,3 +272,44 @@ func renderTable(headers []string, rows [][]string) string {
 	}
 	return b.String()
 }
+
+// splitFields splits a --fields flag value on commas, trimming whitespace
+// and dropping empty entries.
+func splitFields(s string) []string {
+	parts := strings.Split(s, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// keyedTable renders items (decoded JSON objects) as an aligned table.
+// cols are case-insensitive keys matched via findKeyIn; headers are cols
+// upper-cased. Items that are not JSON objects are skipped. Returns noneMsg
+// unchanged when items is empty.
+func keyedTable(items []any, cols []string, noneMsg string) string {
+	if len(items) == 0 {
+		return noneMsg
+	}
+	headers := make([]string, len(cols))
+	for i, c := range cols {
+		headers[i] = strings.ToUpper(c)
+	}
+	rows := make([][]string, 0, len(items))
+	for _, item := range items {
+		m, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		row := make([]string, len(cols))
+		for i, c := range cols {
+			row[i] = asString(m[findKeyIn(m, c)])
+		}
+		rows = append(rows, row)
+	}
+	return renderTable(headers, rows)
+}

@@ -100,9 +100,11 @@ smeldr-cli posts delete my-post
 ### List
 
 ```bash
-smeldr-cli posts list
+smeldr-cli posts list                          # aligned table (columns: SLUG, STATUS, CREATEDAT, UPDATEDAT)
 smeldr-cli posts list --status draft
 smeldr-cli posts list --status published
+smeldr-cli posts list --json                    # raw JSON
+smeldr-cli posts list --fields slug,title,status  # custom columns (case-insensitive)
 ```
 
 ### Get a single item
@@ -189,7 +191,8 @@ Requires a running [smeldr.dev/social](https://smeldr.dev/docs/social) v0.8.0+ i
 ```bash
 smeldr-cli social post create --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
 smeldr-cli social post queue  --credential <id> --body "..." [--platform mastodon|linkedin|x]
-smeldr-cli social post list   [--status draft|queued|scheduled|published|failed|archived]
+smeldr-cli social post list   [--status draft|queued|scheduled|published|failed|archived] [--json] [--fields <a,b,c>]
+                               # aligned table by default (columns: ID, PLATFORM, STATUS, SCHEDULED_AT)
 smeldr-cli social post get    <slug>
 smeldr-cli social post publish <slug>
 smeldr-cli social post archive <slug>

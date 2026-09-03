@@ -42,7 +42,8 @@ Subcommands:
 Post verbs:
   create  --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
   queue   --credential <id> --body "..." [--platform mastodon|linkedin|x]
-  list    [--status draft|scheduled|queued|published|archived|failed]
+  list    [--status draft|scheduled|queued|published|archived|failed] [--json] [--fields <a,b,c>]
+          aligned table by default (columns: id, platform, status, scheduled_at)
   get     <id>
   publish <id>
   archive <id>
@@ -104,7 +105,8 @@ func printSocialPostHelp() {
 Verbs:
   create  --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
   queue   --credential <id> --body "..." [--platform mastodon|linkedin|x]
-  list    [--status draft|scheduled|queued|published|archived|failed]
+  list    [--status draft|scheduled|queued|published|archived|failed] [--json] [--fields <a,b,c>]
+          aligned table by default (columns: id, platform, status, scheduled_at)
   get     <id>
   publish <id>
   archive <id>
@@ -173,12 +175,27 @@ func runSocialPostCreate(args []string) {
 	}
 }
 
+// defaultSocialPostListFields are the columns shown when post list is
+// called without --fields.
+var defaultSocialPostListFields = []string{"id", "platform", "status", "scheduled_at"}
+
 func runSocialPostList(args []string) {
-	var status string
+	var status, fields string
+	var jsonFlag bool
 	for i := 0; i < len(args); i++ {
-		if args[i] == "--status" && i+1 < len(args) {
-			status = args[i+1]
-			i++
+		switch args[i] {
+		case "--status":
+			if i+1 < len(args) {
+				status = args[i+1]
+				i++
+			}
+		case "--fields":
+			if i+1 < len(args) {
+				fields = args[i+1]
+				i++
+			}
+		case "--json":
+			jsonFlag = true
 		}
 	}
 
@@ -197,9 +214,23 @@ func runSocialPostList(args []string) {
 	if code >= 400 {
 		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
 	}
-	if err := printJSON(raw); err != nil {
-		fatal("%v", err)
+
+	if jsonFlag {
+		if err := printJSON(raw); err != nil {
+			fatal("%v", err)
+		}
+		return
 	}
+
+	var items []any
+	if err := json.Unmarshal(raw, &items); err != nil {
+		fatal("decode post list: %v", err)
+	}
+	cols := defaultSocialPostListFields
+	if fields != "" {
+		cols = splitFields(fields)
+	}
+	fmt.Print(keyedTable(items, cols, "No posts.\n"))
 }
 
 func runSocialPostGet(args []string) {

@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.16.0"
+const cliVersion = "0.17.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -90,7 +90,7 @@ Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
   unpublish <slug>                         revert published item to draft
   archive   <slug>                         transition to archived
   delete    <slug>                         permanently delete
-  list      [--status draft|published|archived|scheduled]
+  list      [--status <s>] [--json] [--fields <a,b,c>]  aligned table by default; --json for raw output
   get       <slug>
 
 Token verbs (Admin role required):
@@ -116,7 +116,7 @@ Media subcommands:
 
 Social subcommands:
   post create --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
-  post list   [--status draft|scheduled|queued|published|archived|failed]
+  post list   [--status draft|scheduled|queued|published|archived|failed] [--json] [--fields <a,b,c>]
   post get|publish|archive|delete <id>
   credential create --platform mastodon|linkedin|x [--instance-url <url>]
   credential list

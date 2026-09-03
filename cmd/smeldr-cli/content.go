@@ -55,7 +55,10 @@ Verbs:
   unpublish <slug>              revert to draft
   archive   <slug>              transition to archived
   delete    <slug>              permanently delete
-  list      [--status <s>]      list items; status: draft|published|archived|scheduled
+  list      [--status <s>] [--json] [--fields <a,b,c>]
+                                 list items; status: draft|published|archived|scheduled;
+                                 aligned table by default (columns: slug, status, createdat,
+                                 updatedat), --json for raw output, --fields for custom columns
   get       <slug>              fetch a single item
 `, typePath)
 }
@@ -252,11 +255,18 @@ func runDelete(typePath string, args []string) {
 
 // runList fetches all items of typePath, applies an optional --status filter,
 // and prints the result as JSON.
+// defaultContentListFields are the columns shown when list is called
+// without --fields — Node's own fixed fields, safe defaults for any
+// content type regardless of its custom schema.
+var defaultContentListFields = []string{"slug", "status", "createdat", "updatedat"}
+
 func runList(typePath string, args []string) {
 	fs := flag.NewFlagSet("list", flag.ExitOnError)
 	statusFilter := fs.String("status", "", "filter by status: draft|published|archived|scheduled")
+	jsonFlag := fs.Bool("json", false, "print raw JSON instead of a table")
+	fieldsFlag := fs.String("fields", "", "comma-separated custom columns (case-insensitive), e.g. --fields slug,title,status")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s list [--status <status>]\n", typePath)
+		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s list [--status <status>] [--json] [--fields <a,b,c>]\n", typePath)
 		fs.PrintDefaults()
 	}
 	fs.Parse(args) //nolint:errcheck
@@ -294,11 +304,20 @@ func runList(typePath string, args []string) {
 		items = filtered
 	}
 
-	out, err := json.MarshalIndent(items, "", "  ")
-	if err != nil {
-		fatal("encode output: %v", err)
+	if *jsonFlag {
+		out, err := json.MarshalIndent(items, "", "  ")
+		if err != nil {
+			fatal("encode output: %v", err)
+		}
+		fmt.Println(string(out))
+		return
 	}
-	fmt.Println(string(out))
+
+	cols := defaultContentListFields
+	if *fieldsFlag != "" {
+		cols = splitFields(*fieldsFlag)
+	}
+	fmt.Print(keyedTable(items, cols, "No items.\n"))
 }
 
 // runGet fetches a single item by slug and prints it as JSON.
