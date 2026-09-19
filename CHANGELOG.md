@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.17.2] — 2026-09-19
+
+### Added
+
+`codecov.yml` (target 24%, ~2 points below today's real 25.8% coverage) and a coverage-upload step in `ci.yml` (`go test -coverprofile=coverage.out ./...` + `codecov/codecov-action@v5`). Neither existed before. Raising coverage toward core's own 96% gate is real, separate, follow-up work — this release only adds the regression gate at today's real baseline.
+
+---
+
 ## [0.17.1] — 2026-09-19
 
 ### Changed

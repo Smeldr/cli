@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.17.1"
+const cliVersion = "0.17.2"
 
 func main() {
 	if len(os.Args) < 2 {
