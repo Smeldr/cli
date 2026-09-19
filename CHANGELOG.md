@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.17.1] — 2026-09-19
+
+### Changed
+
+`cli`'s module root has no importable package — `cmd/smeldr-cli` is the only one, and pkg.go.dev renders whatever package doc comment sits there. Moved `main.go`'s existing, accurate comment (env vars, usage) to a dedicated `doc.go`. Docs-only, no behaviour change.
+
+---
+
 ## [0.17.0] — 2026-09-03
 
 ### Added
