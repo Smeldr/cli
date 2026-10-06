@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.17.2"
+const cliVersion = "0.18.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -45,6 +45,8 @@ func main() {
 		runOAuthCommand(os.Args[2:])
 	case "transition":
 		runTransitionCommand(os.Args[2:])
+	case "standing":
+		runStandingCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -65,6 +67,7 @@ Usage:
   smeldr-cli redirect <verb> [args]                       redirect rule management (Editor role required)
   smeldr-cli audit <subcommand> [args]                    audit trail (Editor role required)
   smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
+  smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
   smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
   smeldr-cli status                                       connectivity check
 
@@ -127,6 +130,11 @@ Transition (role required by the target StateFlow's own gate):
   type_name is dynamic (snake_case, e.g. "posts") or compiled (e.g.
   "Decision", "Task", "Signal"). Example — ratifying a Decision:
     smeldr-cli transition Decision <slug> --to ratified
+
+Standing (Editor role required; needs smeldr.dev/mcp v1.46.0+ on the server):
+  standing <type_name> <slug> [--json]
+  prints holds, ceased or none, or "no standing for this type".
+  "<type> get/list" read the REST routes and do not show standing.
 
 OAuth subcommands:
   revoke <token>                           revoke an OAuth refresh token (RFC 7009)

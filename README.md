@@ -333,6 +333,21 @@ wrapper: the server performs the same flow validation it always does.
 
 ---
 
+## Standing command
+
+Check the standing status of an item (dynamic content or a compiled type, e.g. `Decision`, `Task`) over MCP (`get_item_standing`). An item with standing but no stored row returns `none`; a type with no standing configured returns `no standing for this type`.
+
+```bash
+smeldr-cli standing <type_name> <slug> [--json]
+
+# Check standing for a Decision
+smeldr-cli standing Decision my-decision
+```
+
+Note: `<type> get` and `<type> list` do not display standing. The REST item is the module's own struct, and adding the field would change core's REST output. Use `standing` or the MCP get tools to access standing directly.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.18.0] - 2026-10-06
+
+### Added
+
+- `smeldr-cli standing <type_name> <slug> [--json]`: calls the MCP tool `get_item_standing` and prints `holds`, `ceased`, or `none` (an item of a type that has standing but no stored row is `none`), or `no standing for this type` when the type has no standing. Requires `smeldr.dev/mcp` v1.46.0 or later on the server and Editor role. Type-name is dynamic (snake_case) or compiled (e.g. `Decision`, `Amendment`). `--json` prints the tool's whole result.
+
+### Notes
+
+- `<type> get` and `<type> list` do not display standing: the REST item is the module's own struct, and adding the field there would change core's REST output. Use `standing` or the MCP get tools to access standing directly.
+
+---
+
 ## [0.17.2] — 2026-09-19
 
 ### Added
