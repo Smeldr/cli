@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.21.0"
+const cliVersion = "0.22.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -29,6 +29,8 @@ func main() {
 		runHistoryCommand(os.Args[2:])
 	case "reachability":
 		runReachabilityCommand(os.Args[2:])
+	case "relation":
+		runRelationCommand(os.Args[2:])
 	case "media":
 		runMediaCommand(os.Args[2:])
 	case "webhook":
@@ -150,6 +152,11 @@ Reachability (Author role required; needs smeldr.dev/mcp v1.50.0+ on the server)
                [--depth n] [--max-items n] [--limit n] [--offset n]
   prints what is reachable from one item (live edges only, up to 10 hops) as
   JSON; the walk is capped by --max-items and a cut is reported, not hidden.
+
+Relation (Author role required; needs smeldr.dev/mcp v1.51.0+ on the server):
+  relation withdraw <id> --reason <text>
+  ends a live relation on purpose; its row stays as history with you and the
+  reason on record. An ended relation is refused. Relations are never deleted.
 
 OAuth subcommands:
   revoke <token>                           revoke an OAuth refresh token (RFC 7009)

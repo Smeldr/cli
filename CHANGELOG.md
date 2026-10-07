@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.22.0] - 2026-10-07
+
+### Added
+
+- `smeldr-cli relation withdraw <id> --reason <text>` (A434, relation history): ends a live relation on purpose through the MCP `withdraw_relation` tool. Its row stays as history, ended now, with you as the actor and your reason on record (cause `withdrawn`); asserting the same relation again later starts a new row. A relation that has already ended is refused. The reason is required and checked before any request. Needs smeldr.dev/mcp v1.51.0 or later on the server.
+
+---
+
 ## [0.21.0] - 2026-10-07
 
 ### Added
