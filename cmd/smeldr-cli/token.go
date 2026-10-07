@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -35,7 +36,8 @@ func printTokenHelp() {
 	fmt.Fprint(os.Stdout, `smeldr-cli token — token management (Admin role required)
 
 Verbs:
-  create <name> <role> <ttl-days>   issue a new named token
+  create <name> <role> <ttl-days> [--class agent|job|human]
+                                     issue a new named token; --class classifies its actor
   list                               list all tokens (incl. revoked/expired)
   revoke <id>                        revoke a token by fingerprint ID
 
@@ -46,22 +48,12 @@ The MCP endpoint is used for token operations (SMELDR_MCP_URL).
 // runTokenCreate issues a new named token via the MCP create_token tool.
 // Role must be one of: author, editor, admin.
 func runTokenCreate(args []string) {
-	fs := flag.NewFlagSet("token create", flag.ExitOnError)
-	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days>")
+	name, role, ttl, class, err := parseTokenCreateArgs(args)
+	if errors.Is(err, flag.ErrHelp) {
+		os.Exit(0)
 	}
-	fs.Parse(args) //nolint:errcheck
-
-	if fs.NArg() < 3 {
-		fatal("token create requires: <name> <role> <ttl-days>")
-	}
-	name := fs.Arg(0)
-	role := fs.Arg(1)
-	ttlStr := fs.Arg(2)
-
-	ttl, err := strconv.Atoi(ttlStr)
-	if err != nil || ttl <= 0 {
-		fatal("ttl-days must be a positive integer, got %q", ttlStr)
+	if err != nil {
+		fatal("%v", err)
 	}
 
 	cfg, err := loadConfig()
@@ -69,11 +61,7 @@ func runTokenCreate(args []string) {
 		fatal("%v", err)
 	}
 
-	text, err := mcpCall(cfg, "create_token", map[string]any{
-		"name":            name,
-		"role":            role,
-		"expires_in_days": ttl,
-	})
+	text, err := mcpCall(cfg, "create_token", tokenCreateParams(name, role, ttl, class))
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -179,4 +167,55 @@ func mcpCall(cfg Config, tool string, args map[string]any) (string, error) {
 		return "", fmt.Errorf("tool error: %s", resp.Result.Content[0].Text)
 	}
 	return resp.Result.Content[0].Text, nil
+}
+
+// tokenClasses are the values --class accepts: the actor classifications a token
+// can be minted with (D105).
+var tokenClasses = map[string]bool{"agent": true, "job": true, "human": true}
+
+// parseTokenCreateArgs reads `token create <name> <role> <ttl-days> [--class c]`.
+// The flag may come before or after the positional arguments. An invalid class,
+// a missing argument or a non-positive TTL is an error before any request is made.
+func parseTokenCreateArgs(args []string) (name, role string, ttl int, class string, err error) {
+	fs := flag.NewFlagSet("token create", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	fs.Usage = func() {
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human]")
+	}
+	fs.StringVar(&class, "class", "", "classify the token's actor: agent, job or human (never changes permissions)")
+	if err = fs.Parse(args); err != nil {
+		return "", "", 0, "", err
+	}
+	pos := fs.Args()
+	if len(pos) > 3 {
+		// A flag after the positional arguments: parse the rest again.
+		if err = fs.Parse(pos[3:]); err != nil {
+			return "", "", 0, "", err
+		}
+		if fs.NArg() > 0 {
+			return "", "", 0, "", fmt.Errorf("unexpected argument %q", fs.Arg(0))
+		}
+		pos = pos[:3]
+	}
+	if len(pos) < 3 {
+		return "", "", 0, "", fmt.Errorf("token create requires: <name> <role> <ttl-days>")
+	}
+	ttl, convErr := strconv.Atoi(pos[2])
+	if convErr != nil || ttl <= 0 {
+		return "", "", 0, "", fmt.Errorf("ttl-days must be a positive integer, got %q", pos[2])
+	}
+	if class != "" && !tokenClasses[class] {
+		return "", "", 0, "", fmt.Errorf(`--class must be "agent", "job" or "human", got %q`, class)
+	}
+	return pos[0], pos[1], ttl, class, nil
+}
+
+// tokenCreateParams builds the create_token arguments; actor_class is sent only
+// when a class was given, so an unclassified call is exactly what it always was.
+func tokenCreateParams(name, role string, ttl int, class string) map[string]any {
+	p := map[string]any{"name": name, "role": role, "expires_in_days": ttl}
+	if class != "" {
+		p["actor_class"] = class
+	}
+	return p
 }

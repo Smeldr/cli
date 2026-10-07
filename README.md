@@ -129,6 +129,13 @@ Arguments: `<name> <role> <ttl-days>`. Roles: `guest`, `author`, `editor`,
 `admin`. TTL is an integer number of days (e.g. `30` for 30 days). Prints
 the plaintext token once — copy it immediately.
 
+Optional `--class agent|job|human` classifies the token's actor so
+provenance records that kind for what it does (D105), for example
+`smeldr-cli token create core-implementer editor 90 --class agent`. It never
+grants or changes a permission, you attest it (a token may be human only if every use of it is the direct result of one authenticated request by that person (an interactive session, or a personal token a service uses only inside that person's own request); a token that software uses on its own initiative is never human), and an issued token cannot be classified afterwards: issue
+a new one and revoke the old. Without it the token is unclassified and records
+`unclassified`. Needs smeldr.dev/mcp v1.48.0 on the server.
+
 ### List tokens
 
 ```bash
