@@ -355,6 +355,21 @@ Note: `<type> get` and `<type> list` do not display standing. The REST item is t
 
 ---
 
+## History command
+
+Show one item's history, newest first, over MCP (`get_item_provenance`):
+
+```bash
+smeldr-cli history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]
+
+# The last 20 changes of a Decision, with who made each
+smeldr-cli history Decision my-decision --limit 20
+```
+
+Prints JSON: each entry has its time (UTC, second resolution), verb, from and to state, `gated`, and by view the actor. The default view (`members`) carries `actor_kind` (job, agent, human or unclassified), `actor_id`, `surface` and `reason` on every entry; `--view gated` carries them only on a gated transition. You can only narrow your view. Rows written before core v1.121.0 say `human` for an actor with no classification and mean unclassified, never a verified person. Requires Editor role, smeldr.dev/mcp v1.49.0 or later on the server, and provenance enabled there (an error says so when it is not). Relation events are not part of this read.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

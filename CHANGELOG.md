@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.20.0] - 2026-10-07
+
+### Added
+
+- `smeldr-cli history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]` (A428, D101): prints one item's history, newest first, as JSON, through the MCP `get_item_provenance` tool. By default every entry carries its actor (`actor_kind` job, agent, human or unclassified, `actor_id`, `surface`, `reason`); `--view gated` shows the actor only on a gated transition, and you can only narrow your view. Flags may come before or after the positional arguments, and an invalid value is rejected before any request. Needs smeldr.dev/mcp v1.49.0 or later on the server, with provenance enabled.
+
+### Fixed
+
+- `smeldr-cli --version` reports the real version again. v0.19.0 was tagged with the constant still at 0.18.0, so it printed v0.18.0; v0.20.0 prints v0.20.0.
+
+---
+
 ## [0.19.0] - 2026-10-07
 
 ### Added

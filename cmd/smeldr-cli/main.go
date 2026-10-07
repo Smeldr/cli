@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.18.0"
+const cliVersion = "0.20.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -25,6 +25,8 @@ func main() {
 		runLogsCommand(os.Args[2:])
 	case "token":
 		runTokenCommand(os.Args[2:])
+	case "history":
+		runHistoryCommand(os.Args[2:])
 	case "media":
 		runMediaCommand(os.Args[2:])
 	case "webhook":
@@ -135,6 +137,11 @@ Standing (Editor role required; needs smeldr.dev/mcp v1.46.0+ on the server):
   standing <type_name> <slug> [--json]
   prints holds, ceased or none, or "no standing for this type".
   "<type> get/list" read the REST routes and do not show standing.
+
+History (Editor role required; needs smeldr.dev/mcp v1.49.0+ on the server):
+  history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]
+  prints one item's history, newest first, as JSON; the actor is on every
+  entry for members (D101), only on gated transitions with --view gated.
 
 OAuth subcommands:
   revoke <token>                           revoke an OAuth refresh token (RFC 7009)
