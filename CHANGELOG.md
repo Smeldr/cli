@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.21.0] - 2026-10-07
+
+### Added
+
+- `smeldr-cli reachability <type_name> <id> [--kind k] [--direction incoming|outgoing|both] [--depth n] [--max-items n] [--limit n] [--offset n]` (A430, assessment B3): prints what is reachable from one item in the relation graph, up to 10 hops, as JSON, through the MCP `get_reachability` tool. Live edges only. The walk is capped by `--max-items` (default 500, at most 2000) and a cut is reported as `cut` `{depth, dropped}`, with deeper rings absent rather than shown as empty. Flags may come before or after the positional arguments, and an invalid value is rejected before any request. Needs smeldr.dev/mcp v1.50.0 or later on the server.
+
+---
+
 ## [0.20.0] - 2026-10-07
 
 ### Added

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.20.0"
+const cliVersion = "0.21.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -27,6 +27,8 @@ func main() {
 		runTokenCommand(os.Args[2:])
 	case "history":
 		runHistoryCommand(os.Args[2:])
+	case "reachability":
+		runReachabilityCommand(os.Args[2:])
 	case "media":
 		runMediaCommand(os.Args[2:])
 	case "webhook":
@@ -142,6 +144,12 @@ History (Editor role required; needs smeldr.dev/mcp v1.49.0+ on the server):
   history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]
   prints one item's history, newest first, as JSON; the actor is on every
   entry for members (D101), only on gated transitions with --view gated.
+
+Reachability (Author role required; needs smeldr.dev/mcp v1.50.0+ on the server):
+  reachability <type_name> <id> [--kind k] [--direction incoming|outgoing|both]
+               [--depth n] [--max-items n] [--limit n] [--offset n]
+  prints what is reachable from one item (live edges only, up to 10 hops) as
+  JSON; the walk is capped by --max-items and a cut is reported, not hidden.
 
 OAuth subcommands:
   revoke <token>                           revoke an OAuth refresh token (RFC 7009)

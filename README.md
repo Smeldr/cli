@@ -370,6 +370,21 @@ Prints JSON: each entry has its time (UTC, second resolution), verb, from and to
 
 ---
 
+## Reachability command
+
+Show what is reachable from one item in the relation graph, over MCP (`get_reachability`):
+
+```bash
+smeldr-cli reachability <type_name> <id> [--kind k] [--direction incoming|outgoing|both] [--depth n] [--max-items n] [--limit n] [--offset n]
+
+# Everything within three hops of a post
+smeldr-cli reachability post my-post --depth 3
+```
+
+Prints JSON: `items` (each with its `depth`, type, id and the edge class and confidence of the edge that reached it), `ring_sizes`, `total`, `count` and `cut`. Live edges only. `direction` is the walk's own `incoming`, `outgoing` or `both` (default both). The walk is bounded: `--max-items` (default 500, at most 2000) caps how many items it returns; when the cap stops it, `cut` is `{depth, dropped}` and the deeper rings are absent, never shown as empty. `--limit` (default 100, at most 500) and `--offset` page the items. Graph structure only. Requires Author role and smeldr.dev/mcp v1.50.0 or later on the server.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
