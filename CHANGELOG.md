@@ -11,7 +11,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- `smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human]` classifies the token's actor (A416, D105): provenance then records that kind for everything done with the token. The flag may come before or after the positional arguments, and an invalid value is rejected before any request is made. It is passed to the MCP `create_token` tool's `actor_class` (smeldr.dev/mcp v1.48.0 or later on the server); without `--class` the call is exactly what it was and the token is unclassified. `token list` shows each token's `ActorClass` as the server returns it.
+- `smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human]` classifies the token's actor (A418, D105): provenance then records that kind for everything done with the token. The flag may come before or after the positional arguments, and an invalid value is rejected before any request is made. It is passed to the MCP `create_token` tool's `actor_class` (smeldr.dev/mcp v1.48.0 or later on the server); without `--class` the call is exactly what it was and the token is unclassified. `token list` shows each token's `ActorClass` as the server returns it.
 - The classification never grants or changes a permission, you attest it as the minting Admin (a token may be human only if every use of it is the direct result of one authenticated request by that person (an interactive session, or a personal token a service uses only inside that person's own request); a token that software uses on its own initiative is never human), and an issued token cannot be classified afterwards: issue a new one and revoke the old.
 
 ### Notes
