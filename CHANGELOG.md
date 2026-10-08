@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.23.1] - 2026-10-08
+
+### Changed
+
+- `smeldr-cli webhook` help lists `unpublished`, `scheduled` and `transitioned` events, and says `<type>.updated` is a content edit and `<type>.transitioned` fires once for every status change (A452, core D107). Help text only.
+
+---
+
 ## [0.23.0] - 2026-10-08
 
 ### Added
