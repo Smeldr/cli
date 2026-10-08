@@ -7,6 +7,20 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.23.0] - 2026-10-08
+
+### Added
+
+- `smeldr-cli token create ... [--reason <text>]` and `smeldr-cli token revoke <id> [--reason <text>]` (A444): the reason is stored with the act and shown by `token list` (`Reason`, `RevokeReason`). The flag may come before or after the positional arguments. Free text that people read: never put a token value or other secret in it.
+- `smeldr-cli grant <token-id> <role> [--scope ...] [--anchor <id>] [--reason <text>] [--expires-in-days N]`, `grant revoke <grant-id> [--reason <text>]` and `grant list [<token-id>]` (A448): governance role grants from the command line, over `grant_role`, `revoke_grant` and `list_grants`. It closes the CLI/MCP parity gap for grants. `grant help` prints the usage and sends nothing. `--expires-in-days N` (at most 36500, fractions allowed) time-boxes a grant (A447).
+- `smeldr-cli history Token <fingerprint>` and `history RoleGrant <grant-id>` show a token's or a grant's history through the server's `get_item_provenance`, with no cli change (README).
+
+### Upgrading
+
+- `--reason`, `grant` and `--expires-in-days` need smeldr.dev/mcp v1.53.0 or later on the server.
+
+---
+
 ## [0.22.0] - 2026-10-07
 
 ### Added

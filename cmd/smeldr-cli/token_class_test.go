@@ -21,7 +21,7 @@ func TestParseTokenCreateArgs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			name, role, ttl, class, err := parseTokenCreateArgs(tt.args)
+			name, role, ttl, class, _, err := parseTokenCreateArgs(tt.args)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("err = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -36,11 +36,11 @@ func TestParseTokenCreateArgs(t *testing.T) {
 }
 
 func TestTokenCreateParams(t *testing.T) {
-	p := tokenCreateParams("bot", "editor", 30, "agent")
+	p := tokenCreateParams("bot", "editor", 30, "agent", "")
 	if p["actor_class"] != "agent" || p["name"] != "bot" || p["role"] != "editor" || p["expires_in_days"] != 30 {
 		t.Errorf("params = %v", p)
 	}
-	if _, has := tokenCreateParams("ci", "author", 30, "")["actor_class"]; has {
+	if _, has := tokenCreateParams("ci", "author", 30, "", "")["actor_class"]; has {
 		t.Error("actor_class must be left out when no class was given")
 	}
 }

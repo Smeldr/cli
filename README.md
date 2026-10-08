@@ -136,6 +136,10 @@ grants or changes a permission, you attest it (a token may be human only if ever
 a new one and revoke the old. Without it the token is unclassified and records
 `unclassified`. Needs smeldr.dev/mcp v1.48.0 on the server.
 
+Optional `--reason <text>` says why the token is minted. It is stored with the
+act and shown by `token list`. It is free text that people read: never put a
+token value or other secret in it.
+
 ### List tokens
 
 ```bash
@@ -148,9 +152,22 @@ smeldr-cli token list
 smeldr-cli token revoke <id>
 ```
 
-Revocation is permanent and takes effect immediately.
+Revocation is permanent and takes effect immediately. Optional
+`--reason <text>` says why, stored with the act and shown by `token list`.
 
 ---
+
+## Grant commands
+
+Governance role grants over MCP (`grant_role`, `revoke_grant`, `list_grants`; Admin role required). Held, version pending:
+
+```bash
+smeldr-cli grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>]
+smeldr-cli grant revoke <grant-id> [--reason <text>]
+smeldr-cli grant list [<token-id>]
+```
+
+`<token-id>` is the token's JWT user id (`token_id` from `token create`), not the fingerprint `token list` shows. `--scope` may repeat (static scope patterns `type:id` or `type:*`); `--anchor` is the anchor item id of a dynamic scope. `--reason` is stored with the act and shown by `grant list`: free text that people read, never a token value or other secret. Flags may come before or after the arguments; a missing argument is an error before any request. `--expires-in-days N` makes the grant time-boxed: when it expires it stops authorizing, with no revoke needed, and `grant list` still shows it with its `ExpiresAt`.
 
 ## Status check
 
@@ -367,6 +384,8 @@ smeldr-cli history Decision my-decision --limit 20
 ```
 
 Prints JSON: each entry has its time (UTC, second resolution), verb, from and to state, `gated`, and by view the actor. The default view (`members`) carries `actor_kind` (job, agent, human or unclassified), `actor_id`, `surface` and `reason` on every entry; `--view gated` carries them only on a gated transition. You can only narrow your view. Rows written before core v1.121.0 say `human` for an actor with no classification and mean unclassified, never a verified person. Requires Editor role, smeldr.dev/mcp v1.49.0 or later on the server, and provenance enabled there (an error says so when it is not). Relation events are not part of this read.
+
+A token's or a grant's history works the same way (needs smeldr.dev/mcp v1.53.0 or later on the server): `smeldr-cli history Token <fingerprint-id>` (the id `token list` shows) or `smeldr-cli history RoleGrant <grant-id>`. It shows when it was minted or granted and revoked, by whom and why, also after a grant is gone, and needs the same access as `token list`.
 
 ---
 

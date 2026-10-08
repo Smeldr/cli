@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.22.0"
+const cliVersion = "0.23.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -25,6 +25,8 @@ func main() {
 		runLogsCommand(os.Args[2:])
 	case "token":
 		runTokenCommand(os.Args[2:])
+	case "grant":
+		runGrantCommand(os.Args[2:])
 	case "history":
 		runHistoryCommand(os.Args[2:])
 	case "reachability":
@@ -65,6 +67,7 @@ Usage:
   smeldr-cli init [--url URL] [--bootstrap-token TOKEN]   bootstrap a new instance
   smeldr-cli <type> <verb> [slug] [flags]                 content operations
   smeldr-cli token <verb> [args]                          token management
+  smeldr-cli grant [revoke|list] [args]                   governance role grants (Admin role required)
   smeldr-cli webhook <verb> [args]                        webhook management
   smeldr-cli preview <prefix> <slug>                      generate draft preview URL
   smeldr-cli social <subcommand> [args]                   social post, credential, and platform management
