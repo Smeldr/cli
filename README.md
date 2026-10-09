@@ -159,7 +159,7 @@ Revocation is permanent and takes effect immediately. Optional
 
 ## Grant commands
 
-Governance role grants over MCP (`grant_role`, `revoke_grant`, `list_grants`; Admin role required). Held, version pending:
+Governance role grants over MCP (`grant_role`, `revoke_grant`, `list_grants`; Admin role required; v0.23.0):
 
 ```bash
 smeldr-cli grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>]
@@ -168,6 +168,18 @@ smeldr-cli grant list [<token-id>]
 ```
 
 `<token-id>` is the token's JWT user id (`token_id` from `token create`), not the fingerprint `token list` shows. `--scope` may repeat (static scope patterns `type:id` or `type:*`); `--anchor` is the anchor item id of a dynamic scope. `--reason` is stored with the act and shown by `grant list`: free text that people read, never a token value or other secret. Flags may come before or after the arguments; a missing argument is an error before any request. `--expires-in-days N` makes the grant time-boxed: when it expires it stops authorizing, with no revoke needed, and `grant list` still shows it with its `ExpiresAt`.
+
+## Content-type commands
+
+Runtime-defined content types over MCP (`define_content_type`, `redefine_content_type`, `get_content_type_schema`; v0.24.0):
+
+```bash
+smeldr-cli content-type define --type <name> --fields <file.json> [--url-prefix /p] [--label L]
+smeldr-cli content-type redefine --type <name> --fields <file.json> [--label L] [--reason R]
+smeldr-cli content-type get <name>
+```
+
+`--fields` is a JSON file holding the full field list: an array of `{name, type, required, format, role, description}` objects. A redefinition takes effect at once, for later writes. It may change the label, a field's role, format and description, make a required field optional and add optional fields; it refuses removing a field, changing its type, making it required, a new required field and any URL prefix change. `define` and `redefine` need the `define-type` operation (Admin by default); `get` needs Author. Arguments are checked before any request. `--reason` is stored with the change: free text that people read, never a secret.
 
 ## Status check
 

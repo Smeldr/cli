@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.23.1"
+const cliVersion = "0.24.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -27,6 +27,8 @@ func main() {
 		runTokenCommand(os.Args[2:])
 	case "grant":
 		runGrantCommand(os.Args[2:])
+	case "content-type":
+		runContentTypeCommand(os.Args[2:])
 	case "history":
 		runHistoryCommand(os.Args[2:])
 	case "reachability":
@@ -68,6 +70,7 @@ Usage:
   smeldr-cli <type> <verb> [slug] [flags]                 content operations
   smeldr-cli token <verb> [args]                          token management
   smeldr-cli grant [revoke|list] [args]                   governance role grants (Admin role required)
+  smeldr-cli content-type <define|redefine|get> [args]    runtime-defined content types
   smeldr-cli webhook <verb> [args]                        webhook management
   smeldr-cli preview <prefix> <slug>                      generate draft preview URL
   smeldr-cli social <subcommand> [args]                   social post, credential, and platform management

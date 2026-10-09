@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.24.0] - 2026-10-09
+
+### Added
+
+- `smeldr-cli content-type define`, `content-type redefine` and `content-type get` (A459): runtime-defined content types from the command line, over `define_content_type`, `redefine_content_type` and `get_content_type_schema`. `--fields` reads the full field list from a JSON file. A redefinition may loosen and add, never remove, retype, tighten or move the URL prefix. `content-type redefine` needs smeldr.dev/mcp v1.56.0 or later on the server.
+
+---
+
 ## [0.23.1] - 2026-10-08
 
 ### Changed
