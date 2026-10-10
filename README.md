@@ -416,6 +416,21 @@ Prints JSON: `items` (each with its `depth`, type, id and the edge class and con
 
 ---
 
+## Relation list command
+
+Page through every relation on the instance, over MCP (`list_relations`):
+
+```bash
+smeldr-cli relation list [--kind K] [--source-type T] [--target-type T] [--include-ended] [--as-of RFC3339] [--limit N] [--offset N] [--all] [--json]
+
+# The whole live graph, as one moment
+smeldr-cli relation list --all --limit 500
+```
+
+Prints a table (id, kind, source, target, edge class, end cause), or JSON with `--json`: `edges`, `total`, `count`, `limit`, `offset` and `as_of`. Ordered by created_at, then id. The first page fixes `as_of`; `--all` pages on with it until the total, so the edges describe the graph at that one moment. Live edges only unless `--include-ended`. Source and target ids are the items' raw ID, as the list tools return them. Requires Author role and smeldr.dev/mcp v1.58.0 or later on the server.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

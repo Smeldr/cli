@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.24.0"
+const cliVersion = "0.25.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -159,7 +159,11 @@ Reachability (Author role required; needs smeldr.dev/mcp v1.50.0+ on the server)
   prints what is reachable from one item (live edges only, up to 10 hops) as
   JSON; the walk is capped by --max-items and a cut is reported, not hidden.
 
-Relation (Author role required; needs smeldr.dev/mcp v1.51.0+ on the server):
+Relation (Author role required; needs smeldr.dev/mcp v1.51.0+ on the server, list v1.58.0+):
+  relation list [--kind k] [--source-type t] [--target-type t] [--include-ended]
+                [--as-of RFC3339] [--limit n] [--offset n] [--all] [--json]
+  pages through every relation on the instance; --all pages to the total at
+  the first page's as_of. Prints a table, or JSON with --json.
   relation withdraw <id> --reason <text>
   ends a live relation on purpose; its row stays as history with you and the
   reason on record. An ended relation is refused. Relations are never deleted.

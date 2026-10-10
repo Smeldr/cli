@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.25.0] - 2026-10-10
+
+### Added
+
+- `smeldr-cli relation list` (A464): every relation on the instance, paged, over `list_relations`. Flags `--kind`, `--source-type`, `--target-type`, `--include-ended`, `--as-of`, `--limit`, `--offset`; `--all` pages to the total with the first page's `as_of`, so one command prints the whole graph at one moment; `--json` prints the edges as JSON instead of a table. Arguments are checked before any request. Needs smeldr.dev/mcp v1.58.0 or later on the server.
+
+---
+
 ## [0.24.0] - 2026-10-09
 
 ### Added
