@@ -384,6 +384,22 @@ Note: `<type> get` and `<type> list` do not display standing. The REST item is t
 
 ---
 
+## Migrate-addresses command
+
+Give every record without an address its address (D110) over MCP (`migrate_addresses`). Without `--apply` it is a dry run: the server runs the whole migration and rolls it back, so the report shows exactly what an apply would do and nothing is written. The report is printed to stdout as JSON and a one-line summary to stderr; `--report` also writes the report to a file.
+
+```bash
+smeldr-cli migrate-addresses [--apply] [--report <path>]
+
+# Read what would change, then apply after a backup
+smeldr-cli migrate-addresses --report dry.json
+smeldr-cli migrate-addresses --apply --report apply.json
+```
+
+Applying is a governance act: dry run first, back up the database, and keep the report with the deploy record. Needs the Admin role and smeldr.dev/mcp v1.60.0 or later on the server.
+
+---
+
 ## History command
 
 Show one item's history, newest first, over MCP (`get_item_provenance`):

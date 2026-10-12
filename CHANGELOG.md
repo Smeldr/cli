@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.26.0] - 2026-10-12
+
+### Added
+
+- `smeldr-cli migrate-addresses [--apply] [--report <path>]` (A492): gives every record without an address its address (D110), over the `migrate_addresses` MCP tool. Without `--apply` it is a dry run: the server runs the whole migration and rolls it back, so the report shows what an apply would do and nothing is written. The report is printed to stdout as JSON. A one-line summary (dry run or applied, records numbered per type, renumbered count, how long the database writer was held) goes to stderr, so stdout stays pure JSON. `--report <path>` or `--report=<path>` also writes the report to a file, through a temporary file and a rename, so a failed write leaves no half report. An unknown flag, an argument, or `--report` without a path is refused before any request. Needs the Admin role (the `administer` operation under governance) and smeldr.dev/mcp v1.60.0 with smeldr.dev/core v1.145.0 or later on the server.
+
+---
+
 ## [0.25.0] - 2026-10-10
 
 ### Added

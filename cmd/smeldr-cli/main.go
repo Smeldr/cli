@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.25.0"
+const cliVersion = "0.26.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -57,6 +57,8 @@ func main() {
 		runTransitionCommand(os.Args[2:])
 	case "standing":
 		runStandingCommand(os.Args[2:])
+	case "migrate-addresses":
+		runMigrateAddressesCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -80,6 +82,7 @@ Usage:
   smeldr-cli audit <subcommand> [args]                    audit trail (Editor role required)
   smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
   smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
+  smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
   smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
   smeldr-cli status                                       connectivity check
 
