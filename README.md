@@ -447,6 +447,51 @@ Prints a table (id, kind, source, target, edge class, end cause), or JSON with `
 
 ---
 
+## Subscription commands
+
+Your event subscriptions (D116), over MCP. Requires Author role and smeldr.dev/mcp v1.64.0 or later on the server, on an instance that keeps subscriptions (smeldr.dev/core v1.162.0).
+
+```bash
+smeldr-cli subscription list [--owner <user-id>]
+smeldr-cli subscription get N12
+smeldr-cli subscription create --name "core tasks" --filter '{"types":["Task"],"fields":{"band":["core"]}}'
+smeldr-cli subscription create --name "from a file" --filter @filter.json --include-own
+smeldr-cli subscription update N12 --name renamed --include-own=false
+smeldr-cli subscription pause N12
+smeldr-cli subscription resume N12
+smeldr-cli subscription delete N12
+```
+
+`--filter` is a JSON object (types, events, event_names, from_states, to_states, items, related_to, fields, signal_kinds, addressed_to_me, sent_by_me); the server refuses an unknown key. The three default subscriptions are listed and can be paused, not deleted. `--owner` names another token and needs administer.
+
+## Signal commands
+
+Answer or withdraw an open request (D115), over `answer_signal` and `withdraw_signal`:
+
+```bash
+smeldr-cli signal answer S42 --text "Use the second option" [--ref Task:T7]
+smeldr-cli signal withdraw S42 --reason "No longer needed"
+```
+
+## Watch command
+
+Print the event stream, one JSON line per event:
+
+```bash
+smeldr-cli watch --subscription N12
+smeldr-cli watch --channel core,architect [--include-own]
+smeldr-cli watch --subscription N12 --after <event-id>
+```
+
+- Each event is printed to stdout as it arrives, so the command works as a monitor. Heartbeats are not printed; `caught_up` and `skipped` lines go to stderr.
+- A dropped or cleanly closed connection (a server restart) is reconnected with `?after=<last event id>`, with a backoff of 1 s doubling to 30 s that resets once a connection is up. An event delivered twice is printed once (the last 1,024 IDs are kept).
+- Without `--after`, `--subscription` resumes from the subscription's saved cursor.
+- 400, 401, 403 and 404 end the command with exit 1 and the server's message. Ctrl-C stops it.
+
+Requires Author role; `--subscription` needs smeldr.dev/core v1.162.0 or later on the server.
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

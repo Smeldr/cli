@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.26.0"
+const cliVersion = "0.27.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -59,6 +59,12 @@ func main() {
 		runStandingCommand(os.Args[2:])
 	case "migrate-addresses":
 		runMigrateAddressesCommand(os.Args[2:])
+	case "subscription":
+		runSubscriptionCommand(os.Args[2:])
+	case "signal":
+		runSignalCommand(os.Args[2:])
+	case "watch":
+		runWatchCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -83,6 +89,9 @@ Usage:
   smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
   smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
+  smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
+  smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request (D115)
+  smeldr-cli watch [--subscription <address> | --channel <names>] [--after <id>]   print the event stream
   smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
   smeldr-cli status                                       connectivity check
 

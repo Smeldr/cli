@@ -12,5 +12,12 @@
 //
 //	smeldr-cli <type> <verb> [slug] [flags]
 //	smeldr-cli token <verb> [args...]
+//	smeldr-cli subscription <verb> [args...]
+//	smeldr-cli signal <answer|withdraw> <address> [flags]
+//	smeldr-cli watch --subscription <address>
 //	smeldr-cli status
+//
+// watch prints the event stream, one JSON line per event, and reconnects with
+// ?after=<last event id> when the connection drops or closes, so it can serve
+// as a long-running listener.
 package main
