@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **`smeldr-cli search` (T885, A539).** `search [<text>] [--type t]... [--state s]... [--place p|none] [--limit n] [--offset n] [--json]` over the `search` tool. Prints a table (record, type, state, title, snippet line) and "N of TOTAL". Needs smeldr.dev/mcp v1.65.0 or later on the server.
+
+---
+
 ## [0.27.0] - 2026-10-16
 
 ### Added

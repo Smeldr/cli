@@ -384,6 +384,19 @@ Note: `<type> get` and `<type> list` do not display standing. The REST item is t
 
 ---
 
+## Search command
+
+Find records across every type you may read over MCP (`search`, smeldr.dev/mcp v1.65.0 or later): plain, case-insensitive text, filtered by type, state and place. Records you may not read never appear and never count.
+
+```bash
+smeldr-cli search [<text>] [--type t]... [--state s]... [--place p|none] [--limit n] [--offset n] [--json]
+
+# Proposed Decisions with no Domain or Area (the import inbox)
+smeldr-cli search --type Decision --state proposed --place none
+```
+
+---
+
 ## Migrate-addresses command
 
 Give every record without an address its address (D110) over MCP (`migrate_addresses`). Without `--apply` it is a dry run: the server runs the whole migration and rolls it back, so the report shows exactly what an apply would do and nothing is written. The report is printed to stdout as JSON and a one-line summary to stderr; `--report` also writes the report to a file.

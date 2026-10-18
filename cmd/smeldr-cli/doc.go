@@ -14,6 +14,7 @@
 //	smeldr-cli token <verb> [args...]
 //	smeldr-cli subscription <verb> [args...]
 //	smeldr-cli signal <answer|withdraw> <address> [flags]
+//	smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]
 //	smeldr-cli watch --subscription <address>
 //	smeldr-cli status
 //

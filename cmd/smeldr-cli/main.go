@@ -57,6 +57,8 @@ func main() {
 		runTransitionCommand(os.Args[2:])
 	case "standing":
 		runStandingCommand(os.Args[2:])
+	case "search":
+		runSearchCommand(os.Args[2:])
 	case "migrate-addresses":
 		runMigrateAddressesCommand(os.Args[2:])
 	case "subscription":
@@ -88,6 +90,7 @@ Usage:
   smeldr-cli audit <subcommand> [args]                    audit trail (Editor role required)
   smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
   smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
+  smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]   find records across every type you may read
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
   smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
   smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request (D115)
@@ -159,6 +162,11 @@ Standing (Editor role required; needs smeldr.dev/mcp v1.46.0+ on the server):
   standing <type_name> <slug> [--json]
   prints holds, ceased or none, or "no standing for this type".
   "<type> get/list" read the REST routes and do not show standing.
+
+Search (Author role required; needs smeldr.dev/mcp v1.65.0+ on the server):
+  search [<text>] [--type t]... [--state s]... [--place p|none] [--limit n] [--offset n] [--json]
+  plain text, case-insensitive, across every type you may read; hidden records
+  never appear or count. --place none lists records without a place.
 
 History (Editor role required; needs smeldr.dev/mcp v1.49.0+ on the server):
   history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]
