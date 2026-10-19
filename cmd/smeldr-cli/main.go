@@ -59,6 +59,10 @@ func main() {
 		runStandingCommand(os.Args[2:])
 	case "search":
 		runSearchCommand(os.Args[2:])
+	case "decisions-for-paths":
+		runDecisionsForPathsCommand(os.Args[2:])
+	case "coverage":
+		runCoverageCommand(os.Args[2:])
 	case "migrate-addresses":
 		runMigrateAddressesCommand(os.Args[2:])
 	case "subscription":
@@ -91,6 +95,8 @@ Usage:
   smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
   smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
   smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]   find records across every type you may read
+  smeldr-cli decisions-for-paths --repo owner/name [--stdin] [<path>...]   which Decisions apply to these files
+  smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
   smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
   smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request (D115)
@@ -167,6 +173,11 @@ Search (Author role required; needs smeldr.dev/mcp v1.65.0+ on the server):
   search [<text>] [--type t]... [--state s]... [--place p|none] [--limit n] [--offset n] [--json]
   plain text, case-insensitive, across every type you may read; hidden records
   never appear or count. --place none lists records without a place.
+
+Coverage (needs smeldr.dev/mcp with core's coverage rules on the server):
+  decisions-for-paths --repo owner/name [--stdin] [--no-organization] [--json] [<path>...]   (Author)
+  coverage check --repo owner/name [--stdin] [--json] [<path>...]   (Editor)
+  paths as arguments or one per line with --stdin, for example from git diff --name-only.
 
 History (Editor role required; needs smeldr.dev/mcp v1.49.0+ on the server):
   history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]

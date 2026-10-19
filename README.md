@@ -397,6 +397,20 @@ smeldr-cli search --type Decision --state proposed --place none
 
 ---
 
+## Coverage commands
+
+Ask which Decisions apply to the files you change, and keep coverage rules true (core's coverage rules, D142; `decisions_for_paths` and `check_coverage` over MCP). Paths come as arguments or one per line with `--stdin`.
+
+```bash
+# Which Decisions apply to this branch's changes (Author; at most 3000 paths)
+git diff --name-only main | smeldr-cli decisions-for-paths --repo acme/app --stdin [--no-organization] [--json]
+
+# Count what each coverage rule matches; a rule that matches nothing opens a condition (Editor)
+git ls-files | smeldr-cli coverage check --repo acme/app --stdin [--json]
+```
+
+---
+
 ## Migrate-addresses command
 
 Give every record without an address its address (D110) over MCP (`migrate_addresses`). Without `--apply` it is a dry run: the server runs the whole migration and rolls it back, so the report shows exactly what an apply would do and nothing is written. The report is printed to stdout as JSON and a one-line summary to stderr; `--report` also writes the report to a file.

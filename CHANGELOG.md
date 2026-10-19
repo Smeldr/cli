@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **`decisions-for-paths` and `coverage check` (core T886, A@@CLI@@).** `smeldr-cli decisions-for-paths --repo owner/name [--stdin] [--no-organization] [--json] [<path>...]` calls `decisions_for_paths`: the Areas, the Decisions in force and the uncovered paths for the files you change. `smeldr-cli coverage check --repo owner/name [--stdin] [--json] [<path>...]` calls `check_coverage` with the repository's file list. Paths as arguments or one per line on standard input. Needs smeldr.dev/mcp with core's coverage rules on the server (the places release).
+
+---
+
 ## [0.28.0] - 2026-10-18
 
 ### Added
