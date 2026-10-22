@@ -409,6 +409,12 @@ git diff --name-only main | smeldr-cli decisions-for-paths --repo acme/app --std
 git ls-files | smeldr-cli coverage check --repo acme/app --stdin [--json]
 ```
 
+Ask who approves a place you can read (core T911, D147; `approvers_of` over MCP, Author):
+
+```bash
+smeldr-cli approvers ARE3 [--json]
+```
+
 ---
 
 ## Migrate-addresses command

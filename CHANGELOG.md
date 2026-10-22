@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **`approvers` (core T911, D147).** `smeldr-cli approvers <place> [--json]` lists who approves an Organization, Domain or Area you can read (token name, role, class, anchor address) through the `approvers_of` MCP tool. Needs smeldr.dev/mcp with `approvers_of` on the server.
+
+---
+
 ## [0.29.0] - 2026-10-19
 
 Needs smeldr.dev/mcp v1.66.0 (core v1.168.0) on the server for the coverage commands.

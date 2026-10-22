@@ -61,6 +61,8 @@ func main() {
 		runSearchCommand(os.Args[2:])
 	case "decisions-for-paths":
 		runDecisionsForPathsCommand(os.Args[2:])
+	case "approvers":
+		runApproversCommand(os.Args[2:])
 	case "coverage":
 		runCoverageCommand(os.Args[2:])
 	case "migrate-addresses":
@@ -96,6 +98,7 @@ Usage:
   smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
   smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]   find records across every type you may read
   smeldr-cli decisions-for-paths --repo owner/name [--stdin] [<path>...]   which Decisions apply to these files
+  smeldr-cli approvers <place> [--json]                           who approves an Organization, Domain or Area
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
   smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
@@ -176,6 +179,7 @@ Search (Author role required; needs smeldr.dev/mcp v1.65.0+ on the server):
 
 Coverage (needs smeldr.dev/mcp with core's coverage rules on the server):
   decisions-for-paths --repo owner/name [--stdin] [--no-organization] [--json] [<path>...]   (Author)
+  approvers <place> [--json]   who approves a place you can read (Author; core T911)
   coverage check --repo owner/name [--stdin] [--json] [<path>...]   (Editor)
   paths as arguments or one per line with --stdin, for example from git diff --name-only.
 
