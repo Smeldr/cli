@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.29.0"
+const cliVersion = "0.30.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -67,6 +67,8 @@ func main() {
 		runCoverageCommand(os.Args[2:])
 	case "decision":
 		runDecisionCommand(os.Args[2:])
+	case "check":
+		runCheckCommand(os.Args[2:])
 	case "migrate-addresses":
 		runMigrateAddressesCommand(os.Args[2:])
 	case "subscription":
@@ -103,6 +105,7 @@ Usage:
   smeldr-cli approvers <place> [--json]                           who approves an Organization, Domain or Area
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
   smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources (D148)
+  smeldr-cli check change|merge|answer|show|list ...               the pull request check (core T918)
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
   smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
   smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request (D115)

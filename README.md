@@ -422,6 +422,16 @@ smeldr-cli decision sources D148 [--json]
 smeldr-cli decision sources D148 --set sources.json   # or --set - for stdin, or --clear
 ```
 
+The pull request check (core T918; `check_change`, `record_merge`, `answer_change_check`, `get_change_check`, `list_change_checks` over MCP). `change` and `merge` are for the host's adapter or an operator; `answer` counts when you hold approve-change over the Area:
+
+```bash
+git diff --name-only main | smeldr-cli check change --repo acme/app --number 7 --head <sha> --stdin
+smeldr-cli check merge --repo acme/app --number 7 --head <sha> --merge <sha>
+smeldr-cli check answer CHK3 ARE1 --approve        # or --not-approved --reason "why"
+smeldr-cli check show CHK3
+smeldr-cli check list --repo acme/app --number 7   # or --area ARE1, --decision D7
+```
+
 ---
 
 ## Migrate-addresses command

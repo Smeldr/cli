@@ -41,16 +41,7 @@ func pathArgs(name string, args []string, extra func(flag string) bool) (repo st
 		fatal("%s needs --repo owner/name", name)
 	}
 	if fromStdin {
-		sc := bufio.NewScanner(stdin)
-		sc.Buffer(make([]byte, 64*1024), 1024*1024)
-		for sc.Scan() {
-			if p := strings.TrimSpace(sc.Text()); p != "" {
-				paths = append(paths, p)
-			}
-		}
-		if err := sc.Err(); err != nil {
-			fatal("read paths: %v", err)
-		}
+		paths = append(paths, readLines(stdin)...)
 	}
 	if len(paths) == 0 {
 		fatal("%s needs paths: as arguments, or one per line with --stdin", name)
@@ -210,4 +201,20 @@ smeldr.dev/mcp with core's coverage rules (the places release) on the server.
 Example:
   git ls-files | smeldr-cli coverage check --repo acme/app --stdin
 `)
+}
+
+// readLines reads the non-empty, trimmed lines of r: paths given with --stdin.
+func readLines(r io.Reader) []string {
+	var out []string
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, 64*1024), 1024*1024)
+	for sc.Scan() {
+		if p := strings.TrimSpace(sc.Text()); p != "" {
+			out = append(out, p)
+		}
+	}
+	if err := sc.Err(); err != nil {
+		fatal("read paths: %v", err)
+	}
+	return out
 }
