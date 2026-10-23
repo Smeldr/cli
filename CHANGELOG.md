@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`rests` and `premise confirm` (core T919, D150, D149).** `smeldr-cli rests <type> <item> [--json]` counts live what rests on an item and what it rests on (`get_rest_counts`); `--stored <type>:<item>...` reads what the last sweep stored (`list_rest_counts`). `smeldr-cli premise confirm <condition> --reason "why"` (by the Signal, core T925) or `<decision> <premise> --reason "why"` confirms that a Decision still holds although its premise is not in force (`confirm_premise`). Needs smeldr.dev/mcp with these tools on the server.
+
 ---
 
 ## [0.30.0] - 2026-10-23

@@ -63,6 +63,10 @@ func main() {
 		runDecisionsForPathsCommand(os.Args[2:])
 	case "approvers":
 		runApproversCommand(os.Args[2:])
+	case "rests":
+		runRestsCommand(os.Args[2:])
+	case "premise":
+		runPremiseCommand(os.Args[2:])
 	case "coverage":
 		runCoverageCommand(os.Args[2:])
 	case "decision":
@@ -103,6 +107,8 @@ Usage:
   smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]   find records across every type you may read
   smeldr-cli decisions-for-paths --repo owner/name [--stdin] [<path>...]   which Decisions apply to these files
   smeldr-cli approvers <place> [--json]                           who approves an Organization, Domain or Area
+  smeldr-cli rests <type> <item> | --stored <type>:<item>...      what rests on an item, and what it rests on (D150)
+  smeldr-cli premise confirm <decision> <premise> --reason "why"  a Decision still holds although its premise is not in force (D149)
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
   smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources (D148)
   smeldr-cli check change|merge|answer|show|list ...               the pull request check (core T918)
@@ -186,6 +192,8 @@ Search (Author role required; needs smeldr.dev/mcp v1.65.0+ on the server):
 Coverage (needs smeldr.dev/mcp with core's coverage rules on the server):
   decisions-for-paths --repo owner/name [--stdin] [--no-organization] [--json] [<path>...]   (Author)
   approvers <place> [--json]   who approves a place you can read (Author; core T911)
+  rests <type> <item> [--json]   live rest counts (core T919); --stored <type>:<item>... the swept ones
+  premise confirm <decision> <premise> --reason "why"   (ratify over the Decision's place; core D149)
   coverage check --repo owner/name [--stdin] [--json] [<path>...]   (Editor)
   paths as arguments or one per line with --stdin, for example from git diff --name-only.
 

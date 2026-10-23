@@ -415,6 +415,15 @@ Ask who approves a place you can read (core T911, D147; `approvers_of` over MCP,
 smeldr-cli approvers ARE3 [--json]
 ```
 
+What rests on an item, and what it rests on (core T919, D150; `get_rest_counts` and `list_rest_counts` over MCP): live for one item, or as the last sweep stored them for several. A Decision still holds although its premise is not in force (D149; `confirm_premise`, ratify over its place):
+
+```bash
+smeldr-cli rests Decision D12 [--json]
+smeldr-cli rests --stored Decision:D12 Decision:D13 [--json]
+smeldr-cli premise confirm D12 D7 --reason "the draft is what we follow"
+smeldr-cli premise confirm S3170 --reason "the draft is what we follow"   # by the condition, when you may not read the premise
+```
+
 A Decision's pinned external sources (core T914, D148; `get_decision` and `update_decision` over MCP). Each is a file at a full commit SHA with a role; set them while the Decision is proposed (a ratified one is locked: supersede it to re-pin):
 
 ```bash
