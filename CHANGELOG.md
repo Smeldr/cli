@@ -9,6 +9,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.30.0] - 2026-10-23
+
+Needs smeldr.dev/mcp v1.67.0 (core v1.171.0) on the server for the new commands.
+
 ### Added
 
 - **`check` (core T918).** `smeldr-cli check change|merge|answer|show|list`: the pull request check over its MCP tools. `change` reads paths as arguments or with `--stdin`. Needs smeldr.dev/mcp with the pull request check tools.
