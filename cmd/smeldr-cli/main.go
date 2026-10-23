@@ -65,6 +65,8 @@ func main() {
 		runApproversCommand(os.Args[2:])
 	case "coverage":
 		runCoverageCommand(os.Args[2:])
+	case "decision":
+		runDecisionCommand(os.Args[2:])
 	case "migrate-addresses":
 		runMigrateAddressesCommand(os.Args[2:])
 	case "subscription":
@@ -100,6 +102,7 @@ Usage:
   smeldr-cli decisions-for-paths --repo owner/name [--stdin] [<path>...]   which Decisions apply to these files
   smeldr-cli approvers <place> [--json]                           who approves an Organization, Domain or Area
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
+  smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources (D148)
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
   smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
   smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request (D115)

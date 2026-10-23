@@ -415,6 +415,13 @@ Ask who approves a place you can read (core T911, D147; `approvers_of` over MCP,
 smeldr-cli approvers ARE3 [--json]
 ```
 
+A Decision's pinned external sources (core T914, D148; `get_decision` and `update_decision` over MCP). Each is a file at a full commit SHA with a role; set them while the Decision is proposed (a ratified one is locked: supersede it to re-pin):
+
+```bash
+smeldr-cli decision sources D148 [--json]
+smeldr-cli decision sources D148 --set sources.json   # or --set - for stdin, or --clear
+```
+
 ---
 
 ## Migrate-addresses command

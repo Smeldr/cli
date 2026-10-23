@@ -12,6 +12,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - **`approvers` (core T911, D147).** `smeldr-cli approvers <place> [--json]` lists who approves an Organization, Domain or Area you can read (token name, role, class, anchor address) through the `approvers_of` MCP tool. Needs smeldr.dev/mcp with `approvers_of` on the server.
+- **`decision sources` (core T914, D148).** `smeldr-cli decision sources <decision> [--json]` lists a Decision's pinned sources; `--set <file.json|->` replaces them and `--clear` empties them, through `get_decision` and `update_decision`. Any other `decision` subcommand is the generic content command as before. Needs smeldr.dev/core with Decision sources on the server.
 
 ---
 
