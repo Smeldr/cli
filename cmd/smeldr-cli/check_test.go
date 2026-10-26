@@ -46,6 +46,73 @@ func TestCheckChange_ToolAndArgs(t *testing.T) {
 	}
 }
 
+// TestCheckFlagOrder (T958): every check subcommand reads its flags before,
+// after or among its arguments, and refuses an unknown flag or a stray
+// argument instead of ignoring it.
+func TestCheckFlagOrder(t *testing.T) {
+	repo := []string{"--repo", "acme/app", "--number", "7", "--head", cliHead}
+	cat := func(parts ...[]string) []string {
+		var out []string
+		for _, p := range parts {
+			out = append(out, p...)
+		}
+		return out
+	}
+	for _, tc := range []struct {
+		name    string
+		parse   func([]string) (checkCall, error)
+		args    []string
+		want    map[string]any
+		raw     bool
+		wantErr string
+	}{
+		{"change, flags before", parseCheckChange, cat(repo, []string{"a.go", "b.go"}),
+			map[string]any{"paths": "[a.go b.go]", "number": "7"}, false, ""},
+		{"change, flags after", parseCheckChange, cat([]string{"a.go", "b.go"}, repo, []string{"--files-total", "9"}),
+			map[string]any{"paths": "[a.go b.go]", "files_total": "9"}, false, ""},
+		{"change, mixed", parseCheckChange, cat([]string{"a.go", "--json"}, repo, []string{"b.go"}),
+			map[string]any{"paths": "[a.go b.go]", "repository": "acme/app"}, true, ""},
+		{"change, unknown flag", parseCheckChange, cat(repo, []string{"a.go", "--file-total", "9"}), nil, false, "-file-total"},
+		{"answer, flags after", parseCheckAnswer, []string{"CHK1", "ARE1", "--approve"},
+			map[string]any{"check": "CHK1", "area": "ARE1", "approve": "true"}, false, ""},
+		{"answer, flags before", parseCheckAnswer, []string{"--approve", "CHK1", "ARE1"},
+			map[string]any{"check": "CHK1", "approve": "true"}, false, ""},
+		{"answer, mixed", parseCheckAnswer, []string{"CHK1", "--not-approved", "ARE1", "--reason", "r"},
+			map[string]any{"area": "ARE1", "approve": "false", "reason": "r"}, false, ""},
+		{"answer, a third argument", parseCheckAnswer, []string{"CHK1", "ARE1", "ARE2", "--approve"}, nil, false, "needs --approve or --not-approved"},
+		{"answer, both", parseCheckAnswer, []string{"CHK1", "ARE1", "--approve", "--not-approved"}, nil, false, "needs --approve or --not-approved"},
+		{"answer, neither", parseCheckAnswer, []string{"CHK1", "ARE1"}, nil, false, "needs --approve or --not-approved"},
+		{"answer, misspelled", parseCheckAnswer, []string{"CHK1", "ARE1", "--aprove"}, nil, false, "-aprove"},
+		{"merge, flags after a stray", parseCheckMerge, cat([]string{"x"}, repo, []string{"--merge", cliHead}), nil, false, `check merge: unexpected argument "x"`},
+		{"merge", parseCheckMerge, cat(repo, []string{"--merge", cliHead, "--json"}), map[string]any{"merge_commit": cliHead}, true, ""},
+		{"list, flags", parseCheckList, []string{"--repo", "acme/app", "--number", "2"}, map[string]any{"number": "2"}, false, ""},
+		{"list, a stray", parseCheckList, []string{"--repo", "acme/app", "extra"}, nil, false, `check list: unexpected argument "extra"`},
+		{"show, flag before", parseCheckShow, []string{"--json", "CHK1"}, map[string]any{"check": "CHK1"}, true, ""},
+		{"show, two checks", parseCheckShow, []string{"CHK1", "CHK2"}, nil, false, "check show <check>"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, err := tc.parse(tc.args)
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("err = %v, want %q", err, tc.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			for k, v := range tc.want {
+				if got := fmt.Sprint(c.params[k]); got != v {
+					t.Errorf("%s = %s, want %s (params %v)", k, got, v, c.params)
+				}
+			}
+			if c.raw != tc.raw {
+				t.Errorf("raw = %v", c.raw)
+			}
+		})
+	}
+}
+
 func TestCheckMergeAnswerShowList(t *testing.T) {
 	tool, args, out := mockMCP(t, map[string]any{"covered": true, "head_mismatch": true, "opened": []any{"ARE1"}}, func() {
 		runCheckCommand([]string{"merge", "--repo", "acme/app", "--number", "7", "--head", cliHead, "--merge", cliHead})

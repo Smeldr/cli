@@ -453,6 +453,8 @@ smeldr-cli check show CHK3
 smeldr-cli check list --repo acme/app --number 7   # or --area ARE1, --decision D7
 ```
 
+Flags may come before or after the arguments (`check answer --approve CHK3 ARE1` reads the same). An unknown flag or a stray argument is refused, never ignored; after `--` every argument is a path.
+
 ---
 
 ## Migrate-addresses command

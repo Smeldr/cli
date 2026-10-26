@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -98,53 +99,96 @@ func printCheckView(text string, raw bool) {
 	w.Flush()
 }
 
-func runCheckChange(args []string) {
-	fs := flag.NewFlagSet("check change", flag.ExitOnError)
+// checkCall is a check subcommand's parsed arguments: the tool to call, its
+// parameters, and whether to print the raw JSON.
+type checkCall struct {
+	tool   string
+	params map[string]any
+	raw    bool
+}
+
+// newCheckFlags is a subcommand's FlagSet: errors are returned, never an
+// exit, so an unknown flag is refused with its name (T958).
+func newCheckFlags(name string) *flag.FlagSet {
+	fs := flag.NewFlagSet(name, flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	return fs
+}
+
+// noPositionals refuses a stray argument to a subcommand that takes none.
+func noPositionals(name string, pos []string) error {
+	if len(pos) > 0 {
+		return fmt.Errorf("%s: unexpected argument %q", name, pos[0])
+	}
+	return nil
+}
+
+// runCheckCall runs a parsed subcommand, or exits with err.
+func runCheckCall(c checkCall, err error) string {
+	if err != nil {
+		fatal("%v", err)
+	}
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal("%v", err)
+	}
+	text, err := mcpCall(cfg, c.tool, c.params)
+	if err != nil {
+		fatal("%v", err)
+	}
+	return text
+}
+
+func parseCheckChange(args []string) (checkCall, error) {
+	fs := newCheckFlags("check change")
 	repo := fs.String("repo", "", "repository, owner/name")
 	number := fs.Int("number", 0, "pull request number")
 	head := fs.String("head", "", "head commit, 40-character SHA")
 	total := fs.Int("files-total", 0, "files the change touches (default: the paths given)")
 	fromStdin := fs.Bool("stdin", false, "read paths one per line from stdin")
 	raw := fs.Bool("json", false, "raw JSON")
-	_ = fs.Parse(args)
-	paths := fs.Args()
+	paths, err := parseInterspersed(fs, args)
+	if err != nil {
+		return checkCall{}, err
+	}
 	if *fromStdin {
 		paths = append(paths, readLines(stdin)...)
 	}
 	if *repo == "" || *number <= 0 || *head == "" || len(paths) == 0 {
-		fatal("check change needs --repo, --number, --head and paths (arguments or --stdin)")
+		return checkCall{}, errors.New("check change needs --repo, --number, --head and paths (arguments or --stdin)")
 	}
-	cfg, err := loadConfig()
-	if err != nil {
-		fatal("%v", err)
-	}
-	text, err := mcpCall(cfg, "check_change", map[string]any{"repository": *repo, "number": *number, "head_commit": *head, "paths": paths, "files_total": *total})
-	if err != nil {
-		fatal("%v", err)
-	}
-	printCheckView(text, *raw)
+	return checkCall{"check_change", map[string]any{"repository": *repo, "number": *number, "head_commit": *head, "paths": paths, "files_total": *total}, *raw}, nil
 }
 
-func runCheckMerge(args []string) {
-	fs := flag.NewFlagSet("check merge", flag.ExitOnError)
+func runCheckChange(args []string) {
+	c, err := parseCheckChange(args)
+	printCheckView(runCheckCall(c, err), c.raw)
+}
+
+func parseCheckMerge(args []string) (checkCall, error) {
+	fs := newCheckFlags("check merge")
 	repo := fs.String("repo", "", "repository, owner/name")
 	number := fs.Int("number", 0, "pull request number")
 	head := fs.String("head", "", "the merged head commit")
 	merge := fs.String("merge", "", "the commit on the default branch")
 	raw := fs.Bool("json", false, "raw JSON")
-	_ = fs.Parse(args)
+	pos, err := parseInterspersed(fs, args)
+	if err == nil {
+		err = noPositionals("check merge", pos)
+	}
+	if err != nil {
+		return checkCall{}, err
+	}
 	if *repo == "" || *number <= 0 || *head == "" || *merge == "" {
-		fatal("check merge needs --repo, --number, --head and --merge")
+		return checkCall{}, errors.New("check merge needs --repo, --number, --head and --merge")
 	}
-	cfg, err := loadConfig()
-	if err != nil {
-		fatal("%v", err)
-	}
-	text, err := mcpCall(cfg, "record_merge", map[string]any{"repository": *repo, "number": *number, "head_commit": *head, "merge_commit": *merge})
-	if err != nil {
-		fatal("%v", err)
-	}
-	if *raw {
+	return checkCall{"record_merge", map[string]any{"repository": *repo, "number": *number, "head_commit": *head, "merge_commit": *merge}, *raw}, nil
+}
+
+func runCheckMerge(args []string) {
+	c, err := parseCheckMerge(args)
+	text := runCheckCall(c, err)
+	if c.raw {
 		if err := printJSON([]byte(text)); err != nil {
 			fatal("%v", err)
 		}
@@ -171,53 +215,47 @@ func runCheckMerge(args []string) {
 	}
 }
 
-func runCheckAnswer(args []string) {
-	fs := flag.NewFlagSet("check answer", flag.ExitOnError)
+func parseCheckAnswer(args []string) (checkCall, error) {
+	fs := newCheckFlags("check answer")
 	approve := fs.Bool("approve", false, "approve the change for the Area")
 	reject := fs.Bool("not-approved", false, "do not approve it (needs --reason)")
 	reason := fs.String("reason", "", "why")
 	raw := fs.Bool("json", false, "raw JSON")
-	_ = fs.Parse(args)
-	if fs.NArg() != 2 || *approve == *reject {
-		fatal("check answer <check> <area> needs --approve or --not-approved (with --reason)")
-	}
-	cfg, err := loadConfig()
+	pos, err := parseInterspersed(fs, args)
 	if err != nil {
-		fatal("%v", err)
+		return checkCall{}, err
 	}
-	text, err := mcpCall(cfg, "answer_change_check", map[string]any{"check": fs.Arg(0), "area": fs.Arg(1), "approve": *approve, "reason": *reason})
+	if len(pos) != 2 || *approve == *reject {
+		return checkCall{}, errors.New("check answer <check> <area> needs --approve or --not-approved (with --reason)")
+	}
+	return checkCall{"answer_change_check", map[string]any{"check": pos[0], "area": pos[1], "approve": *approve, "reason": *reason}, *raw}, nil
+}
+
+func runCheckAnswer(args []string) {
+	c, err := parseCheckAnswer(args)
+	printCheckView(runCheckCall(c, err), c.raw)
+}
+
+func parseCheckShow(args []string) (checkCall, error) {
+	fs := newCheckFlags("check show")
+	raw := fs.Bool("json", false, "raw JSON")
+	pos, err := parseInterspersed(fs, args)
 	if err != nil {
-		fatal("%v", err)
+		return checkCall{}, err
 	}
-	printCheckView(text, *raw)
+	if len(pos) != 1 {
+		return checkCall{}, errors.New("check show <check> [--json]")
+	}
+	return checkCall{"get_change_check", map[string]any{"check": pos[0]}, *raw}, nil
 }
 
 func runCheckShow(args []string) {
-	raw := false
-	var check string
-	for _, a := range args {
-		if a == "--json" {
-			raw = true
-		} else {
-			check = a
-		}
-	}
-	if check == "" {
-		fatal("check show <check> [--json]")
-	}
-	cfg, err := loadConfig()
-	if err != nil {
-		fatal("%v", err)
-	}
-	text, err := mcpCall(cfg, "get_change_check", map[string]any{"check": check})
-	if err != nil {
-		fatal("%v", err)
-	}
-	printCheckView(text, raw)
+	c, err := parseCheckShow(args)
+	printCheckView(runCheckCall(c, err), c.raw)
 }
 
-func runCheckList(args []string) {
-	fs := flag.NewFlagSet("check list", flag.ExitOnError)
+func parseCheckList(args []string) (checkCall, error) {
+	fs := newCheckFlags("check list")
 	repo := fs.String("repo", "", "repository, owner/name")
 	number := fs.Int("number", 0, "pull request number")
 	area := fs.String("area", "", "an Area")
@@ -225,16 +263,20 @@ func runCheckList(args []string) {
 	status := fs.String("status", "", "one state")
 	limit := fs.Int("limit", 0, "at most this many")
 	raw := fs.Bool("json", false, "raw JSON")
-	_ = fs.Parse(args)
-	cfg, err := loadConfig()
-	if err != nil {
-		fatal("%v", err)
+	pos, err := parseInterspersed(fs, args)
+	if err == nil {
+		err = noPositionals("check list", pos)
 	}
-	text, err := mcpCall(cfg, "list_change_checks", map[string]any{"repository": *repo, "number": *number, "area": *area, "decision": *decision, "status": *status, "limit": *limit})
 	if err != nil {
-		fatal("%v", err)
+		return checkCall{}, err
 	}
-	if *raw {
+	return checkCall{"list_change_checks", map[string]any{"repository": *repo, "number": *number, "area": *area, "decision": *decision, "status": *status, "limit": *limit}, *raw}, nil
+}
+
+func runCheckList(args []string) {
+	c, err := parseCheckList(args)
+	text := runCheckCall(c, err)
+	if c.raw {
 		if err := printJSON([]byte(text)); err != nil {
 			fatal("%v", err)
 		}
@@ -273,6 +315,9 @@ Usage:
   smeldr-cli check answer <check> <area> --approve | --not-approved --reason "why" [--json]
   smeldr-cli check show   <check> [--json]
   smeldr-cli check list   [--repo owner/name [--number N]] [--area A] [--decision D] [--status S] [--limit N] [--json]
+
+Flags may come before or after the arguments; an unknown flag or a stray
+argument is refused.
 
 change and merge are for the host's adapter or an operator (check_change
 capability). answer counts when you hold approve-change over that Area (or

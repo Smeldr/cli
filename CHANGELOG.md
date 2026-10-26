@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`check` reads flags after the arguments (core T958, A589).** `check change`, `merge`, `answer`, `list` and `show` read their flags before, after or among the positional arguments. Before, Go's flag parsing stopped at the first argument, so `check answer CHK3 ARE1 --approve` (the README's own example) was refused as a wrong argument count, and `check change ... a.go --files-total 9` sent `--files-total` and `9` as paths. An unknown flag or a stray argument is now refused with its name, never ignored; `--` ends the flags. New `parseInterspersed` in flags.go.
+
 ---
 
 ## [0.33.0] - 2026-10-26
