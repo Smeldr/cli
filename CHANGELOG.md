@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.33.1] - 2026-10-26
+
 ### Fixed
 
 - **Every command reads flags after its arguments (core T959, A590).** The content commands (`create`, `update`, `publish`/`unpublish`/`archive`, `delete`, `list`, `get`), `audit list`, `init`, `logs`, `status`, `token list` and `block node create`/`update`/`list` read their flags before, after or among their arguments, through `parseInterspersed` (T958). Before, a flag after an argument was dropped: `posts update my-post --from post.md` was refused for a missing `--from`, `posts delete a b` deleted only `a`, and `posts list x --json` printed a table. Now a stray argument is refused (`delete: unexpected argument "b"`). `grant`, `history`, `reachability`, `relation withdraw`, `token revoke` and `token create` replace their hand-written re-parse with the same helper, so a flag between two arguments (`grant tok --reason r steward`) works too. An unknown flag now exits 1, like every other refusal, instead of the flag package's 2; `-h` still exits 0. `logs --json` no longer drops printJSON's error.
