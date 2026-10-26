@@ -415,6 +415,12 @@ Ask who approves a place you can read (core T911, D147; `approvers_of` over MCP,
 smeldr-cli approvers ARE3 [--json]
 ```
 
+Ask who administers the instance (core T944, D154; `administrators` over MCP): token name and class only, for any token, also one with no grant yet:
+
+```bash
+smeldr-cli administrators [--json]
+```
+
 What rests on an item, and what it rests on (core T919, D150; `get_rest_counts` and `list_rest_counts` over MCP): live for one item, or as the last sweep stored them for several. A Decision still holds although its premise is not in force (D149; `confirm_premise`, ratify over its place):
 
 ```bash

@@ -11,6 +11,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.32.0] - 2026-10-26
+
+Needs smeldr.dev/mcp v1.69.0 (core v1.175.0) on the server for the new command.
+
+### Added
+
+- **`administrators` (core T944, D154).** `smeldr-cli administrators [--json]` lists who administers the instance (token name and class) through the `administrators` MCP tool. Any token may ask, also one with no grant yet. Needs smeldr.dev/mcp with `administrators` on the server.
+
+---
+
 ## [0.31.0] - 2026-10-23
 
 Needs smeldr.dev/mcp v1.68.0 (core v1.172.0) on the server for the new commands.
