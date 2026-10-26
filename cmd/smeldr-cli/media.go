@@ -50,41 +50,19 @@ func runMediaCommand(args []string) {
 // ─── upload ───────────────────────────────────────────────────────────────────
 
 func runMediaUpload(cfg Config, args []string) {
-	var (
-		filePath    string
-		description string
-	)
-
-	// Parse positional and flag args.
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--description", "-d":
-			i++
-			if i >= len(args) {
-				fmt.Fprintln(os.Stderr, "error: --description requires a value")
-				os.Exit(1)
-			}
-			description = args[i]
-		default:
-			if filePath == "" && !strings.HasPrefix(args[i], "-") {
-				filePath = args[i]
-			} else {
-				fmt.Fprintf(os.Stderr, "unknown flag: %s\n", args[i])
-				os.Exit(1)
-			}
-		}
-	}
+	fs := newCommandFlags("media upload")
+	var description string
+	fs.StringVar(&description, "description", "", "alt text, required for images (WCAG 1.1.1)")
+	fs.StringVar(&description, "d", "", "short for --description")
+	filePath := parseCommandFlags(fs, args, 1, "media upload requires a file path")[0]
 
 	if filePath == "" {
-		fmt.Fprintln(os.Stderr, "error: file path required")
-		printMediaUsage(os.Stderr)
-		os.Exit(1)
+		fatal("media upload requires a file path")
 	}
 
 	ext := strings.ToLower(filepath.Ext(filePath))
 	if imageExts[ext] && description == "" {
-		fmt.Fprintln(os.Stderr, "error: --description is required for image files (WCAG 1.1.1)")
-		os.Exit(1)
+		fatal("--description is required for image files (WCAG 1.1.1)")
 	}
 
 	data, err := os.ReadFile(filePath)
@@ -165,21 +143,11 @@ func multipartRequest(cfg Config, url string, body io.Reader, contentType string
 // ─── list ─────────────────────────────────────────────────────────────────────
 
 func runMediaList(cfg Config, args []string) {
+	fs := newCommandFlags("media list")
 	var typeFilter string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--type", "-t":
-			i++
-			if i >= len(args) {
-				fmt.Fprintln(os.Stderr, "error: --type requires a value")
-				os.Exit(1)
-			}
-			typeFilter = args[i]
-		default:
-			fmt.Fprintf(os.Stderr, "unknown flag: %s\n", args[i])
-			os.Exit(1)
-		}
-	}
+	fs.StringVar(&typeFilter, "type", "", "only this media type")
+	fs.StringVar(&typeFilter, "t", "", "short for --type")
+	parseCommandFlags(fs, args, 0, "")
 
 	url := cfg.ForgeURL + "/media"
 	if typeFilter != "" {
@@ -227,11 +195,8 @@ func runMediaList(cfg Config, args []string) {
 // ─── delete ───────────────────────────────────────────────────────────────────
 
 func runMediaDelete(cfg Config, args []string) {
-	if len(args) == 0 {
-		fmt.Fprintln(os.Stderr, "error: media delete requires an ID")
-		os.Exit(1)
-	}
-	id := args[0]
+	fs := newCommandFlags("media delete")
+	id := parseCommandFlags(fs, args, 1, "media delete requires an ID")[0]
 
 	raw, code, err := request(cfg, http.MethodDelete, cfg.ForgeURL+"/media/"+id, nil)
 	if err != nil {

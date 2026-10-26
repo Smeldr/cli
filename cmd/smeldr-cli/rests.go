@@ -32,19 +32,13 @@ func runRestsCommand(args []string) {
 		printRestsHelp()
 		return
 	}
-	// Flags may come anywhere, as in approvers.
-	stored, raw := false, false
-	var rest []string
-	for _, a := range args {
-		switch a {
-		case "--stored":
-			stored = true
-		case "--json":
-			raw = true
-		default:
-			rest = append(rest, a)
-		}
-	}
+	fs := newCommandFlags("rests")
+	fs.Usage = printRestsHelp
+	storedF := fs.Bool("stored", false, "the last sweep's stored counts")
+	asJSON := fs.Bool("json", false, "raw JSON")
+	// list_rest_counts takes at most 200 items.
+	rest := parseCommandFlagsAtMost(fs, args, 200)
+	stored, raw := *storedF, *asJSON
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
@@ -152,19 +146,11 @@ func runPremiseCommand(args []string) {
 	if args[0] != "confirm" {
 		fatal("unknown premise command %q: confirm", args[0])
 	}
-	var reason string
-	var rest []string
-	for i := 1; i < len(args); i++ {
-		switch a := args[i]; {
-		case a == "--reason" && i+1 < len(args):
-			i++
-			reason = args[i]
-		case strings.HasPrefix(a, "--reason="):
-			reason = strings.TrimPrefix(a, "--reason=")
-		default:
-			rest = append(rest, a)
-		}
-	}
+	fs := newCommandFlags("premise confirm")
+	fs.Usage = printPremiseHelp
+	reasonF := fs.String("reason", "", "why the Decision still holds")
+	rest := parseCommandFlagsAtMost(fs, args[1:], 2)
+	reason := *reasonF
 	if len(rest) < 1 || len(rest) > 2 || strings.TrimSpace(reason) == "" {
 		fatal("premise confirm <condition> --reason \"why\", or premise confirm <decision> <premise> --reason \"why\"")
 	}

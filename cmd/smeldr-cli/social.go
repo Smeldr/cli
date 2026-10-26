@@ -115,31 +115,13 @@ Verbs:
 }
 
 func runSocialPostCreate(args []string) {
-	var platform, credential, body, at string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--platform":
-			if i+1 < len(args) {
-				platform = args[i+1]
-				i++
-			}
-		case "--credential":
-			if i+1 < len(args) {
-				credential = args[i+1]
-				i++
-			}
-		case "--body":
-			if i+1 < len(args) {
-				body = args[i+1]
-				i++
-			}
-		case "--at":
-			if i+1 < len(args) {
-				at = args[i+1]
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("social post create")
+	platformF := fs.String("platform", "", "mastodon, linkedin or x (default mastodon)")
+	credentialF := fs.String("credential", "", "the credential")
+	bodyF := fs.String("body", "", "the text")
+	atF := fs.String("at", "", "when, RFC3339")
+	parseCommandFlags(fs, args, 0, "")
+	platform, credential, body, at := *platformF, *credentialF, *bodyF, *atF
 	if credential == "" {
 		fatal("social post create requires --credential <id>")
 	}
@@ -180,24 +162,12 @@ func runSocialPostCreate(args []string) {
 var defaultSocialPostListFields = []string{"id", "platform", "status", "scheduled_at"}
 
 func runSocialPostList(args []string) {
-	var status, fields string
-	var jsonFlag bool
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--status":
-			if i+1 < len(args) {
-				status = args[i+1]
-				i++
-			}
-		case "--fields":
-			if i+1 < len(args) {
-				fields = args[i+1]
-				i++
-			}
-		case "--json":
-			jsonFlag = true
-		}
-	}
+	fs := newCommandFlags("social post list")
+	statusF := fs.String("status", "", "one status")
+	fieldsF := fs.String("fields", "", "comma-separated columns")
+	asJSON := fs.Bool("json", false, "raw JSON")
+	parseCommandFlags(fs, args, 0, "")
+	status, fields, jsonFlag := *statusF, *fieldsF, *asJSON
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -234,14 +204,12 @@ func runSocialPostList(args []string) {
 }
 
 func runSocialPostGet(args []string) {
-	if len(args) == 0 {
-		fatal("social post get requires <id>")
-	}
+	id := oneArgument("social post get", args, "social post get requires <id>")
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	raw, code, err := request(cfg, "GET", cfg.ForgeURL+"/social/posts/"+args[0], nil)
+	raw, code, err := request(cfg, "GET", cfg.ForgeURL+"/social/posts/"+id, nil)
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -254,14 +222,12 @@ func runSocialPostGet(args []string) {
 }
 
 func runSocialPostPublish(args []string) {
-	if len(args) == 0 {
-		fatal("social post publish requires <id>")
-	}
+	id := oneArgument("social post publish", args, "social post publish requires <id>")
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	raw, code, err := request(cfg, "PUT", cfg.ForgeURL+"/social/posts/"+args[0], map[string]any{"status": "queued"})
+	raw, code, err := request(cfg, "PUT", cfg.ForgeURL+"/social/posts/"+id, map[string]any{"status": "queued"})
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -274,14 +240,12 @@ func runSocialPostPublish(args []string) {
 }
 
 func runSocialPostArchive(args []string) {
-	if len(args) == 0 {
-		fatal("social post archive requires <id>")
-	}
+	id := oneArgument("social post archive", args, "social post archive requires <id>")
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	raw, code, err := request(cfg, "PUT", cfg.ForgeURL+"/social/posts/"+args[0], map[string]any{"status": "archived"})
+	raw, code, err := request(cfg, "PUT", cfg.ForgeURL+"/social/posts/"+id, map[string]any{"status": "archived"})
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -294,14 +258,12 @@ func runSocialPostArchive(args []string) {
 }
 
 func runSocialPostDelete(args []string) {
-	if len(args) == 0 {
-		fatal("social post delete requires <id>")
-	}
+	id := oneArgument("social post delete", args, "social post delete requires <id>")
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	raw, code, err := request(cfg, "DELETE", cfg.ForgeURL+"/social/posts/"+args[0], nil)
+	raw, code, err := request(cfg, "DELETE", cfg.ForgeURL+"/social/posts/"+id, nil)
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -345,21 +307,11 @@ Verbs:
 }
 
 func runSocialCredentialCreate(args []string) {
-	var platform, instanceURL string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--platform":
-			if i+1 < len(args) {
-				platform = args[i+1]
-				i++
-			}
-		case "--instance-url":
-			if i+1 < len(args) {
-				instanceURL = args[i+1]
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("social credential create")
+	platformF := fs.String("platform", "", "mastodon, linkedin or x")
+	instanceF := fs.String("instance-url", "", "the Mastodon instance")
+	parseCommandFlags(fs, args, 0, "")
+	platform, instanceURL := *platformF, *instanceF
 	if platform == "" {
 		fatal("social credential create requires --platform mastodon|linkedin|x")
 	}
@@ -414,14 +366,12 @@ func runSocialCredentialList(args []string) {
 }
 
 func runSocialCredentialGet(args []string) {
-	if len(args) == 0 {
-		fatal("social credential get requires <id>")
-	}
+	id := oneArgument("social credential get", args, "social credential get requires <id>")
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "get_social_credential", map[string]any{"slug": args[0]})
+	text, err := mcpCall(cfg, "get_social_credential", map[string]any{"slug": id})
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -431,14 +381,12 @@ func runSocialCredentialGet(args []string) {
 }
 
 func runSocialCredentialDelete(args []string) {
-	if len(args) == 0 {
-		fatal("social credential delete requires <id>")
-	}
+	id := oneArgument("social credential delete", args, "social credential delete requires <id>")
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "delete_social_credential", map[string]any{"slug": args[0]})
+	text, err := mcpCall(cfg, "delete_social_credential", map[string]any{"slug": id})
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -452,26 +400,12 @@ func runSocialCredentialDelete(args []string) {
 // ─── post queue verb ───────────────────────────────────────────────────────────
 
 func runSocialPostQueue(args []string) {
-	var platform, credential, body string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--platform":
-			if i+1 < len(args) {
-				platform = args[i+1]
-				i++
-			}
-		case "--credential":
-			if i+1 < len(args) {
-				credential = args[i+1]
-				i++
-			}
-		case "--body":
-			if i+1 < len(args) {
-				body = args[i+1]
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("social post queue")
+	platformF := fs.String("platform", "", "mastodon, linkedin or x (default mastodon)")
+	credentialF := fs.String("credential", "", "the credential")
+	bodyF := fs.String("body", "", "the text")
+	parseCommandFlags(fs, args, 0, "")
+	platform, credential, body := *platformF, *credentialF, *bodyF
 	if credential == "" {
 		fatal("social post queue requires --credential <id>")
 	}
@@ -545,22 +479,12 @@ Slot format: "<weekday> <HH:MM> <IANA timezone>"
 }
 
 func runSocialScheduleCreate(args []string) {
-	var credential string
-	var slotArgs []string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--credential":
-			if i+1 < len(args) {
-				credential = args[i+1]
-				i++
-			}
-		case "--slot":
-			if i+1 < len(args) {
-				slotArgs = append(slotArgs, args[i+1])
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("social schedule create")
+	credentialF := fs.String("credential", "", "the credential")
+	var slotFlags stringsFlag
+	fs.Var(&slotFlags, "slot", "a publication slot (repeatable)")
+	parseCommandFlags(fs, args, 0, "")
+	credential, slotArgs := *credentialF, []string(slotFlags)
 	if credential == "" {
 		fatal("social schedule create requires --credential <id>")
 	}
@@ -683,13 +607,13 @@ func runSocialScheduleDelete(args []string) {
 
 // requireCredentialFlag parses --credential from args and fatals if absent.
 func requireCredentialFlag(args []string, cmd string) string {
-	for i := 0; i < len(args); i++ {
-		if args[i] == "--credential" && i+1 < len(args) {
-			return args[i+1]
-		}
+	fs := newCommandFlags(cmd)
+	credential := fs.String("credential", "", "the credential")
+	parseCommandFlags(fs, args, 0, "")
+	if *credential == "" {
+		fatal("%s requires --credential <id>", cmd)
 	}
-	fatal("%s requires --credential <id>", cmd)
-	return ""
+	return *credential
 }
 
 // findScheduleByCredential calls list_publication_schedules and returns the
@@ -745,41 +669,16 @@ Verbs:
 }
 
 func runSocialPlatformConfigure(args []string) {
-	var platform, clientID, clientSecret, redirectURL, instanceURL, successURL string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--platform":
-			if i+1 < len(args) {
-				platform = args[i+1]
-				i++
-			}
-		case "--client-id":
-			if i+1 < len(args) {
-				clientID = args[i+1]
-				i++
-			}
-		case "--client-secret":
-			if i+1 < len(args) {
-				clientSecret = args[i+1]
-				i++
-			}
-		case "--redirect-url":
-			if i+1 < len(args) {
-				redirectURL = args[i+1]
-				i++
-			}
-		case "--instance-url":
-			if i+1 < len(args) {
-				instanceURL = args[i+1]
-				i++
-			}
-		case "--success-url":
-			if i+1 < len(args) {
-				successURL = args[i+1]
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("social platform configure")
+	platformF := fs.String("platform", "", "mastodon, linkedin or x")
+	clientIDF := fs.String("client-id", "", "the app's client ID")
+	clientSecretF := fs.String("client-secret", "", "the app's client secret")
+	redirectF := fs.String("redirect-url", "", "the OAuth redirect URL")
+	instanceF := fs.String("instance-url", "", "the Mastodon instance")
+	successF := fs.String("success-url", "", "where to go after connecting")
+	parseCommandFlags(fs, args, 0, "")
+	platform, clientID, clientSecret := *platformF, *clientIDF, *clientSecretF
+	redirectURL, instanceURL, successURL := *redirectF, *instanceF, *successF
 	if platform == "" {
 		fatal("social platform configure requires --platform mastodon|linkedin|x")
 	}

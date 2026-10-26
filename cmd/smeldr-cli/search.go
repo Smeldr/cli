@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 	"text/tabwriter"
 )
 
@@ -12,57 +11,43 @@ import (
 // search MCP tool (T885). args is [text] [--type t]... [--state s]...
 // [--place p] [--limit n] [--offset n] [--json].
 func runSearchCommand(args []string) {
-	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help" || args[0] == "help") {
+	if wantsHelp(args) {
 		printSearchHelp()
 		return
 	}
+	fs := newCommandFlags("search")
+	fs.Usage = printSearchHelp
+	var types, states stringsFlag
+	fs.Var(&types, "type", "a record type (repeatable)")
+	fs.Var(&states, "state", "a state (repeatable)")
+	place := fs.String("place", "", "an Organization, Domain or Area")
+	limit := fs.Int("limit", 0, "at most this many")
+	offset := fs.Int("offset", 0, "hits to skip")
+	asJSON := fs.Bool("json", false, "raw JSON")
+	pos := parseCommandFlagsAtMost(fs, args, 1)
+	raw := *asJSON
 	call := map[string]any{}
-	var types, states []string
-	raw := false
-	value := func(i int, flag string) string {
-		if i+1 >= len(args) {
-			fatal("%s needs a value", flag)
-		}
-		return args[i+1]
+	set := setFlags(fs)
+	if len(pos) == 1 {
+		call["query"] = pos[0]
 	}
-	number := func(i int, flag string) int {
-		n, err := strconv.Atoi(value(i, flag))
-		if err != nil || n < 0 {
-			fatal("%s must be a number of 0 or more", flag)
-		}
-		return n
+	if set["place"] {
+		call["place"] = *place
 	}
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; a {
-		case "--json":
-			raw = true
-		case "--type":
-			types = append(types, value(i, a))
-			i++
-		case "--state":
-			states = append(states, value(i, a))
-			i++
-		case "--place":
-			call["place"] = value(i, a)
-			i++
-		case "--limit":
-			call["limit"] = number(i, a)
-			i++
-		case "--offset":
-			call["offset"] = number(i, a)
-			i++
-		default:
-			if _, set := call["query"]; set {
-				fatal("search takes one text; quote it if it has spaces")
-			}
-			call["query"] = a
+	for name, n := range map[string]int{"limit": *limit, "offset": *offset} {
+		if !set[name] {
+			continue
 		}
+		if n < 0 {
+			fatal("--%s must be a number of 0 or more", name)
+		}
+		call[name] = n
 	}
 	if len(types) > 0 {
-		call["types"] = types
+		call["types"] = []string(types)
 	}
 	if len(states) > 0 {
-		call["states"] = states
+		call["states"] = []string(states)
 	}
 	if len(call) == 0 {
 		fatal("search needs a text or at least one of --type, --state, --place")

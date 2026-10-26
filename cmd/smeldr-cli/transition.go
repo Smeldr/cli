@@ -7,36 +7,17 @@ import "fmt"
 // transition_item MCP tool. args is [type_name, slug, --to <state>,
 // --reason <text>].
 func runTransitionCommand(args []string) {
-	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help" || args[0] == "help") {
+	if wantsHelp(args) {
 		printTransitionHelp()
 		return
 	}
 
-	var typeName, slug, toState, reason string
-	positional := 0
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--to":
-			if i+1 < len(args) {
-				toState = args[i+1]
-				i++
-			}
-		case "--reason":
-			if i+1 < len(args) {
-				reason = args[i+1]
-				i++
-			}
-		default:
-			switch positional {
-			case 0:
-				typeName = args[i]
-			case 1:
-				slug = args[i]
-			}
-			positional++
-		}
-	}
-
+	fs := newCommandFlags("transition")
+	fs.Usage = printTransitionHelp
+	to := fs.String("to", "", "the state to move to")
+	why := fs.String("reason", "", "why")
+	pos := parseCommandFlags(fs, args, 2, "transition requires <type_name> <slug> --to <state>")
+	typeName, slug, toState, reason := pos[0], pos[1], *to, *why
 	if typeName == "" || slug == "" {
 		fatal("transition requires <type_name> <slug> --to <state>")
 	}

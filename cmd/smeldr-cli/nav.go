@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
-	"strconv"
+	"strings"
 )
 
 // runNavCommand dispatches nav subcommands. args begins with the verb.
@@ -55,12 +56,10 @@ The MCP endpoint is used for all nav operations (SMELDR_MCP_URL).
 
 // runNavList lists all navigation items via list_nav_items MCP tool.
 func runNavList(args []string) {
-	var jsonFlag bool
-	for _, a := range args {
-		if a == "--json" {
-			jsonFlag = true
-		}
-	}
+	fs := newCommandFlags("nav list")
+	asJSON := fs.Bool("json", false, "raw JSON")
+	parseCommandFlags(fs, args, 0, "")
+	jsonFlag := *asJSON
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -86,47 +85,10 @@ func runNavList(args []string) {
 
 // runNavCreate creates a navigation item via create_nav_item MCP tool.
 func runNavCreate(args []string) {
-	var label, path, parentID, module string
-	var hidden, ghost bool
-	var sortOrder int
-
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--label":
-			if i+1 < len(args) {
-				label = args[i+1]
-				i++
-			}
-		case "--path":
-			if i+1 < len(args) {
-				path = args[i+1]
-				i++
-			}
-		case "--parent-id":
-			if i+1 < len(args) {
-				parentID = args[i+1]
-				i++
-			}
-		case "--module":
-			if i+1 < len(args) {
-				module = args[i+1]
-				i++
-			}
-		case "--hidden":
-			hidden = true
-		case "--ghost":
-			ghost = true
-		case "--sort-order":
-			if i+1 < len(args) {
-				n, err := strconv.Atoi(args[i+1])
-				if err != nil {
-					fatal("--sort-order must be a number: %v", err)
-				}
-				sortOrder = n
-				i++
-			}
-		}
-	}
+	fs, f := navFlags("nav create")
+	parseCommandFlags(fs, args, 0, "")
+	label, path, parentID, module := *f.label, *f.path, *f.parentID, *f.module
+	hidden, ghost, sortOrder := *f.hidden, *f.ghost, *f.sortOrder
 	if label == "" {
 		fatal("nav create requires --label <label>")
 	}
@@ -157,49 +119,16 @@ func runNavCreate(args []string) {
 // runNavUpdate updates a navigation item via update_nav_item MCP tool.
 // The first argument is the item ID; subsequent arguments are optional field flags.
 func runNavUpdate(args []string) {
-	if len(args) == 0 {
-		fatal("nav update requires an item ID")
-	}
-	id := args[0]
-	args = args[1:]
-
+	fs, f := navFlags("nav update")
+	id := parseCommandFlags(fs, args, 1, "nav update requires an item ID")[0]
 	callArgs := map[string]any{"id": id}
-
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--label":
-			if i+1 < len(args) {
-				callArgs["label"] = args[i+1]
-				i++
-			}
-		case "--path":
-			if i+1 < len(args) {
-				callArgs["path"] = args[i+1]
-				i++
-			}
-		case "--parent-id":
-			if i+1 < len(args) {
-				callArgs["parent_id"] = args[i+1]
-				i++
-			}
-		case "--module":
-			if i+1 < len(args) {
-				callArgs["module"] = args[i+1]
-				i++
-			}
-		case "--hidden":
-			callArgs["hidden"] = true
-		case "--ghost":
-			callArgs["ghost"] = true
-		case "--sort-order":
-			if i+1 < len(args) {
-				n, err := strconv.Atoi(args[i+1])
-				if err != nil {
-					fatal("--sort-order must be a number: %v", err)
-				}
-				callArgs["sort_order"] = float64(n)
-				i++
-			}
+	set := setFlags(fs)
+	for name, v := range map[string]any{
+		"label": *f.label, "path": *f.path, "parent-id": *f.parentID, "module": *f.module,
+		"hidden": *f.hidden, "ghost": *f.ghost, "sort-order": float64(*f.sortOrder),
+	} {
+		if set[name] {
+			callArgs[strings.ReplaceAll(name, "-", "_")] = v
 		}
 	}
 
@@ -218,10 +147,7 @@ func runNavUpdate(args []string) {
 
 // runNavDelete deletes a navigation item via delete_nav_item MCP tool.
 func runNavDelete(args []string) {
-	if len(args) == 0 {
-		fatal("nav delete requires an item ID")
-	}
-	id := args[0]
+	id := oneArgument("nav delete", args, "nav delete requires an item ID")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -269,4 +195,25 @@ func boolCell(v any) string {
 		return "yes"
 	}
 	return "no"
+}
+
+// navFields are the flags nav create and nav update share.
+type navFields struct {
+	label, path, parentID, module *string
+	hidden, ghost                 *bool
+	sortOrder                     *int
+}
+
+// navFlags is the FlagSet of nav create or nav update.
+func navFlags(name string) (*flag.FlagSet, navFields) {
+	fs := newCommandFlags(name)
+	return fs, navFields{
+		label:     fs.String("label", "", "the label"),
+		path:      fs.String("path", "", "the path"),
+		parentID:  fs.String("parent-id", "", "the parent item's ID"),
+		module:    fs.String("module", "", "the module"),
+		hidden:    fs.Bool("hidden", false, "hide the item"),
+		ghost:     fs.Bool("ghost", false, "a ghost item"),
+		sortOrder: fs.Int("sort-order", 0, "the sort order"),
+	}
 }

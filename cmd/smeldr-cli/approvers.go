@@ -10,22 +10,15 @@ import (
 // runApproversCommand lists who approves a place via the approvers_of MCP
 // tool (core T911, D147).
 func runApproversCommand(args []string) {
-	var place string
-	raw := false
-	for _, a := range args {
-		switch a {
-		case "-h", "--help", "help":
-			printApproversHelp()
-			return
-		case "--json":
-			raw = true
-		default:
-			if place != "" {
-				fatal("approvers takes one place, got %q and %q", place, a)
-			}
-			place = a
-		}
+	if wantsHelp(args) {
+		printApproversHelp()
+		return
 	}
+	fs := newCommandFlags("approvers")
+	fs.Usage = printApproversHelp
+	asJSON := fs.Bool("json", false, "raw JSON")
+	pos := parseCommandFlags(fs, args, 1, "approvers needs a place: an Organization, Domain or Area by address, slug or ID (for example DOM4)")
+	place, raw := pos[0], *asJSON
 	if place == "" {
 		fatal("approvers needs a place: an Organization, Domain or Area by address, slug or ID (for example DOM4)")
 	}

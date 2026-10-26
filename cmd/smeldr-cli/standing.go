@@ -8,27 +8,16 @@ import (
 // runStandingCommand prints one item's standing (D100) via the
 // get_item_standing MCP tool. args is [type_name, slug, --json].
 func runStandingCommand(args []string) {
-	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help" || args[0] == "help") {
+	if wantsHelp(args) {
 		printStandingHelp()
 		return
 	}
 
-	var typeName, slug string
-	raw := false
-	positional := 0
-	for _, a := range args {
-		if a == "--json" {
-			raw = true
-			continue
-		}
-		switch positional {
-		case 0:
-			typeName = a
-		case 1:
-			slug = a
-		}
-		positional++
-	}
+	fs := newCommandFlags("standing")
+	fs.Usage = printStandingHelp
+	asJSON := fs.Bool("json", false, "raw JSON")
+	pos := parseCommandFlags(fs, args, 2, "standing requires <type_name> <slug>")
+	typeName, slug, raw := pos[0], pos[1], *asJSON
 	if typeName == "" || slug == "" {
 		fatal("standing requires <type_name> <slug>")
 	}

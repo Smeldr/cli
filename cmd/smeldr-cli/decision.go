@@ -32,29 +32,19 @@ type decisionSource struct {
 // them with --set <file.json> (- for stdin) or --clear, via get_decision and
 // update_decision.
 func runDecisionSourcesCommand(args []string) {
-	var decision, setFrom string
-	raw, clear := false, false
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; a {
-		case "-h", "--help", "help":
-			printDecisionSourcesHelp()
-			return
-		case "--json":
-			raw = true
-		case "--clear":
-			clear = true
-		case "--set":
-			if i+1 >= len(args) {
-				fatal("--set needs a JSON file, or - for stdin")
-			}
-			i++
-			setFrom = args[i]
-		default:
-			if decision != "" {
-				fatal("decision sources takes one Decision, got %q and %q", decision, a)
-			}
-			decision = a
-		}
+	if wantsHelp(args) {
+		printDecisionSourcesHelp()
+		return
+	}
+	fs := newCommandFlags("decision sources")
+	fs.Usage = printDecisionSourcesHelp
+	asJSON := fs.Bool("json", false, "raw JSON")
+	clearFlag := fs.Bool("clear", false, "remove every source")
+	set := fs.String("set", "", "a JSON file of sources, or - for stdin")
+	pos := parseCommandFlags(fs, args, 1, "decision sources needs a Decision: address (D148), slug or ID")
+	decision, setFrom, raw, clear := pos[0], *set, *asJSON, *clearFlag
+	if setFlags(fs)["set"] && setFrom == "" {
+		fatal("--set needs a JSON file, or - for stdin")
 	}
 	if decision == "" {
 		fatal("decision sources needs a Decision: address (D148), slug or ID")

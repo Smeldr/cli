@@ -23,12 +23,8 @@ func runPreviewCommand(args []string) {
 		}
 		return
 	}
-	if len(args) < 2 {
-		fatal("preview requires <prefix> and <slug> — e.g. smeldr-cli preview /posts my-draft")
-	}
-
-	prefix := args[0]
-	slug := args[1]
+	pos := parseCommandFlags(newCommandFlags("preview"), args, 2, "preview requires <prefix> and <slug> — e.g. smeldr-cli preview /posts my-draft")
+	prefix, slug := pos[0], pos[1]
 
 	if !strings.HasPrefix(prefix, "/") {
 		fatal("prefix must begin with / (e.g. /posts) — got %q", prefix)

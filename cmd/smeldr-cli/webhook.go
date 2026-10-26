@@ -55,21 +55,11 @@ The MCP endpoint is used for webhook operations (SMELDR_MCP_URL).
 
 // runWebhookCreate registers a new webhook endpoint via create_webhook MCP tool.
 func runWebhookCreate(args []string) {
-	var urlFlag, eventsFlag string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--url":
-			if i+1 < len(args) {
-				urlFlag = args[i+1]
-				i++
-			}
-		case "--events":
-			if i+1 < len(args) {
-				eventsFlag = args[i+1]
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("webhook create")
+	urlF := fs.String("url", "", "the endpoint, https")
+	eventsF := fs.String("events", "", "comma-separated event names")
+	parseCommandFlags(fs, args, 0, "")
+	urlFlag, eventsFlag := *urlF, *eventsF
 	if urlFlag == "" {
 		fatal("webhook create requires --url <https://...>")
 	}
@@ -123,10 +113,7 @@ func runWebhookList(args []string) {
 
 // runWebhookDelete permanently removes a webhook endpoint via delete_webhook MCP tool.
 func runWebhookDelete(args []string) {
-	if len(args) == 0 {
-		fatal("webhook delete requires a webhook endpoint ID")
-	}
-	id := args[0]
+	id := oneArgument("webhook delete", args, "webhook delete requires a webhook endpoint ID")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -144,21 +131,11 @@ func runWebhookDelete(args []string) {
 
 // runWebhookDeliveries shows delivery logs for a job or all jobs for an endpoint.
 func runWebhookDeliveries(args []string) {
-	var jobID, endpointID string
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--job":
-			if i+1 < len(args) {
-				jobID = args[i+1]
-				i++
-			}
-		case "--endpoint":
-			if i+1 < len(args) {
-				endpointID = args[i+1]
-				i++
-			}
-		}
-	}
+	fs := newCommandFlags("webhook deliveries")
+	job := fs.String("job", "", "a delivery job")
+	endpoint := fs.String("endpoint", "", "an endpoint")
+	parseCommandFlags(fs, args, 0, "")
+	jobID, endpointID := *job, *endpoint
 	if jobID == "" && endpointID == "" {
 		fatal("webhook deliveries requires --job <job-id> or --endpoint <endpoint-id>")
 	}
@@ -185,10 +162,7 @@ func runWebhookDeliveries(args []string) {
 
 // runWebhookRetry re-queues a dead-lettered webhook job via retry_webhook MCP tool.
 func runWebhookRetry(args []string) {
-	if len(args) == 0 {
-		fatal("webhook retry requires a job ID")
-	}
-	jobID := args[0]
+	jobID := oneArgument("webhook retry", args, "webhook retry requires a job ID")
 
 	cfg, err := loadConfig()
 	if err != nil {

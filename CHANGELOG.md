@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **No command ignores an argument it does not know (core T960, A591).** The commands that parsed their arguments by hand now use the same flag parsing as the rest (T958, T959): transition, standing, approvers, decision sources, search, rests, premise confirm, nav list/create/update/delete, redirect list/create/delete, webhook create/deliveries/delete/retry, social post create/list/queue/get/publish/archive/delete, social credential create/get/delete, social schedule create/show/pause/resume/delete, social platform configure, block node get/publish/archive, media upload/list/delete and preview. An unknown flag, a stray argument or a flag with no value is refused with exit 1, never dropped. Before, `transition Task T1 --to done --reson "..."` ran the transition without the reason; `search text --jsn` sent `--jsn` as the query; nav, redirect, social and webhook ignored any flag they did not know and a value flag with no value; `delete a b` on nav, redirect, webhook, social and media acted on `a` only. Flags can come anywhere and `--name=value` works. media's errors now go through the same exit path (`-d` and `-t` stay as short forms). Commands that already refused unknown arguments (administrators, coverage, migrate-addresses, subscription) are unchanged.
+
 ---
 
 ## [0.33.1] - 2026-10-26

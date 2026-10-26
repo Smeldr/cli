@@ -25,17 +25,53 @@ func newCommandFlags(name string) *flag.FlagSet {
 // unknown flag, a missing value or a stray argument is refused through
 // fatal, and fewer than want arguments fatal with missing (T959).
 func parseCommandFlags(fs *flag.FlagSet, args []string, want int, missing string) []string {
-	pos, err := parseAtMost(fs, args, want)
-	switch {
-	case errors.Is(err, flag.ErrHelp):
-		osExit(0)
-		return nil
-	case err != nil:
-		fatal("%s: %v", fs.Name(), err)
-	case len(pos) < want:
+	pos := parseCommandFlagsAtMost(fs, args, want)
+	if len(pos) < want {
 		fatal("%s", missing)
 	}
 	return pos
+}
+
+// oneArgument is the one argument of a command that takes exactly one and
+// no flags: a second argument or any flag is refused (T960).
+func oneArgument(name string, args []string, missing string) string {
+	return parseCommandFlags(newCommandFlags(name), args, 1, missing)[0]
+}
+
+// parseCommandFlagsAtMost is parseCommandFlags for a command whose
+// arguments are optional, up to max; the caller checks for too few.
+func parseCommandFlagsAtMost(fs *flag.FlagSet, args []string, max int) []string {
+	pos, err := parseAtMost(fs, args, max)
+	switch {
+	case errors.Is(err, flag.ErrHelp):
+		osExit(0)
+	case err != nil:
+		fatal("%s: %v", fs.Name(), err)
+	}
+	return pos
+}
+
+// wantsHelp reports whether args ask for help: -h or --help anywhere, or
+// help as the first argument (later, "help" may be a value). Such a command
+// prints its help and returns, as it always has.
+func wantsHelp(args []string) bool {
+	if len(args) > 0 && args[0] == "help" {
+		return true
+	}
+	for _, a := range args {
+		if a == "-h" || a == "--help" {
+			return true
+		}
+	}
+	return false
+}
+
+// setFlags reports which of fs's flags were given, for a command that sends
+// a value only when it was set.
+func setFlags(fs *flag.FlagSet) map[string]bool {
+	set := map[string]bool{}
+	fs.Visit(func(f *flag.Flag) { set[f.Name] = true })
+	return set
 }
 
 // parseAtMost is parseInterspersed refusing more than max positional

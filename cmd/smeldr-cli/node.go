@@ -137,14 +137,12 @@ func runNodeUpdate(args []string) {
 // runNodeByID runs a single-argument node tool (get_node / publish_node /
 // archive_node) on the block whose id is the first positional argument.
 func runNodeByID(args []string, tool, verb string) {
-	if len(args) < 1 || strings.HasPrefix(args[0], "-") {
-		fatal("block node %s requires <id>", verb)
-	}
+	id := oneArgument("block node "+verb, args, fmt.Sprintf("block node %s requires <id>", verb))
 	cfg, err := loadConfig()
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, tool, map[string]any{"id": args[0]})
+	text, err := mcpCall(cfg, tool, map[string]any{"id": id})
 	if err != nil {
 		fatal("%v", err)
 	}

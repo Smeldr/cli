@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 )
 
 // runRedirectCommand dispatches redirect subcommands. args begins with the verb.
@@ -45,12 +44,10 @@ The MCP endpoint is used for redirect operations (SMELDR_MCP_URL).
 
 // runRedirectList lists all redirect rules via list_redirects MCP tool.
 func runRedirectList(args []string) {
-	var jsonFlag bool
-	for _, a := range args {
-		if a == "--json" {
-			jsonFlag = true
-		}
-	}
+	fs := newCommandFlags("redirect list")
+	asJSON := fs.Bool("json", false, "raw JSON")
+	parseCommandFlags(fs, args, 0, "")
+	jsonFlag := *asJSON
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -76,35 +73,13 @@ func runRedirectList(args []string) {
 
 // runRedirectCreate creates a redirect rule via create_redirect MCP tool.
 func runRedirectCreate(args []string) {
-	var from, to string
-	var code int
-	var isPrefix bool
-
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--from":
-			if i+1 < len(args) {
-				from = args[i+1]
-				i++
-			}
-		case "--to":
-			if i+1 < len(args) {
-				to = args[i+1]
-				i++
-			}
-		case "--code":
-			if i+1 < len(args) {
-				n, err := strconv.Atoi(args[i+1])
-				if err != nil {
-					fatal("--code must be a number: %v", err)
-				}
-				code = n
-				i++
-			}
-		case "--prefix":
-			isPrefix = true
-		}
-	}
+	fs := newCommandFlags("redirect create")
+	fromFlag := fs.String("from", "", "the path to redirect")
+	toFlag := fs.String("to", "", "the target")
+	codeFlag := fs.Int("code", 0, "the HTTP status code")
+	prefix := fs.Bool("prefix", false, "match the path as a prefix")
+	parseCommandFlags(fs, args, 0, "")
+	from, to, code, isPrefix := *fromFlag, *toFlag, *codeFlag, *prefix
 	if from == "" {
 		fatal("redirect create requires --from <path>")
 	}
@@ -133,10 +108,7 @@ func runRedirectCreate(args []string) {
 
 // runRedirectDelete deletes a redirect rule via delete_redirect MCP tool.
 func runRedirectDelete(args []string) {
-	if len(args) == 0 {
-		fatal("redirect delete requires a from-path argument")
-	}
-	from := args[0]
+	from := oneArgument("redirect delete", args, "redirect delete requires a from-path argument")
 
 	cfg, err := loadConfig()
 	if err != nil {
