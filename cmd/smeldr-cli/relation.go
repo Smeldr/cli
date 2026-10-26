@@ -57,18 +57,9 @@ func parseRelationArgs(args []string) (map[string]any, error) {
 	fs := flag.NewFlagSet("relation withdraw", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	reason := fs.String("reason", "", "why the relation no longer holds (required)")
-	if err := fs.Parse(args[1:]); err != nil {
+	pos, err := parseAtMost(fs, args[1:], 1)
+	if err != nil {
 		return nil, err
-	}
-	pos := fs.Args()
-	if len(pos) > 1 {
-		if err := fs.Parse(pos[1:]); err != nil {
-			return nil, err
-		}
-		if fs.NArg() > 0 {
-			return nil, fmt.Errorf("unexpected argument %q", fs.Arg(0))
-		}
-		pos = pos[:1]
 	}
 	if len(pos) < 1 || pos[0] == "" {
 		return nil, fmt.Errorf("relation withdraw requires <id>")

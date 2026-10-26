@@ -110,9 +110,7 @@ type checkCall struct {
 // newCheckFlags is a subcommand's FlagSet: errors are returned, never an
 // exit, so an unknown flag is refused with its name (T958).
 func newCheckFlags(name string) *flag.FlagSet {
-	fs := flag.NewFlagSet(name, flag.ContinueOnError)
-	fs.SetOutput(os.Stderr)
-	return fs
+	return newCommandFlags(name)
 }
 
 // noPositionals refuses a stray argument to a subcommand that takes none.

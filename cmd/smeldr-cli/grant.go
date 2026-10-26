@@ -146,19 +146,8 @@ func parseGrantFlags(name string, args []string, want int, withScope bool) (pos 
 		fs.StringVar(&anchor, "anchor", "", "anchor item id for a dynamic scope")
 		fs.StringVar(&days, "expires-in-days", "", "time-box the grant: expires after this many days")
 	}
-	if err = fs.Parse(args); err != nil {
+	if pos, err = parseAtMost(fs, args, want); err != nil {
 		return nil, "", nil, "", "", err
-	}
-	pos = fs.Args()
-	if len(pos) > want {
-		// Flags after the positional arguments: parse the rest again.
-		if err = fs.Parse(pos[want:]); err != nil {
-			return nil, "", nil, "", "", err
-		}
-		if fs.NArg() > 0 {
-			return nil, "", nil, "", "", fmt.Errorf("unexpected argument %q", fs.Arg(0))
-		}
-		pos = pos[:want]
 	}
 	return pos, reason, scopes, anchor, days, nil
 }

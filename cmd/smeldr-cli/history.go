@@ -47,19 +47,9 @@ func parseHistoryArgs(args []string) (map[string]any, error) {
 	limit := fs.Int("limit", -1, "entries per page (default 50, at most 500)")
 	offset := fs.Int("offset", -1, "entries to skip, newest first")
 	view := fs.String("view", "", "members (default) or gated")
-	if err := fs.Parse(args); err != nil {
+	pos, err := parseAtMost(fs, args, 2)
+	if err != nil {
 		return nil, err
-	}
-	pos := fs.Args()
-	if len(pos) > 2 {
-		// Flags after the positional arguments: parse the rest again.
-		if err := fs.Parse(pos[2:]); err != nil {
-			return nil, err
-		}
-		if fs.NArg() > 0 {
-			return nil, fmt.Errorf("unexpected argument %q", fs.Arg(0))
-		}
-		pos = pos[:2]
 	}
 	if len(pos) < 2 || pos[0] == "" || pos[1] == "" {
 		return nil, fmt.Errorf("history requires <type_name> <slug>")

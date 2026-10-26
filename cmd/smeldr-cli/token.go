@@ -75,11 +75,11 @@ func runTokenCreate(args []string) {
 
 // runTokenList lists all tokens via the MCP list_tokens tool.
 func runTokenList(args []string) {
-	fs := flag.NewFlagSet("token list", flag.ExitOnError)
+	fs := newCommandFlags("token list")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token list")
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -128,18 +128,9 @@ func parseTokenRevokeArgs(args []string) (id, reason string, err error) {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token revoke <id> [--reason <text>]")
 	}
 	fs.StringVar(&reason, "reason", "", "why the token is revoked (never a secret)")
-	if err = fs.Parse(args); err != nil {
+	pos, err := parseAtMost(fs, args, 1)
+	if err != nil {
 		return "", "", err
-	}
-	pos := fs.Args()
-	if len(pos) > 1 {
-		if err = fs.Parse(pos[1:]); err != nil {
-			return "", "", err
-		}
-		if fs.NArg() > 0 {
-			return "", "", fmt.Errorf("unexpected argument %q", fs.Arg(0))
-		}
-		pos = pos[:1]
 	}
 	if len(pos) < 1 {
 		return "", "", fmt.Errorf("token revoke requires a token fingerprint ID")
@@ -222,19 +213,9 @@ func parseTokenCreateArgs(args []string) (name, role string, ttl int, class, rea
 	}
 	fs.StringVar(&class, "class", "", "classify the token's actor: agent, job or human (never changes permissions)")
 	fs.StringVar(&reason, "reason", "", "why the token is minted (never a secret)")
-	if err = fs.Parse(args); err != nil {
+	pos, err := parseAtMost(fs, args, 3)
+	if err != nil {
 		return "", "", 0, "", "", err
-	}
-	pos := fs.Args()
-	if len(pos) > 3 {
-		// A flag after the positional arguments: parse the rest again.
-		if err = fs.Parse(pos[3:]); err != nil {
-			return "", "", 0, "", "", err
-		}
-		if fs.NArg() > 0 {
-			return "", "", 0, "", "", fmt.Errorf("unexpected argument %q", fs.Arg(0))
-		}
-		pos = pos[:3]
 	}
 	if len(pos) < 3 {
 		return "", "", 0, "", "", fmt.Errorf("token create requires: <name> <role> <ttl-days>")

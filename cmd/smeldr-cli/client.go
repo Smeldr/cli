@@ -155,5 +155,5 @@ func printJSON(raw []byte) error {
 // fatal prints a formatted error message to stderr and exits with code 1.
 func fatal(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, "smeldr-cli: "+format+"\n", args...)
-	os.Exit(1)
+	osExit(1)
 }

@@ -50,18 +50,9 @@ func parseReachabilityArgs(args []string) (map[string]any, error) {
 	maxItems := fs.Int("max-items", 0, "cap on items the walk returns (default 500, at most 2000)")
 	limit := fs.Int("limit", 0, "page size (default 100, at most 500)")
 	offset := fs.Int("offset", 0, "items to skip")
-	if err := fs.Parse(args); err != nil {
+	pos, err := parseAtMost(fs, args, 2)
+	if err != nil {
 		return nil, err
-	}
-	pos := fs.Args()
-	if len(pos) > 2 {
-		if err := fs.Parse(pos[2:]); err != nil {
-			return nil, err
-		}
-		if fs.NArg() > 0 {
-			return nil, fmt.Errorf("unexpected argument %q", fs.Arg(0))
-		}
-		pos = pos[:2]
 	}
 	if len(pos) < 2 || pos[0] == "" || pos[1] == "" {
 		return nil, fmt.Errorf("reachability requires <type_name> <id>")

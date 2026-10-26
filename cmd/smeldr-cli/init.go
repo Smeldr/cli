@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,7 +15,7 @@ import (
 //
 //	smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]
 func runInit(args []string) {
-	fs := flag.NewFlagSet("init", flag.ExitOnError)
+	fs := newCommandFlags("init")
 	url := fs.String("url", "http://localhost:8080", "Base URL of the Smeldr instance")
 	bootstrapToken := fs.String("bootstrap-token", "", "Bootstrap token from startup log (required)")
 	name := fs.String("name", "operator", "Name for the created admin token")
@@ -26,7 +25,7 @@ func runInit(args []string) {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]")
 		fs.PrintDefaults()
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	if *bootstrapToken == "" {
 		fatal("--bootstrap-token is required (copy from startup log)")

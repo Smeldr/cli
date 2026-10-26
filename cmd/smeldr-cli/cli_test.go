@@ -160,7 +160,9 @@ func TestLoadEnvFile_setsUnsetVars(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("TEST_SMELDR_CLI_X=hello\n# comment line\nTEST_SMELDR_CLI_Y=world\n")
+	if _, err := f.WriteString("TEST_SMELDR_CLI_X=hello\n# comment line\nTEST_SMELDR_CLI_Y=world\n"); err != nil {
+		t.Fatal(err)
+	}
 	f.Close()
 
 	os.Unsetenv("TEST_SMELDR_CLI_X")
@@ -182,7 +184,9 @@ func TestLoadEnvFile_doesNotOverrideSet(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	f.WriteString("TEST_SMELDR_CLI_Z=from-file\n")
+	if _, err := f.WriteString("TEST_SMELDR_CLI_Z=from-file\n"); err != nil {
+		t.Fatal(err)
+	}
 	f.Close()
 
 	os.Setenv("TEST_SMELDR_CLI_Z", "already-set")

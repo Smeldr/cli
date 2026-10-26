@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -65,13 +64,13 @@ Verbs:
 
 // runCreate parses --from <file>, builds the JSON body, and POSTs to {type}.
 func runCreate(typePath string, args []string) {
-	fs := flag.NewFlagSet("create", flag.ExitOnError)
+	fs := newCommandFlags("create")
 	from := fs.String("from", "", "frontmatter file (use - for stdin)")
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s create --from <file>\n", typePath)
 		fs.PrintDefaults()
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	if *from == "" {
 		fatal("--from <file> is required for create")
@@ -111,18 +110,13 @@ func runCreate(typePath string, args []string) {
 // runUpdate does a GET-then-PUT, overlaying frontmatter fields onto the
 // existing item. Fields absent from the frontmatter file are preserved.
 func runUpdate(typePath string, args []string) {
-	fs := flag.NewFlagSet("update", flag.ExitOnError)
+	fs := newCommandFlags("update")
 	from := fs.String("from", "", "frontmatter file (use - for stdin)")
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s update <slug> --from <file>\n", typePath)
 		fs.PrintDefaults()
 	}
-	fs.Parse(args) //nolint:errcheck
-
-	if fs.NArg() < 1 {
-		fatal("update requires a slug argument")
-	}
-	slug := fs.Arg(0)
+	slug := parseCommandFlags(fs, args, 1, "update requires a slug argument")[0]
 
 	if *from == "" {
 		fatal("--from <file> is required for update")
@@ -171,16 +165,11 @@ func runUpdate(typePath string, args []string) {
 // runLifecycle implements publish, unpublish, and archive by doing a
 // GET-then-PUT with the appropriate status value.
 func runLifecycle(typePath, verb string, args []string) {
-	fs := flag.NewFlagSet(verb, flag.ExitOnError)
+	fs := newCommandFlags(verb)
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s %s <slug>\n", typePath, verb)
 	}
-	fs.Parse(args) //nolint:errcheck
-
-	if fs.NArg() < 1 {
-		fatal("%s requires a slug argument", verb)
-	}
-	slug := fs.Arg(0)
+	slug := parseCommandFlags(fs, args, 1, verb+" requires a slug argument")[0]
 
 	var newStatus string
 	switch verb {
@@ -224,16 +213,11 @@ func runLifecycle(typePath, verb string, args []string) {
 
 // runDelete permanently deletes an item by slug.
 func runDelete(typePath string, args []string) {
-	fs := flag.NewFlagSet("delete", flag.ExitOnError)
+	fs := newCommandFlags("delete")
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s delete <slug>\n", typePath)
 	}
-	fs.Parse(args) //nolint:errcheck
-
-	if fs.NArg() < 1 {
-		fatal("delete requires a slug argument")
-	}
-	slug := fs.Arg(0)
+	slug := parseCommandFlags(fs, args, 1, "delete requires a slug argument")[0]
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -261,7 +245,7 @@ func runDelete(typePath string, args []string) {
 var defaultContentListFields = []string{"slug", "status", "createdat", "updatedat"}
 
 func runList(typePath string, args []string) {
-	fs := flag.NewFlagSet("list", flag.ExitOnError)
+	fs := newCommandFlags("list")
 	statusFilter := fs.String("status", "", "filter by status: draft|published|archived|scheduled")
 	jsonFlag := fs.Bool("json", false, "print raw JSON instead of a table")
 	fieldsFlag := fs.String("fields", "", "comma-separated custom columns (case-insensitive), e.g. --fields slug,title,status")
@@ -269,7 +253,7 @@ func runList(typePath string, args []string) {
 		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s list [--status <status>] [--json] [--fields <a,b,c>]\n", typePath)
 		fs.PrintDefaults()
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -322,16 +306,11 @@ func runList(typePath string, args []string) {
 
 // runGet fetches a single item by slug and prints it as JSON.
 func runGet(typePath string, args []string) {
-	fs := flag.NewFlagSet("get", flag.ExitOnError)
+	fs := newCommandFlags("get")
 	fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s get <slug>\n", typePath)
 	}
-	fs.Parse(args) //nolint:errcheck
-
-	if fs.NArg() < 1 {
-		fatal("get requires a slug argument")
-	}
-	slug := fs.Arg(0)
+	slug := parseCommandFlags(fs, args, 1, "get requires a slug argument")[0]
 
 	cfg, err := loadConfig()
 	if err != nil {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -58,7 +57,7 @@ type auditRecord struct {
 
 // runAuditList fetches audit records from GET /_audit and prints a table.
 func runAuditList(args []string) {
-	fs := flag.NewFlagSet("audit list", flag.ExitOnError)
+	fs := newCommandFlags("audit list")
 	fromFlag := fs.String("from", "", "filter records at or after this RFC3339 timestamp")
 	toFlag := fs.String("to", "", "filter records at or before this RFC3339 timestamp")
 	typeFlag := fs.String("type", "", "filter by content type")
@@ -66,7 +65,7 @@ func runAuditList(args []string) {
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli audit list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]")
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	cfg, err := loadConfig()
 	if err != nil {

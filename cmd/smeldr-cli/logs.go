@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -33,7 +32,7 @@ type logEntry struct {
 // a human-readable table (default) or raw JSON (--json). Requires Admin role.
 // The endpoint is called directly (not via MCP) so it works when MCP is down.
 func runLogsCommand(args []string) {
-	fs := flag.NewFlagSet("logs", flag.ExitOnError)
+	fs := newCommandFlags("logs")
 	levelFlag := fs.String("level", "", "minimum log level inclusive (e.g. warn, error)")
 	limitFlag := fs.Int("limit", 0, "most recent N entries (0 = no limit)")
 	sinceFlag := fs.String("since", "", "entries strictly after this RFC3339 timestamp")
@@ -42,7 +41,7 @@ func runLogsCommand(args []string) {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]")
 		fmt.Fprintln(os.Stderr, "Requires Admin role. The server must call app.CaptureLogs() (core v1.36.0+).")
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -88,7 +87,9 @@ func runLogsCommand(args []string) {
 	}
 
 	if *jsonFlag {
-		printJSON(raw)
+		if err := printJSON(raw); err != nil {
+			fatal("%v", err)
+		}
 		return
 	}
 

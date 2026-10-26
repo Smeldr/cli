@@ -11,6 +11,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Every command reads flags after its arguments (core T959, A590).** The content commands (`create`, `update`, `publish`/`unpublish`/`archive`, `delete`, `list`, `get`), `audit list`, `init`, `logs`, `status`, `token list` and `block node create`/`update`/`list` read their flags before, after or among their arguments, through `parseInterspersed` (T958). Before, a flag after an argument was dropped: `posts update my-post --from post.md` was refused for a missing `--from`, `posts delete a b` deleted only `a`, and `posts list x --json` printed a table. Now a stray argument is refused (`delete: unexpected argument "b"`). `grant`, `history`, `reachability`, `relation withdraw`, `token revoke` and `token create` replace their hand-written re-parse with the same helper, so a flag between two arguments (`grant tok --reason r steward`) works too. An unknown flag now exits 1, like every other refusal, instead of the flag package's 2; `-h` still exits 0. `logs --json` no longer drops printJSON's error.
+
 - **`check` reads flags after the arguments (core T958, A589).** `check change`, `merge`, `answer`, `list` and `show` read their flags before, after or among the positional arguments. Before, Go's flag parsing stopped at the first argument, so `check answer CHK3 ARE1 --approve` (the README's own example) was refused as a wrong argument count, and `check change ... a.go --files-total 9` sent `--files-total` and `9` as paths. An unknown flag or a stray argument is now refused with its name, never ignored; `--` ends the flags. New `parseInterspersed` in flags.go.
 
 ---

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -71,7 +70,7 @@ func buildFields(fieldsJSON string, fields fieldFlag) (map[string]any, error) {
 
 // runNodeCreate creates a Draft block via the create_node MCP tool.
 func runNodeCreate(args []string) {
-	fs := flag.NewFlagSet("block node create", flag.ExitOnError)
+	fs := newCommandFlags("block node create")
 	typeName := fs.String("type", "", "block type_name (required), e.g. content_block, hero")
 	fieldsJSON := fs.String("fields", "", "type-specific fields as a JSON object (PascalCase keys)")
 	fields := fieldFlag{}
@@ -80,7 +79,7 @@ func runNodeCreate(args []string) {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node create --type <type_name> [--field K=V ...] [--fields <json>]")
 		fs.PrintDefaults()
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	if *typeName == "" {
 		fatal("block node create requires --type <type_name>")
@@ -105,12 +104,7 @@ func runNodeCreate(args []string) {
 // runNodeUpdate partially updates a block's fields via update_node. The id is the
 // first positional argument; flags follow it.
 func runNodeUpdate(args []string) {
-	if len(args) < 1 || strings.HasPrefix(args[0], "-") {
-		fatal("block node update requires <id> (smeldr-cli block node update <id> [--field K=V ...] [--fields <json>])")
-	}
-	id := args[0]
-
-	fs := flag.NewFlagSet("block node update", flag.ExitOnError)
+	fs := newCommandFlags("block node update")
 	fieldsJSON := fs.String("fields", "", "fields to merge as a JSON object (PascalCase keys)")
 	fields := fieldFlag{}
 	fs.Var(fields, "field", "a field as Key=Value, repeatable")
@@ -118,7 +112,7 @@ func runNodeUpdate(args []string) {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node update <id> [--field K=V ...] [--fields <json>]")
 		fs.PrintDefaults()
 	}
-	fs.Parse(args[1:]) //nolint:errcheck
+	id := parseCommandFlags(fs, args, 1, "block node update requires <id> (smeldr-cli block node update <id> [--field K=V ...] [--fields <json>])")[0]
 
 	merged, err := buildFields(*fieldsJSON, fields)
 	if err != nil {
@@ -162,7 +156,7 @@ func runNodeByID(args []string, tool, verb string) {
 // runNodeList lists blocks via list_nodes, printing an aligned table by default
 // or raw JSON with --json.
 func runNodeList(args []string) {
-	fs := flag.NewFlagSet("block node list", flag.ExitOnError)
+	fs := newCommandFlags("block node list")
 	typeName := fs.String("type", "", "filter by block type_name")
 	status := fs.String("status", "", "filter by status (draft|scheduled|published|archived)")
 	asJSON := fs.Bool("json", false, "output raw JSON instead of a table")
@@ -170,7 +164,7 @@ func runNodeList(args []string) {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node list [--type <type_name>] [--status <s>] [--json]")
 		fs.PrintDefaults()
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	toolArgs := map[string]any{}
 	if *typeName != "" {

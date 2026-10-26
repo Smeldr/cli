@@ -48,6 +48,15 @@ SMELDR_MCP_URL=https://mysite.com/mcp/message
 `SMELDR_MCP_URL` defaults to `{SMELDR_URL}/mcp/message` if not set. It is only
 required for MCP-based commands (token, block, nav, redirect, social, etc.).
 
+## Flags and arguments
+
+Flags may come before or after a command's arguments: `smeldr-cli posts update
+my-post --from post.md` and `smeldr-cli posts update --from post.md my-post`
+are the same. An unknown flag, a missing argument or one argument too many is
+refused with exit 1 and a message naming it, never ignored; `-h` prints the
+usage and exits 0. After `--` every argument is an argument, even one that
+starts with `-`.
+
 ---
 
 ## Content commands

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,11 +11,11 @@ import (
 // runStatus calls /_health on the configured Smeldr instance and prints the
 // response. Exits with code 1 if the instance is unreachable or unhealthy.
 func runStatus(args []string) {
-	fs := flag.NewFlagSet("status", flag.ExitOnError)
+	fs := newCommandFlags("status")
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli status")
 	}
-	fs.Parse(args) //nolint:errcheck
+	parseCommandFlags(fs, args, 0, "")
 
 	cfg, err := loadConfig()
 	if err != nil {
