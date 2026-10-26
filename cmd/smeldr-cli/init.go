@@ -8,27 +8,37 @@ import (
 	"strings"
 )
 
+// initBootstrapToken is the bootstrap token init spends (T961).
+var initBootstrapToken = secretSource{
+	flag:      "bootstrap-token",
+	stdinFlag: "bootstrap-token-stdin",
+	env:       "SMELDR_BOOTSTRAP_TOKEN",
+	missing:   "init requires the bootstrap token from the startup log",
+}
+
 // runInit bootstraps a new Smeldr instance by using a bootstrap token to create
 // a named admin token, then writes .smeldr-cli.env for subsequent CLI use.
 //
 // Usage:
 //
-//	smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]
+//	SMELDR_BOOTSTRAP_TOKEN=... smeldr-cli init [--url URL] [--name NAME] [--days N] [--force]
 func runInit(args []string) {
 	fs := newCommandFlags("init")
 	url := fs.String("url", "http://localhost:8080", "Base URL of the Smeldr instance")
-	bootstrapToken := fs.String("bootstrap-token", "", "Bootstrap token from startup log (required)")
+	bootstrapFlag, bootstrapStdin := initBootstrapToken.secretFlags(fs, "the bootstrap token from the startup log")
 	name := fs.String("name", "operator", "Name for the created admin token")
 	days := fs.Int("days", 365, "Token TTL in days")
 	force := fs.Bool("force", false, "Overwrite existing .smeldr-cli.env")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli init [--url URL] [--bootstrap-token TOKEN] [--name NAME] [--days N] [--force]")
+		fmt.Fprintln(os.Stderr, "Usage: SMELDR_BOOTSTRAP_TOKEN=... smeldr-cli init [--url URL] [--name NAME] [--days N] [--force]")
+		fmt.Fprintln(os.Stderr, "   or: smeldr-cli init --bootstrap-token-stdin [...] < token.txt")
 		fs.PrintDefaults()
 	}
 	parseCommandFlags(fs, args, 0, "")
 
-	if *bootstrapToken == "" {
-		fatal("--bootstrap-token is required (copy from startup log)")
+	bootstrapToken, err := initBootstrapToken.read(fs, *bootstrapFlag, *bootstrapStdin)
+	if err != nil {
+		fatal("init: %v", err)
 	}
 	if *days <= 0 {
 		fatal("--days must be a positive integer")
@@ -50,7 +60,7 @@ func runInit(args []string) {
 	// Step 2: create a named admin token via MCP using the bootstrap token.
 	tmpCfg := Config{
 		ForgeURL: instanceURL,
-		Token:    *bootstrapToken,
+		Token:    bootstrapToken,
 		MCPURL:   instanceURL + "/mcp/message",
 	}
 	text, err := mcpCall(tmpCfg, "create_token", map[string]any{
@@ -64,12 +74,13 @@ func runInit(args []string) {
 
 	// Step 3: extract "token" from the JSON result.
 	var result map[string]any
-	if err := json.Unmarshal([]byte(text), &result); err != nil {
-		fatal("unexpected create_token response: %v\nraw: %s", err, text)
+	// Never print the response: it holds the new admin token (T961).
+	if json.Unmarshal([]byte(text), &result) != nil {
+		fatal("create_token returned a response that is not JSON (%d bytes); the token, if one was made, is not shown: revoke tokens named %q and run init again", len(text), *name)
 	}
 	newToken, ok := result["token"].(string)
 	if !ok || newToken == "" {
-		fatal("create_token response missing token field\nraw: %s", text)
+		fatal("create_token returned no token")
 	}
 	fmt.Printf("OK  token %q created (admin, %d days)\n", *name, *days)
 
@@ -84,7 +95,11 @@ func runInit(args []string) {
 	if err := os.WriteFile(envFile, []byte(content), 0o600); err != nil {
 		fatal("write %s: %v", envFile, err)
 	}
-	fmt.Printf("OK  %s written\n", envFile)
+	// WriteFile keeps an existing file's mode (--force): set 0600 again.
+	if err := os.Chmod(envFile, 0o600); err != nil {
+		fatal("chmod %s: %v", envFile, err)
+	}
+	fmt.Printf("OK  %s written (mode 600; keep it out of version control: add it to .gitignore)\n", envFile)
 
 	// Step 6: verify the new token works.
 	verifyCfg := Config{

@@ -9,7 +9,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Secrets from the environment or stdin (core T961, A592).** `social platform configure` reads the client secret from `SMELDR_SOCIAL_CLIENT_SECRET` or, with `--client-secret-stdin`, from the first line of stdin; `init` reads the bootstrap token from `SMELDR_BOOTSTRAP_TOKEN` or `--bootstrap-token-stdin`. Exactly one source is accepted; two are refused, and so is an empty value. No error or warning ever shows the secret.
+
+### Changed
+
+- **`--client-secret` and `--bootstrap-token` are deprecated (core T961).** They still work, and print a warning naming the safer forms: a value given as an argument stays in shell history and the process list.
+- **A readable `.smeldr-cli.env` is warned about (core T961).** On Unix, when the file is readable by group or others, the CLI prints the mode and the `chmod 600` fix, never the content.
+- `token create -h` says the plaintext token is printed once, to stdout.
+
 ### Fixed
+
+- **`init` never prints the new admin token (core T961).** When create_token's response did not parse, the error printed the whole response, which holds the token; it now gives the byte count and what to do. `init --force` over an existing `.smeldr-cli.env` sets mode 600 again (WriteFile kept the old mode).
 
 - **No command ignores an argument it does not know (core T960, A591).** The commands that parsed their arguments by hand now use the same flag parsing as the rest (T958, T959): transition, standing, approvers, decision sources, search, rests, premise confirm, nav list/create/update/delete, redirect list/create/delete, webhook create/deliveries/delete/retry, social post create/list/queue/get/publish/archive/delete, social credential create/get/delete, social schedule create/show/pause/resume/delete, social platform configure, block node get/publish/archive, media upload/list/delete and preview. An unknown flag, a stray argument or a flag with no value is refused with exit 1, never dropped. Before, `transition Task T1 --to done --reson "..."` ran the transition without the reason; `search text --jsn` sent `--jsn` as the query; nav, redirect, social and webhook ignored any flag they did not know and a value flag with no value; `delete a b` on nav, redirect, webhook, social and media acted on `a` only. Flags can come anywhere and `--name=value` works. media's errors now go through the same exit path (`-d` and `-t` stay as short forms). Commands that already refused unknown arguments (administrators, coverage, migrate-addresses, subscription) are unchanged.
 

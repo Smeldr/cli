@@ -48,6 +48,22 @@ SMELDR_MCP_URL=https://mysite.com/mcp/message
 `SMELDR_MCP_URL` defaults to `{SMELDR_URL}/mcp/message` if not set. It is only
 required for MCP-based commands (token, block, nav, redirect, social, etc.).
 
+`.smeldr-cli.env` holds a bearer token: keep it out of version control (add it
+to your `.gitignore`) and readable only by you (`chmod 600 .smeldr-cli.env`).
+On Unix the CLI warns when the file is readable by others.
+
+`smeldr-cli init` writes the file for a new instance. Give it the bootstrap
+token from the server's startup log in the environment or on stdin, not as an
+argument (an argument stays in shell history and the process list):
+
+```bash
+SMELDR_BOOTSTRAP_TOKEN=... smeldr-cli init --url https://mysite.com
+smeldr-cli init --url https://mysite.com --bootstrap-token-stdin < bootstrap.txt
+```
+
+`--bootstrap-token <token>` still works but is deprecated and warns. `init`
+writes the file with mode 600, also over an existing file with `--force`.
+
 ## Flags and arguments
 
 Flags may come before or after a command's arguments: `smeldr-cli posts update
@@ -263,12 +279,14 @@ smeldr-cli social credential delete <id>
 
 Configures the OAuth 2.0 app credentials for a platform (client ID, client secret, redirect URL).  
 Requires Admin role. Credentials are stored encrypted server-side and never echoed back.
+Give the client secret in `SMELDR_SOCIAL_CLIENT_SECRET` or on stdin with
+`--client-secret-stdin`, so it stays out of shell history and the process list.
+`--client-secret <secret>` still works but is deprecated and warns.
 
 ```bash
-smeldr-cli social platform configure \
+SMELDR_SOCIAL_CLIENT_SECRET=... smeldr-cli social platform configure \
   --platform mastodon|linkedin|x \
   --client-id <id> \
-  --client-secret <secret> \
   --redirect-url <url> \
   [--instance-url <url>]   # mastodon only \
   [--success-url <url>]

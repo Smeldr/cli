@@ -668,16 +668,24 @@ Verbs:
 `)
 }
 
+// socialClientSecret is the OAuth app's client secret (T961).
+var socialClientSecret = secretSource{
+	flag:      "client-secret",
+	stdinFlag: "client-secret-stdin",
+	env:       "SMELDR_SOCIAL_CLIENT_SECRET",
+	missing:   "social platform configure requires the app's client secret",
+}
+
 func runSocialPlatformConfigure(args []string) {
 	fs := newCommandFlags("social platform configure")
 	platformF := fs.String("platform", "", "mastodon, linkedin or x")
 	clientIDF := fs.String("client-id", "", "the app's client ID")
-	clientSecretF := fs.String("client-secret", "", "the app's client secret")
+	clientSecretF, secretStdin := socialClientSecret.secretFlags(fs, "the app's client secret")
 	redirectF := fs.String("redirect-url", "", "the OAuth redirect URL")
 	instanceF := fs.String("instance-url", "", "the Mastodon instance")
 	successF := fs.String("success-url", "", "where to go after connecting")
 	parseCommandFlags(fs, args, 0, "")
-	platform, clientID, clientSecret := *platformF, *clientIDF, *clientSecretF
+	platform, clientID := *platformF, *clientIDF
 	redirectURL, instanceURL, successURL := *redirectF, *instanceF, *successF
 	if platform == "" {
 		fatal("social platform configure requires --platform mastodon|linkedin|x")
@@ -685,8 +693,9 @@ func runSocialPlatformConfigure(args []string) {
 	if clientID == "" {
 		fatal("social platform configure requires --client-id <id>")
 	}
-	if clientSecret == "" {
-		fatal("social platform configure requires --client-secret <secret>")
+	clientSecret, err := socialClientSecret.read(fs, *clientSecretF, *secretStdin)
+	if err != nil {
+		fatal("social platform configure: %v", err)
 	}
 	if redirectURL == "" {
 		fatal("social platform configure requires --redirect-url <url>")

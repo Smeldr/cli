@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -42,13 +43,18 @@ func loadConfig() (Config, error) {
 }
 
 // loadEnvFile reads key=value lines from path and sets environment variables
-// that are not already set. Silently ignores files that do not exist.
+// that are not already set. Silently ignores files that do not exist. The
+// file holds a token, so on Unix a mode readable by group or others is
+// warned about, with the fix and never the content (T961).
 func loadEnvFile(path string) {
 	f, err := os.Open(path)
 	if err != nil {
 		return
 	}
 	defer f.Close()
+	if fi, err := f.Stat(); err == nil {
+		warnReadableByOthers(path, fi.Mode().Perm())
+	}
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
@@ -156,4 +162,13 @@ func printJSON(raw []byte) error {
 func fatal(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, "smeldr-cli: "+format+"\n", args...)
 	osExit(1)
+}
+
+// warnReadableByOthers warns when a file holding a secret is readable by its
+// group or by others. Windows has no such mode bits; it is skipped there.
+func warnReadableByOthers(path string, perm os.FileMode) {
+	if runtime.GOOS == "windows" || perm&0o077 == 0 {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "smeldr-cli: warning: %s is readable by others (mode %04o); run chmod 600 %s\n", path, perm, path)
 }

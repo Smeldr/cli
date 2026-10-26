@@ -53,7 +53,7 @@ The MCP endpoint is used for token operations (SMELDR_MCP_URL).
 func runTokenCreate(args []string) {
 	name, role, ttl, class, reason, err := parseTokenCreateArgs(args)
 	if errors.Is(err, flag.ErrHelp) {
-		os.Exit(0)
+		osExit(0)
 	}
 	if err != nil {
 		fatal("%v", err)
@@ -210,6 +210,7 @@ func parseTokenCreateArgs(args []string) (name, role string, ttl int, class, rea
 	fs.SetOutput(os.Stderr)
 	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human] [--reason <text>]")
+		fmt.Fprintln(os.Stderr, "The plaintext token is printed once, to stdout; store it now.")
 	}
 	fs.StringVar(&class, "class", "", "classify the token's actor: agent, job or human (never changes permissions)")
 	fs.StringVar(&reason, "reason", "", "why the token is minted (never a secret)")
