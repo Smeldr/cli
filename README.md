@@ -421,6 +421,12 @@ Ask who administers the instance (core T944, D154; `administrators` over MCP): t
 smeldr-cli administrators [--json]
 ```
 
+What the detectors found (core T953; `list_findings` over MCP), filtered by what you may read:
+
+```bash
+smeldr-cli findings [--detector standing-drift] [--type Decision] [--limit 50] [--json]
+```
+
 What rests on an item, and what it rests on (core T919, D150; `get_rest_counts` and `list_rest_counts` over MCP): live for one item, or as the last sweep stored them for several. A Decision still holds although its premise is not in force (D149; `confirm_premise`, ratify over its place):
 
 ```bash

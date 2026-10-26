@@ -11,6 +11,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.33.0] - 2026-10-26
+
+Needs smeldr.dev/mcp v1.70.0 (core v1.177.0) on the server for `findings`.
+
+### Added
+
+- **`findings` (core T953).** `smeldr-cli findings [--detector D] [--type T] [--limit N] [--json]` lists what the detectors found (detector, subject address or type:id, last seen, message) through the `list_findings` MCP tool, filtered by what you may read. Needs smeldr.dev/mcp with `list_findings` on the server.
+
+---
+
 ## [0.32.0] - 2026-10-26
 
 Needs smeldr.dev/mcp v1.69.0 (core v1.175.0) on the server for the new command.
