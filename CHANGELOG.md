@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.35.0] - 2026-10-27
+
 ### Added
 
 - **`init --no-approver` (core T970).** Grants `admin` only, so the token cannot ratify.
