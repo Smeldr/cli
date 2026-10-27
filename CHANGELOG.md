@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.34.0] - 2026-10-26
+
 ### Added
 
 - **Secrets from the environment or stdin (core T961, A592).** `social platform configure` reads the client secret from `SMELDR_SOCIAL_CLIENT_SECRET` or, with `--client-secret-stdin`, from the first line of stdin; `init` reads the bootstrap token from `SMELDR_BOOTSTRAP_TOKEN` or `--bootstrap-token-stdin`. Exactly one source is accepted; two are refused, and so is an empty value. No error or warning ever shows the secret.
