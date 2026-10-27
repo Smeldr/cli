@@ -9,6 +9,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`init --no-approver` (core T970).** Grants `admin` only, so the token cannot ratify.
+
+### Changed
+
+- **`init` creates a ratifier (core T970, D142 point 6).** The token it writes is the founder's: class `human`, with `admin` and `approver`, both granted with the reason "founder of the organization (D142)". It can ratify Decisions. When a global approver already exists, `init` grants `admin` only and says so; without governance it grants nothing. The success lines name the class and every grant.
+
+### Fixed
+
+- **`init` gives its token the grants it needs (core T970, A593).** Under governance a token's role field grants nothing, so the `operator` token `init` made could not act as admin (`token list` was refused). The final check now calls `list_tokens` with the new token instead of only reaching `/_health`. An existing `.smeldr-cli.env` without `--force` is refused before any token is created, so a refused `init` leaves no orphaned token.
+
 ---
 
 ## [0.34.0] - 2026-10-26

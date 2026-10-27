@@ -107,12 +107,42 @@ func TestSocialPlatformConfigure_SecretFromEnv(t *testing.T) {
 	}
 }
 
-// initServer answers /_health and create_token with text as the tool result.
+// initServer answers /_health and the MCP tools init calls: create_token
+// with text, list_grants with no grants, and the rest with {}.
 func initServer(t *testing.T, text string) string {
+	t.Helper()
+	return initServerTools(t, map[string]string{"create_token": text}, nil)
+}
+
+// initServerTools answers each tool with tools[name] (default {}, and no
+// grants for list_grants; a value starting "ERROR " is a JSON-RPC error)
+// and records every call in calls.
+func initServerTools(t *testing.T, tools map[string]string, calls *[]map[string]any) string {
 	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/_health" {
 			_, _ = io.WriteString(w, `{"status":"ok"}`)
+			return
+		}
+		var req struct {
+			Params struct {
+				Name      string         `json:"name"`
+				Arguments map[string]any `json:"arguments"`
+			} `json:"params"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&req)
+		if calls != nil {
+			*calls = append(*calls, map[string]any{"tool": req.Params.Name, "args": req.Params.Arguments})
+		}
+		text, ok := tools[req.Params.Name]
+		if !ok {
+			text = "{}"
+			if req.Params.Name == "list_grants" {
+				text = `{"grants":[]}`
+			}
+		}
+		if strings.HasPrefix(text, "ERROR ") {
+			_ = json.NewEncoder(w).Encode(map[string]any{"jsonrpc": "2.0", "id": 1, "error": map[string]any{"code": -32602, "message": strings.TrimPrefix(text, "ERROR ")}})
 			return
 		}
 		_ = json.NewEncoder(w).Encode(map[string]any{"jsonrpc": "2.0", "id": 1, "result": map[string]any{
@@ -128,7 +158,7 @@ func initServer(t *testing.T, text string) string {
 func TestInit_Secrets(t *testing.T) {
 	t.Chdir(t.TempDir())
 	const newToken = "tok-NEWADMINTOKEN-0123456789"
-	url := initServer(t, `{"token":"`+newToken+`"}`)
+	url := initServer(t, `{"token":"`+newToken+`","token_id":"u-1"}`)
 	t.Setenv(initBootstrapToken.env, "boot-123")
 	if err := os.WriteFile(".smeldr-cli.env", []byte("old\n"), 0o644); err != nil {
 		t.Fatal(err)

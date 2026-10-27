@@ -64,6 +64,14 @@ smeldr-cli init --url https://mysite.com --bootstrap-token-stdin < bootstrap.txt
 `--bootstrap-token <token>` still works but is deprecated and warns. `init`
 writes the file with mode 600, also over an existing file with `--force`.
 
+**`init` creates a ratifier.** The token it writes is yours, the person
+founding this server (D142): class `human`, with the `admin` and `approver`
+roles, both granted with the reason "founder of the organization (D142)". It
+can ratify Decisions. `--no-approver` grants `admin` only. If a global
+approver already exists, `init` grants `admin` only and says so. On a server
+without governance it grants nothing (the token's role is enough there). It
+then checks that the new token can act as admin.
+
 ## Flags and arguments
 
 Flags may come before or after a command's arguments: `smeldr-cli posts update
