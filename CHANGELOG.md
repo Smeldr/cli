@@ -11,6 +11,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.35.1] - 2026-10-28
+
+### Added
+
+- **Release binaries (core T977).** Every tag now attaches `smeldr-cli` built for linux/amd64, linux/arm64, darwin/amd64, darwin/arm64 and windows/amd64 (`.exe`), static (`CGO_ENABLED=0`) and with `-trimpath`, plus a `SHA256SUMS` file. Go is no longer needed to install the CLI. The workflow refuses a tag whose binaries report another version.
+
+---
+
 ## [0.35.0] - 2026-10-27
 
 ### Added

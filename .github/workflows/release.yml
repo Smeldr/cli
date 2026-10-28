@@ -1,0 +1,68 @@
+name: Release binaries
+
+on:
+  push:
+    tags: ['v*']
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  build-and-attach:
+    name: Build smeldr-cli and attach to the release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build smeldr-cli (five targets, static)
+        env:
+          GOWORK: 'off'
+          CGO_ENABLED: '0'
+        run: |
+          set -eu
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+            os=${target%/*}
+            arch=${target#*/}
+            ext=""
+            if [ "$os" = windows ]; then ext=".exe"; fi
+            GOOS=$os GOARCH=$arch go build -trimpath -o "dist/smeldr-cli-$os-$arch$ext" ./cmd/smeldr-cli
+          done
+
+      - name: Confirm the binaries report the tagged version
+        run: |
+          got=$(dist/smeldr-cli-linux-amd64 version)
+          if [ "$got" != "smeldr-cli ${{ github.ref_name }}" ]; then
+            echo "::error::smeldr-cli reports \"$got\", the tag is ${{ github.ref_name }}: bump cliVersion in cmd/smeldr-cli/main.go."
+            exit 1
+          fi
+
+      - name: Write SHA256SUMS
+        working-directory: dist
+        run: sha256sum smeldr-cli-* > SHA256SUMS
+
+      - name: Confirm the release exists before attaching to it
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for i in $(seq 1 20); do
+            if gh release view ${{ github.ref_name }} --json tagName >/dev/null 2>&1; then
+              echo "Release ${{ github.ref_name }} found on attempt $i/20."
+              exit 0
+            fi
+            echo "Release ${{ github.ref_name }} not found yet (attempt $i/20), retrying in 5s..."
+            sleep 5
+          done
+          echo "::error::Release ${{ github.ref_name }} did not appear within ~100s of the tag push."
+          exit 1
+
+      - name: Attach binaries and SHA256SUMS to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} dist/*
