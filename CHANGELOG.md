@@ -11,6 +11,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.35.2] - 2026-10-31
+
+### Fixed
+
+- **`init` says what protects the env file on Windows (core T1000, A608).** On Unix the line still reads "mode 600". On Windows a file mode restricts nobody, so it now says the file is protected by the user profile's permissions. The client's permission warning already skipped Windows; this is the matching message.
+
+---
+
 ## [0.35.1] - 2026-10-28
 
 ### Added

@@ -136,3 +136,16 @@ func TestInit_ExistingEnvFileRefusedFirst(t *testing.T) {
 		t.Errorf("exit %d after %d tool calls, want 1 after none", code, len(calls))
 	}
 }
+
+// init's env-file line names what protects the file on each platform (T1000).
+func TestEnvWrittenMessage(t *testing.T) {
+	for goos, want := range map[string]string{
+		"linux":   "OK  .smeldr-cli.env written (mode 600; keep it out of version control: add it to .gitignore)",
+		"darwin":  "OK  .smeldr-cli.env written (mode 600; keep it out of version control: add it to .gitignore)",
+		"windows": "OK  .smeldr-cli.env written (on Windows the file is protected by your user profile's permissions, not by a file mode; keep it out of version control: add it to .gitignore)",
+	} {
+		if got := envWrittenMessage(".smeldr-cli.env", goos); got != want {
+			t.Errorf("%s: %q\nwant %q", goos, got, want)
+		}
+	}
+}

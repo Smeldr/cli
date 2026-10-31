@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -140,7 +141,7 @@ func runInit(args []string) {
 	if err := os.Chmod(envFile, 0o600); err != nil {
 		fatal("chmod %s: %v", envFile, err)
 	}
-	fmt.Printf("OK  %s written (mode 600; keep it out of version control: add it to .gitignore)\n", envFile)
+	fmt.Println(envWrittenMessage(envFile, runtime.GOOS))
 
 	// Step 6: verify the new token can act as admin, not only reach the
 	// server: list_tokens needs the admin grant.
@@ -192,4 +193,14 @@ func initGovernance(cfg Config) (governed, approverExists bool, err error) {
 		}
 	}
 	return true, false, nil
+}
+
+// envWrittenMessage is init's line for the written env file. Mode 600 keeps
+// other users out on Unix; on Windows the file mode restricts nobody, so the
+// line names what does: the user profile's own permissions (T1000).
+func envWrittenMessage(envFile, goos string) string {
+	if goos == "windows" {
+		return fmt.Sprintf("OK  %s written (on Windows the file is protected by your user profile's permissions, not by a file mode; keep it out of version control: add it to .gitignore)", envFile)
+	}
+	return fmt.Sprintf("OK  %s written (mode 600; keep it out of version control: add it to .gitignore)", envFile)
 }
