@@ -131,11 +131,11 @@ func TestHandRolledReparse_Mixed(t *testing.T) {
 	if err != nil || tool != "grant_role" || params["role"] != "steward" || params["reason"] != "owns docs" {
 		t.Errorf("grant, mixed: %q %v %v", tool, params, err)
 	}
-	name, role, ttl, class, reason, err := parseTokenCreateArgs([]string{"bot", "--class", "job", "editor", "30", "--reason", "ci"})
+	name, role, ttl, class, reason, _, err := parseTokenCreateArgs([]string{"bot", "--class", "job", "editor", "30", "--reason", "ci"})
 	if err != nil || name != "bot" || role != "editor" || ttl != 30 || class != "job" || reason != "ci" {
 		t.Errorf("token create, mixed: %q %q %d %q %q %v", name, role, ttl, class, reason, err)
 	}
-	if _, _, _, _, _, err := parseTokenCreateArgs([]string{"bot", "editor", "30", "extra"}); err == nil || !strings.Contains(err.Error(), `unexpected argument "extra"`) {
+	if _, _, _, _, _, _, err := parseTokenCreateArgs([]string{"bot", "editor", "30", "extra"}); err == nil || !strings.Contains(err.Error(), `unexpected argument "extra"`) {
 		t.Errorf("token create, stray: %v", err)
 	}
 }

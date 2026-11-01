@@ -8,16 +8,16 @@ func TestParseTokenCreateArgs_Reason(t *testing.T) {
 		{"bot", "editor", "30", "--reason", "nightly import"},
 		{"bot", "editor", "30", "--class", "job", "--reason", "nightly import"},
 	} {
-		name, role, ttl, _, reason, err := parseTokenCreateArgs(args)
+		name, role, ttl, _, reason, _, err := parseTokenCreateArgs(args)
 		if err != nil || name != "bot" || role != "editor" || ttl != 30 || reason != "nightly import" {
 			t.Errorf("%v: got %q %q %d reason %q err %v", args, name, role, ttl, reason, err)
 		}
 	}
-	p := tokenCreateParams("bot", "editor", 30, "", "nightly import")
+	p := tokenCreateParams("bot", "editor", 30, "", "nightly import", "")
 	if p["reason"] != "nightly import" {
 		t.Errorf("params = %v; want the reason", p)
 	}
-	if _, has := tokenCreateParams("bot", "editor", 30, "", "")["reason"]; has {
+	if _, has := tokenCreateParams("bot", "editor", 30, "", "", "")["reason"]; has {
 		t.Error("an empty reason was sent")
 	}
 }

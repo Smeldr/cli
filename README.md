@@ -169,6 +169,10 @@ grants or changes a permission, you attest it (a token may be human only if ever
 a new one and revoke the old. Without it the token is unclassified and records
 `unclassified`. Needs smeldr.dev/mcp v1.48.0 on the server.
 
+Optional `--identity <IDN>` mints the token for an existing identity (D165): it
+joins it, takes its class and acts with its grants, so a rotation keeps the
+history (mint, then revoke the old token). Needs a server with core T1014.
+
 Optional `--reason <text>` says why the token is minted. It is stored with the
 act and shown by `token list`. It is free text that people read: never put a
 token value or other secret in it.

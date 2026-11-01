@@ -36,8 +36,9 @@ func printTokenHelp() {
 	fmt.Fprint(os.Stdout, `smeldr-cli token — token management (Admin role required)
 
 Verbs:
-  create <name> <role> <ttl-days> [--class agent|job|human] [--reason <text>]
-                                     issue a new named token; --class classifies its actor
+  create <name> <role> <ttl-days> [--class agent|job|human] [--identity <IDN>] [--reason <text>]
+                                     issue a new named token; --class classifies its actor;
+                                     --identity mints it for that identity (it joins it, D165)
   list                               list all tokens (incl. revoked/expired)
   revoke <id> [--reason <text>]      revoke a token by fingerprint ID
 
@@ -51,7 +52,7 @@ The MCP endpoint is used for token operations (SMELDR_MCP_URL).
 // runTokenCreate issues a new named token via the MCP create_token tool.
 // Role must be one of: author, editor, admin.
 func runTokenCreate(args []string) {
-	name, role, ttl, class, reason, err := parseTokenCreateArgs(args)
+	name, role, ttl, class, reason, identity, err := parseTokenCreateArgs(args)
 	if errors.Is(err, flag.ErrHelp) {
 		osExit(0)
 	}
@@ -64,7 +65,7 @@ func runTokenCreate(args []string) {
 		fatal("%v", err)
 	}
 
-	text, err := mcpCall(cfg, "create_token", tokenCreateParams(name, role, ttl, class, reason))
+	text, err := mcpCall(cfg, "create_token", tokenCreateParams(name, role, ttl, class, reason, identity))
 	if err != nil {
 		fatal("%v", err)
 	}
@@ -205,42 +206,48 @@ var tokenClasses = map[string]bool{"agent": true, "job": true, "human": true}
 // parseTokenCreateArgs reads `token create <name> <role> <ttl-days> [--class c]`.
 // The flag may come before or after the positional arguments. An invalid class,
 // a missing argument or a non-positive TTL is an error before any request is made.
-func parseTokenCreateArgs(args []string) (name, role string, ttl int, class, reason string, err error) {
+//
+// --identity names an identity (address or id) the token joins (D165).
+func parseTokenCreateArgs(args []string) (name, role string, ttl int, class, reason, identity string, err error) {
 	fs := flag.NewFlagSet("token create", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human] [--reason <text>]")
+		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human] [--identity <IDN>] [--reason <text>]")
 		fmt.Fprintln(os.Stderr, "The plaintext token is printed once, to stdout; store it now.")
 	}
 	fs.StringVar(&class, "class", "", "classify the token's actor: agent, job or human (never changes permissions)")
 	fs.StringVar(&reason, "reason", "", "why the token is minted (never a secret)")
+	fs.StringVar(&identity, "identity", "", "mint the token for this identity (address or id): it joins it and takes its class")
 	pos, err := parseAtMost(fs, args, 3)
 	if err != nil {
-		return "", "", 0, "", "", err
+		return "", "", 0, "", "", "", err
 	}
 	if len(pos) < 3 {
-		return "", "", 0, "", "", fmt.Errorf("token create requires: <name> <role> <ttl-days>")
+		return "", "", 0, "", "", "", fmt.Errorf("token create requires: <name> <role> <ttl-days>")
 	}
 	ttl, convErr := strconv.Atoi(pos[2])
 	if convErr != nil || ttl <= 0 {
-		return "", "", 0, "", "", fmt.Errorf("ttl-days must be a positive integer, got %q", pos[2])
+		return "", "", 0, "", "", "", fmt.Errorf("ttl-days must be a positive integer, got %q", pos[2])
 	}
 	if class != "" && !tokenClasses[class] {
-		return "", "", 0, "", "", fmt.Errorf(`--class must be "agent", "job" or "human", got %q`, class)
+		return "", "", 0, "", "", "", fmt.Errorf(`--class must be "agent", "job" or "human", got %q`, class)
 	}
-	return pos[0], pos[1], ttl, class, reason, nil
+	return pos[0], pos[1], ttl, class, reason, identity, nil
 }
 
-// tokenCreateParams builds the create_token arguments; actor_class and reason
-// are sent only when given, so a call without them is exactly what it always
-// was.
-func tokenCreateParams(name, role string, ttl int, class, reason string) map[string]any {
+// tokenCreateParams builds the create_token arguments; actor_class, reason and
+// identity are sent only when given, so a call without them is exactly what it
+// always was.
+func tokenCreateParams(name, role string, ttl int, class, reason, identity string) map[string]any {
 	p := map[string]any{"name": name, "role": role, "expires_in_days": ttl}
 	if class != "" {
 		p["actor_class"] = class
 	}
 	if reason != "" {
 		p["reason"] = reason
+	}
+	if identity != "" {
+		p["identity"] = identity
 	}
 	return p
 }
