@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.36.0] - 2026-11-02
+
 ### Added
 
 - **`token create --identity` mints a token for an identity (core T1014).** `smeldr-cli token create <name> <role> <ttl-days> --identity IDN4` sends `identity` to the MCP `create_token` tool. The token joins that identity and keeps its grants and history. To rotate, mint the new token, then revoke the old one. Without the flag, the call is unchanged. This needs smeldr.dev/mcp with the `identity` argument on the server.
