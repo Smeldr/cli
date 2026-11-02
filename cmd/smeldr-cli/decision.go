@@ -36,6 +36,11 @@ func runDecisionSourcesCommand(args []string) {
 		printDecisionSourcesHelp()
 		return
 	}
+	args, rev, err := takeRev(args)
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
 	fs := newCommandFlags("decision sources")
 	fs.Usage = printDecisionSourcesHelp
 	asJSON := fs.Bool("json", false, "raw JSON")
@@ -72,9 +77,12 @@ func runDecisionSourcesCommand(args []string) {
 				fatal("sources must be a JSON array of {repository, commit, path, anchor, role, hash}: %v", err)
 			}
 		}
-		if _, err := mcpCall(cfg, "update_decision", map[string]any{"slug": decision, "sources": sources}); err != nil {
-			fatal("%v", err)
+		// The rev of the Decision the person read (core T1010).
+		if rev == nil {
+			n := readAndConfirm(cfg, "decision sources --set", "Replace the sources of", "get_decision", map[string]any{"slug": decision}, false)
+			rev = &n
 		}
+		writeCall(cfg, "update_decision", map[string]any{"slug": decision, "sources": sources, "rev": *rev}, nil)
 		fmt.Printf("%s: %d sources set\n", decision, len(sources))
 		return
 	}

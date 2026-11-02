@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -13,9 +14,9 @@ import (
 const grantUsage = `smeldr-cli grant: governance role grants (Admin role required)
 
 Usage:
-  grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>]
+  grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>] [--rev <n>]
                                      grant a role to a token
-  grant revoke <grant-id> [--reason <text>]
+  grant revoke <grant-id> [--reason <text>] [--rev <n>]
                                      revoke a grant by its own id
   grant list [<token-id>]            list all grants, or one token's
 
@@ -25,6 +26,10 @@ fingerprint "token list" shows. --scope may repeat (static scope patterns,
 --expires-in-days makes the grant time-boxed (a positive number of days): when
 it expires it stops authorizing, with no revoke needed, and "grant list" still
 shows it.
+--rev is the rev of the holder's identity you read (identity_rev in "grant list
+<token-id>"): a grant or revoke on a stale view is refused. Without --rev, on a
+terminal, cli shows the identity's grants and asks; without a terminal it
+refuses. A holder that is not an identity yet names no rev.
 --reason is stored with the act and shown by "grant list". It is free text that
 people read: never put a token value or other secret in it.
 
@@ -33,6 +38,11 @@ The MCP endpoint is used (SMELDR_MCP_URL).
 
 // runGrantCommand dispatches the grant commands.
 func runGrantCommand(args []string) {
+	args, rev, err := takeRev(args)
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
 	verb, params, err := parseGrantArgs(args)
 	if errors.Is(err, flag.ErrHelp) {
 		fmt.Fprint(os.Stdout, grantUsage)
@@ -45,13 +55,98 @@ func runGrantCommand(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, verb, params)
-	if err != nil {
-		fatal("%v", err)
+	if verb == "list_grants" {
+		if rev != nil {
+			fatal("--rev is for grant and grant revoke, not grant list")
+			return
+		}
+		text, err := mcpCall(cfg, verb, params)
+		if err != nil {
+			fatal("%v", err)
+		}
+		if err := printJSON([]byte(text)); err != nil {
+			fatal("%v", err)
+		}
+		return
 	}
+	// A grant or revoke names the rev of the holder's identity (core T1010).
+	if rev == nil {
+		rev = confirmGrantRev(cfg, verb, params)
+	}
+	if rev != nil {
+		params["rev"] = *rev
+	}
+	text := writeCall(cfg, verb, params, nil)
 	if err := printJSON([]byte(text)); err != nil {
 		fatal("%v", err)
 	}
+}
+
+// confirmGrantRev reads the holder's grants and its identity's rev, shows
+// them and asks; nil when the holder is not an identity (no rev to name).
+func confirmGrantRev(cfg Config, verb string, params map[string]any) *int {
+	holder, _ := params["token_id"].(string)
+	if verb == "revoke_grant" {
+		holder = grantHolder(cfg, params["id"].(string))
+		if holder == "" {
+			return nil // an unknown grant: the server answers
+		}
+	}
+	text, err := mcpCall(cfg, "list_grants", map[string]any{"token_id": holder})
+	if err != nil {
+		fatal("%v", err)
+		return nil
+	}
+	var res struct {
+		Grants []struct {
+			ID       string `json:"ID"`
+			RoleName string `json:"RoleName"`
+		} `json:"grants"`
+		IdentityRev *int `json:"identity_rev"`
+	}
+	if err := json.Unmarshal([]byte(text), &res); err != nil {
+		fatal("unexpected list_grants response: %v", err)
+		return nil
+	}
+	if res.IdentityRev == nil {
+		return nil // not an identity yet: no rev to name
+	}
+	needTerminal("grant", "identity_rev from grant list "+holder)
+	roles := make([]string, 0, len(res.Grants))
+	for _, g := range res.Grants {
+		roles = append(roles, g.RoleName)
+	}
+	action := "Grant " + fmt.Sprint(params["role"]) + " to"
+	if verb == "revoke_grant" {
+		action = "Revoke grant " + fmt.Sprint(params["id"]) + " from"
+	}
+	confirmRev(action, fmt.Sprintf("identity %s, grants now: %s", holder, strings.Join(roles, ", ")), *res.IdentityRev)
+	return res.IdentityRev
+}
+
+// grantHolder finds the token_id holding grantID, "" when none.
+func grantHolder(cfg Config, grantID string) string {
+	text, err := mcpCall(cfg, "list_grants", map[string]any{})
+	if err != nil {
+		fatal("%v", err)
+		return ""
+	}
+	var res struct {
+		Grants []struct {
+			ID      string `json:"ID"`
+			TokenID string `json:"TokenID"`
+		} `json:"grants"`
+	}
+	if err := json.Unmarshal([]byte(text), &res); err != nil {
+		fatal("unexpected list_grants response: %v", err)
+		return ""
+	}
+	for _, g := range res.Grants {
+		if g.ID == grantID {
+			return g.TokenID
+		}
+	}
+	return ""
 }
 
 // maxExpiryDays is the server's cap on a days argument (100 years), checked

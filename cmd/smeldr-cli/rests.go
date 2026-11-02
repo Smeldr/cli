@@ -146,6 +146,12 @@ func runPremiseCommand(args []string) {
 	if args[0] != "confirm" {
 		fatal("unknown premise command %q: confirm", args[0])
 	}
+	rest0, rev, err := takeRev(args[1:])
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
+	args = append([]string{args[0]}, rest0...)
 	fs := newCommandFlags("premise confirm")
 	fs.Usage = printPremiseHelp
 	reasonF := fs.String("reason", "", "why the Decision still holds")
@@ -162,9 +168,18 @@ func runPremiseCommand(args []string) {
 	if len(rest) == 2 {
 		call = map[string]any{"decision": rest[0], "premise": rest[1], "reason": reason}
 	}
-	if _, err := mcpCall(cfg, "confirm_premise", call); err != nil {
-		fatal("%v", err)
+	// The rev of the resting Decision the person read (core T1010).
+	switch {
+	case rev != nil:
+	case len(rest) == 2:
+		n := readAndConfirm(cfg, "premise confirm", "Confirm that "+rest[0]+" still holds; it is", "get_decision", map[string]any{"slug": rest[0]}, true)
+		rev = &n
+	default:
+		fatal("premise confirm <condition> needs --rev <n>, the rev of the Decision resting on it as you read it (get_decision)")
+		return
 	}
+	call["rev"] = *rev
+	writeCall(cfg, "confirm_premise", call, nil)
 	if len(rest) == 1 {
 		fmt.Printf("confirmed: the condition %s is resolved; its Decision still holds\n", rest[0])
 		return

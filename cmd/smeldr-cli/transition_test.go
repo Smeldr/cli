@@ -8,7 +8,7 @@ import (
 func TestTransition_ToolAndArgs_Ratification(t *testing.T) {
 	result := map[string]any{"id": "dec-1", "slug": "dec-1", "status": "ratified"}
 	tool, args, out := mockMCP(t, result, func() {
-		runTransitionCommand([]string{"Decision", "dec-1", "--to", "ratified"})
+		runTransitionCommand([]string{"Decision", "dec-1", "--to", "ratified", "--rev", "5"})
 	})
 	if tool != "transition_item" {
 		t.Errorf("tool = %q, want transition_item", tool)

@@ -137,9 +137,9 @@ func TestCheckMergeAnswerShowList(t *testing.T) {
 		t.Errorf("merge --json:\n%s", out)
 	}
 	tool, args, _ = mockMCP(t, cliCheck, func() {
-		runCheckCommand([]string{"answer", "--not-approved", "--reason", "breaks the rule", "CHK3", "ARE1"})
+		runCheckCommand([]string{"answer", "--not-approved", "--reason", "breaks the rule", "CHK3", "ARE1", "--rev", "3"})
 	})
-	if tool != "answer_change_check" || args["approve"] != false || args["reason"] != "breaks the rule" || args["check"] != "CHK3" || args["area"] != "ARE1" {
+	if tool != "answer_change_check" || args["approve"] != false || args["reason"] != "breaks the rule" || args["check"] != "CHK3" || args["area"] != "ARE1" || fmt.Sprint(args["rev"]) != "3" {
 		t.Errorf("answer: %q %v", tool, args)
 	}
 	tool, args, out = mockMCP(t, cliCheck, func() { runCheckCommand([]string{"show", "CHK3"}) })

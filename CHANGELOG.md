@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Governance writes name the rev you read (core T1010, T1017).** Core now expects governance writes to name the rev (version) of the record the caller read, so a stale write cannot overwrite newer changes. Without a rev, core warns with `rev_missing`, and after the server cutover it refuses the write; a stale rev is refused with `rev_conflict`. The commands that write this way are `transition` (Decision, Amendment, Organization, Domain, Area and CoverageRule, ratify included), `decision sources --set` and `--clear`, `grant` and `grant revoke`, `check answer`, `premise confirm` and `relation withdraw`. Each takes `--rev <n>`, sent as given. Without the flag on a terminal, the cli reads the record, shows what it will act on, and asks `Proceed with rev <n>? [y/N]`, writing nothing unless the answer is y. Without a terminal, the cli refuses before sending anything. `premise confirm <condition>` and `relation withdraw` always need `--rev`, and `grant` and `grant revoke` name the holder identity's rev. `init` passes the rev each founder grant returns, with no prompt. On `rev_conflict`, the cli prints the server's message and exits 1 without retrying; for a stale ratify it also prints the Decision as it is now. Warnings print to stderr. The grant revs need smeldr.dev/mcp v1.74.0 on the server.
+
 ---
 
 ## [0.36.0] - 2026-11-02

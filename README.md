@@ -199,8 +199,8 @@ Revocation is permanent and takes effect immediately. Optional
 Governance role grants over MCP (`grant_role`, `revoke_grant`, `list_grants`; Admin role required; v0.23.0):
 
 ```bash
-smeldr-cli grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>]
-smeldr-cli grant revoke <grant-id> [--reason <text>]
+smeldr-cli grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>] [--rev <n>]
+smeldr-cli grant revoke <grant-id> [--reason <text>] [--rev <n>]
 smeldr-cli grant list [<token-id>]
 ```
 
@@ -387,6 +387,21 @@ instance the server returns an error that smeldr-cli surfaces directly.
 
 ---
 
+## Naming the rev you read (core T1010)
+
+A governance write names the version of the record you read, so a change made since is never overwritten unseen: `transition` on a Decision, Amendment, Organization, Domain, Area or CoverageRule (ratify included), `decision sources --set`/`--clear`, `grant` and `grant revoke`, `check answer`, `premise confirm` and `relation withdraw`.
+
+- **`--rev <n>`** is the rev you read, and is sent as given. A script or an agent always passes it.
+- **Without `--rev`, on a terminal,** smeldr-cli reads the record, shows what it is about to act on (address, title, status, rev; the body too for a ratify or supersede), and asks `Proceed with rev <n>? [y/N]`. What you confirm is the version you saw. Anything but `y` writes nothing.
+- **Without `--rev` and without a terminal,** the write is refused before anything is sent. smeldr-cli never reads and writes on your behalf.
+- **On Windows,** smeldr-cli asks in PowerShell, Windows Terminal and Git Bash (its own window too, with ConPTY, the default in current Git for Windows). In a terminal that is not a console (an older Git Bash window without ConPTY) it cannot ask and refuses: pass `--rev`, use Windows Terminal or PowerShell, or prefix it with `winpty`.
+- **`premise confirm <condition>` and `relation withdraw` always need `--rev`:** the rev of the resting Decision (`get_decision`), or of the relation (`relation list`).
+- **`grant` and `grant revoke`** name the rev of the holder's identity, `identity_rev` in `grant list <token-id>`. A holder that is not an identity yet names none.
+- **On a conflict** (the record changed since you read it) smeldr-cli prints the server's message and exits 1; it never retries. For a stale ratify it also prints the Decision as it is now: read it, and ratify again only if it still holds.
+- Warnings in a result (`rev_missing` and others) are printed to stderr.
+
+---
+
 ## Transition command
 
 Moves an item — dynamic content or a compiled type (e.g. `Decision`, `Task`,
@@ -395,7 +410,7 @@ Moves an item — dynamic content or a compiled type (e.g. `Decision`, `Task`,
 not by smeldr-cli.
 
 ```bash
-smeldr-cli transition <type_name> <slug> --to <state> [--reason <text>]
+smeldr-cli transition <type_name> <slug> --to <state> [--reason <text>] [--rev <n>]
 
 # Ratifying a Decision
 smeldr-cli transition Decision <slug> --to ratified
@@ -472,7 +487,7 @@ What rests on an item, and what it rests on (core T919, D150; `get_rest_counts` 
 smeldr-cli rests Decision D12 [--json]
 smeldr-cli rests --stored Decision:D12 Decision:D13 [--json]
 smeldr-cli premise confirm D12 D7 --reason "the draft is what we follow"
-smeldr-cli premise confirm S3170 --reason "the draft is what we follow"   # by the condition, when you may not read the premise
+smeldr-cli premise confirm S3170 --reason "the draft is what we follow" --rev 6   # by the condition, when you may not read the premise; --rev is the Decision's
 ```
 
 A Decision's pinned external sources (core T914, D148; `get_decision` and `update_decision` over MCP). Each is a file at a full commit SHA with a role; set them while the Decision is proposed (a ratified one is locked: supersede it to re-pin):

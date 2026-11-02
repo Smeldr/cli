@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 // runTransitionCommand moves an item — dynamic content or a compiled type
 // (e.g. "Decision", "Task", "Signal") — to a new state via the
@@ -12,6 +15,11 @@ func runTransitionCommand(args []string) {
 		return
 	}
 
+	args, rev, err := takeRev(args)
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
 	fs := newCommandFlags("transition")
 	fs.Usage = printTransitionHelp
 	to := fs.String("to", "", "the state to move to")
@@ -38,10 +46,29 @@ func runTransitionCommand(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "transition_item", callArgs)
-	if err != nil {
-		fatal("%v", err)
+	// A governance type names the rev the person read (core T1010).
+	getTool := revGetTool(typeName)
+	weighty := toState == "ratified" || toState == "superseded"
+	if getTool != "" {
+		if rev == nil {
+			n := readAndConfirm(cfg, "transition "+typeName, "Move "+typeName+" to "+toState, getTool, map[string]any{"slug": slug}, weighty)
+			rev = &n
+		}
+		callArgs["rev"] = *rev
+	} else if rev != nil {
+		callArgs["rev"] = *rev
 	}
+	var onConflict func()
+	if getTool != "" && weighty {
+		// Show what changed before the person decides again.
+		onConflict = func() {
+			if now, err := mcpCall(cfg, getTool, map[string]any{"slug": slug}); err == nil {
+				n, _ := revOf(now)
+				fmt.Fprintf(os.Stderr, "It is now:\n  %s\n", describeRecord(now, n, true))
+			}
+		}
+	}
+	text := writeCall(cfg, "transition_item", callArgs, onConflict)
 	if err := printJSON([]byte(text)); err != nil {
 		fatal("%v", err)
 	}
@@ -51,7 +78,7 @@ func printTransitionHelp() {
 	fmt.Print(`smeldr-cli transition — move an item to a new state via its registered StateFlow
 
 Usage:
-  smeldr-cli transition <type_name> <slug> --to <state> [--reason <text>]
+  smeldr-cli transition <type_name> <slug> --to <state> [--reason <text>] [--rev <n>]
 
 type_name is a registered content type name — dynamic (snake_case, e.g.
 "posts") or compiled (e.g. "Decision", "Task", "Signal"). The transition is
@@ -61,5 +88,10 @@ only if the target transition itself requires one.
 
 Example — ratifying a Decision:
   smeldr-cli transition Decision <slug> --to ratified
+
+--rev is the rev of the record you read; it is needed for these types: `)
+	fmt.Println(revTypes() + ".")
+	fmt.Print(`Without --rev, on a terminal, cli shows the record and asks before it
+writes; without a terminal it refuses.
 `)
 }

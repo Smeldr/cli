@@ -117,10 +117,19 @@ func runInit(args []string) {
 		if founder {
 			roles = append(roles, "approver")
 		}
+		// The identity init just made: each grant names the rev the
+		// previous one returned (core T1010), with no prompt.
+		rev := initIdentityRev(tmpCfg, tokenID)
 		for _, role := range roles {
-			if _, err := mcpCall(tmpCfg, "grant_role", map[string]any{"token_id": tokenID, "role": role, "reason": initFounderReason}); err != nil {
+			args := map[string]any{"token_id": tokenID, "role": role, "reason": initFounderReason}
+			if rev != nil {
+				args["rev"] = *rev
+			}
+			text, err := mcpCall(tmpCfg, "grant_role", args)
+			if err != nil {
 				fatal("grant_role %s for token %q failed: %v (revoke the token and run init again)", role, *name, err)
 			}
+			rev = nextIdentityRev(text)
 		}
 		switch {
 		case founder:
@@ -203,4 +212,25 @@ func envWrittenMessage(envFile, goos string) string {
 		return fmt.Sprintf("OK  %s written (on Windows the file is protected by your user profile's permissions, not by a file mode; keep it out of version control: add it to .gitignore)", envFile)
 	}
 	return fmt.Sprintf("OK  %s written (mode 600; keep it out of version control: add it to .gitignore)", envFile)
+}
+
+// initIdentityRev reads the rev of the identity init just created, nil when
+// the server returns none (no identities, or a server before core T1014).
+func initIdentityRev(cfg Config, tokenID string) *int {
+	text, err := mcpCall(cfg, "list_grants", map[string]any{"token_id": tokenID})
+	if err != nil {
+		return nil
+	}
+	return nextIdentityRev(text)
+}
+
+// nextIdentityRev reads identity_rev from a grant tool's result.
+func nextIdentityRev(text string) *int {
+	var res struct {
+		IdentityRev *int `json:"identity_rev"`
+	}
+	if json.Unmarshal([]byte(text), &res) != nil {
+		return nil
+	}
+	return res.IdentityRev
 }

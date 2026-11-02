@@ -18,6 +18,11 @@ func runRelationCommand(args []string) {
 		runRelationList(args[1:])
 		return
 	}
+	args, rev, err := takeRev(args)
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
 	params, err := parseRelationArgs(args)
 	if errors.Is(err, flag.ErrHelp) {
 		printRelationHelp()
@@ -30,10 +35,13 @@ func runRelationCommand(args []string) {
 	if err != nil {
 		fatal("%v", err)
 	}
-	text, err := mcpCall(cfg, "withdraw_relation", params)
-	if err != nil {
-		fatal("%v", err)
+	// The rev of the edge the person read (core T1010): "relation list" shows it.
+	if rev == nil {
+		fatal("relation withdraw needs --rev <n>, the rev of the relation as you read it in \"relation list\"")
+		return
 	}
+	params["rev"] = *rev
+	text := writeCall(cfg, "withdraw_relation", params, nil)
 	if err := printJSON([]byte(text)); err != nil {
 		fatal("%v", err)
 	}

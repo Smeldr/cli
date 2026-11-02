@@ -55,7 +55,7 @@ func TestRests_Stored(t *testing.T) {
 
 func TestPremise_Confirm(t *testing.T) {
 	tool, args, out := mockMCP(t, map[string]any{"confirmed": true}, func() {
-		runPremiseCommand([]string{"confirm", "D12", "D7", "--reason", "still right"})
+		runPremiseCommand([]string{"confirm", "D12", "D7", "--reason", "still right", "--rev", "4"})
 	})
 	if tool != "confirm_premise" || args["decision"] != "D12" || args["premise"] != "D7" || args["reason"] != "still right" {
 		t.Errorf("tool %q, args %v", tool, args)
@@ -64,13 +64,13 @@ func TestPremise_Confirm(t *testing.T) {
 		t.Errorf("out:\n%s", out)
 	}
 	_, args, _ = mockMCP(t, map[string]any{"confirmed": true}, func() {
-		runPremiseCommand([]string{"confirm", "--reason=why", "D12", "D7"})
+		runPremiseCommand([]string{"confirm", "--reason=why", "D12", "D7", "--rev=4"})
 	})
 	if args["reason"] != "why" {
 		t.Errorf("--reason=: %v", args)
 	}
 	_, args, out = mockMCP(t, map[string]any{"confirmed": true}, func() {
-		runPremiseCommand([]string{"confirm", "S3170", "--reason", "still right"})
+		runPremiseCommand([]string{"confirm", "S3170", "--reason", "still right", "--rev", "4"})
 	})
 	if args["condition"] != "S3170" || args["decision"] != nil || !strings.Contains(out, "the condition S3170 is resolved") {
 		t.Errorf("by the condition: %v\n%s", args, out)

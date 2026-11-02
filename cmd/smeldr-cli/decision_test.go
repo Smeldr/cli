@@ -43,7 +43,7 @@ func TestDecisionSources_Set(t *testing.T) {
 	if err := os.WriteFile(file, []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	tool, args, out := mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--set", file}) })
+	tool, args, out := mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--set", file, "--rev", "2"}) })
 	list, _ := args["sources"].([]any)
 	if tool != "update_decision" || args["slug"] != "D148" || len(list) != 1 || !strings.Contains(out, "1 sources set") {
 		t.Errorf("tool %q, args %v, out %s", tool, args, out)
@@ -51,11 +51,11 @@ func TestDecisionSources_Set(t *testing.T) {
 	stdin = strings.NewReader(body)
 	old := stdin
 	t.Cleanup(func() { stdin = old })
-	_, args, _ = mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--set", "-"}) })
+	_, args, _ = mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--set", "-", "--rev", "2"}) })
 	if list, _ := args["sources"].([]any); len(list) != 1 {
 		t.Errorf("stdin: %v", args)
 	}
-	_, args, out = mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--clear"}) })
+	_, args, out = mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--clear", "--rev", "2"}) })
 	if list, ok := args["sources"].([]any); !ok || len(list) != 0 || !strings.Contains(out, "0 sources set") {
 		t.Errorf("--clear: %v %s", args, out)
 	}

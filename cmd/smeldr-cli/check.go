@@ -230,8 +230,27 @@ func parseCheckAnswer(args []string) (checkCall, error) {
 }
 
 func runCheckAnswer(args []string) {
+	args, rev, err := takeRev(args)
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
 	c, err := parseCheckAnswer(args)
-	printCheckView(runCheckCall(c, err), c.raw)
+	if err != nil {
+		fatal("%v", err)
+		return
+	}
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal("%v", err)
+	}
+	// The rev of the Check the approver read (core T1010).
+	if rev == nil {
+		n := readAndConfirm(cfg, "check answer", "Answer for Area "+fmt.Sprint(c.params["area"])+" on", "get_change_check", map[string]any{"check": c.params["check"]}, false)
+		rev = &n
+	}
+	c.params["rev"] = *rev
+	printCheckView(writeCall(cfg, c.tool, c.params, nil), c.raw)
 }
 
 func parseCheckShow(args []string) (checkCall, error) {
