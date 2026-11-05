@@ -9,10 +9,12 @@ import (
 )
 
 // runDecisionCommand handles smeldr-cli decision sources (core T914, D148);
-// any other subcommand is the generic content command for the decision path.
+// any other subcommand is the generic content command on the Decisions route.
+// The content verbs take the URL path segment, and core mounts Decisions at
+// /decisions, so the segment is plural (T1122).
 func runDecisionCommand(args []string) {
 	if len(args) == 0 || args[0] != "sources" {
-		runContentCommand("decision", args)
+		runContentCommand("decisions", args)
 		return
 	}
 	runDecisionSourcesCommand(args[1:])

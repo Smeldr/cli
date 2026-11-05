@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,5 +61,48 @@ func TestDecisionSources_Set(t *testing.T) {
 	_, args, out = mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{"sources", "D148", "--clear", "--rev", "2"}) })
 	if list, ok := args["sources"].([]any); !ok || len(list) != 0 || !strings.Contains(out, "0 sources set") {
 		t.Errorf("--clear: %v %s", args, out)
+	}
+}
+
+// TestDecision_ContentVerbsUseDecisionsRoute: smeldr-cli decision create,
+// get and list reach core's /decisions route, where Decisions are mounted
+// (T1122); before, they went to /decision and answered 404.
+func TestDecision_ContentVerbsUseDecisionsRoute(t *testing.T) {
+	type call struct{ method, path string }
+	var calls []call
+	var created map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls = append(calls, call{r.Method, r.URL.Path})
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.Method == http.MethodPost:
+			_ = json.NewDecoder(r.Body).Decode(&created)
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"address":"D200","Status":"proposed"}`))
+		case r.URL.Path == "/decisions":
+			_, _ = w.Write([]byte(`[]`))
+		default:
+			_, _ = w.Write([]byte(`{"address":"D12"}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+	t.Setenv("SMELDR_URL", srv.URL)
+	t.Setenv("SMELDR_TOKEN", "test-token")
+
+	file := filepath.Join(t.TempDir(), "decision.md")
+	md := "---\ntitle: Money is stored in cents\nscope: billing\n---\nWhy: rounding.\n"
+	if err := os.WriteFile(file, []byte(md), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	captureStdout(t, func() { runDecisionCommand([]string{"create", "--from", file}) })
+	captureStdout(t, func() { runDecisionCommand([]string{"get", "D12"}) })
+	captureStdout(t, func() { runDecisionCommand([]string{"list"}) })
+
+	want := []call{{http.MethodPost, "/decisions"}, {http.MethodGet, "/decisions/D12"}, {http.MethodGet, "/decisions"}}
+	if fmt.Sprint(calls) != fmt.Sprint(want) {
+		t.Errorf("calls = %v, want %v", calls, want)
+	}
+	if created["title"] != "Money is stored in cents" || created["scope"] != "billing" || !strings.Contains(fmt.Sprint(created["Body"]), "Why: rounding.") {
+		t.Errorf("create sent %v", created)
 	}
 }
