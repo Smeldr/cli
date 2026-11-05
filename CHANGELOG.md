@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.37.1] - 2026-11-05
+
 ### Fixed
 
 - **`smeldr-cli decision` verbs use the `/decisions` route (T1122).** The generic verbs (`create`, `update`, `get`, `list`, `publish`, `unpublish`, `archive`, `delete`) sent requests to `/decision`, which core does not mount, so each one answered 404 `route.not_found`. They now use `/decisions`, and `decision create --from file.md` proposes a Decision from the file's frontmatter and body, starting at `proposed`. `decision sources` and `smeldr-cli decisions <verb>` were not affected.
