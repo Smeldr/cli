@@ -38,8 +38,8 @@ func runLogsCommand(args []string) {
 	sinceFlag := fs.String("since", "", "entries strictly after this RFC3339 timestamp")
 	jsonFlag := fs.Bool("json", false, "print raw JSON response")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]")
-		fmt.Fprintln(os.Stderr, "Requires Admin role. The server must call app.CaptureLogs() (core v1.36.0+).")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]")
+		fmt.Fprintln(fs.Output(), "Requires Admin role. The server must call app.CaptureLogs() (core v1.36.0+).")
 	}
 	parseCommandFlags(fs, args, 0, "")
 

@@ -100,6 +100,11 @@ Usage:
   smeldr-cli grant [revoke|list] [args]                   governance role grants (Admin role required)
   smeldr-cli content-type <define|redefine|get> [args]    runtime-defined content types
   smeldr-cli webhook <verb> [args]                        webhook management
+  smeldr-cli media <upload|list|delete> [args]            media library: upload, list, delete files
+  smeldr-cli oauth revoke <token>                         revoke an OAuth token (Admin role required)
+  smeldr-cli history <type> <slug> [--limit n]            one item's history, newest first (D101)
+  smeldr-cli reachability <type> <id> [--kind k]          what is reachable from one item in the relation graph
+  smeldr-cli relation <list|withdraw> [args]              list relations, or end one on purpose
   smeldr-cli preview <prefix> <slug>                      generate draft preview URL
   smeldr-cli social <subcommand> [args]                   social post, credential, and platform management
   smeldr-cli block <node|section|item> <verb> [args]      block system: nodes + composition (T32)

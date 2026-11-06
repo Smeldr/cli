@@ -41,6 +41,11 @@ func oneArgument(name string, args []string, missing string) string {
 // parseCommandFlagsAtMost is parseCommandFlags for a command whose
 // arguments are optional, up to max; the caller checks for too few.
 func parseCommandFlagsAtMost(fs *flag.FlagSet, args []string, max int) []string {
+	// Help that was asked for goes to stdout; a wrong flag's error and usage
+	// stay on stderr (T1147).
+	if asksFlagHelp(args) {
+		fs.SetOutput(os.Stdout)
+	}
 	pos, err := parseAtMost(fs, args, max)
 	switch {
 	case errors.Is(err, flag.ErrHelp):
@@ -60,6 +65,20 @@ func wantsHelp(args []string) bool {
 	}
 	for _, a := range args {
 		if a == "-h" || a == "--help" {
+			return true
+		}
+	}
+	return false
+}
+
+// asksFlagHelp reports whether args hold the flag package's help flag (-h,
+// --help, -help, --h) before any "--".
+func asksFlagHelp(args []string) bool {
+	for _, a := range args {
+		switch a {
+		case "--":
+			return false
+		case "-h", "--help", "-help", "--h":
 			return true
 		}
 	}

@@ -74,8 +74,6 @@ func TestCommandFlags_Refused(t *testing.T) {
 		{"node update, two ids", func() { runNodeCommand([]string{"update", "n1", "n2", "--field", "A=1"}) }, 1, `block node update: unexpected argument "n2"`},
 		{"node update, no id", func() { runNodeCommand([]string{"update", "--field", "A=1"}) }, 1, "block node update requires <id>"},
 		{"node list, stray", func() { runNodeCommand([]string{"list", "x", "--json"}) }, 1, `block node list: unexpected argument "x"`},
-		{"help exits 0", func() { runList("posts", []string{"-h"}) }, 0, "Usage: smeldr-cli posts list"},
-		{"help after an argument exits 0", func() { runDelete("posts", []string{"a", "--help"}) }, 0, "Usage: smeldr-cli posts delete"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			code, stderr := runExpectingExit(t, tc.run)
@@ -137,5 +135,27 @@ func TestHandRolledReparse_Mixed(t *testing.T) {
 	}
 	if _, _, _, _, _, _, err := parseTokenCreateArgs([]string{"bot", "editor", "30", "extra"}); err == nil || !strings.Contains(err.Error(), `unexpected argument "extra"`) {
 		t.Errorf("token create, stray: %v", err)
+	}
+}
+
+// TestCommandFlags_HelpOnStdout: -h on a flag.FlagSet command exits 0 and
+// prints its usage to stdout, with nothing on stderr (T1147).
+func TestCommandFlags_HelpOnStdout(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		run  func()
+		want string
+	}{
+		{"help exits 0", func() { runList("posts", []string{"-h"}) }, "Usage: smeldr-cli posts list"},
+		{"help after an argument exits 0", func() { runDelete("posts", []string{"a", "--help"}) }, "Usage: smeldr-cli posts delete"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var code int
+			var stderr string
+			stdout := captureStdout(t, func() { code, stderr = runExpectingExit(t, tc.run) })
+			if code != 0 || stderr != "" || !strings.Contains(stdout, tc.want) {
+				t.Errorf("exit %d, stdout %q, stderr %q; want exit 0 with %q on stdout", code, stdout, stderr, tc.want)
+			}
+		})
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -13,7 +12,7 @@ import (
 func runStatus(args []string) {
 	fs := newCommandFlags("status")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli status")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli status")
 	}
 	parseCommandFlags(fs, args, 0, "")
 

@@ -13,11 +13,33 @@ import (
 // The content verbs take the URL path segment, and core mounts Decisions at
 // /decisions, so the segment is plural (T1122).
 func runDecisionCommand(args []string) {
+	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help" || args[0] == "help") {
+		printDecisionHelp()
+		return
+	}
 	if len(args) == 0 || args[0] != "sources" {
 		runContentCommand("decisions", args)
 		return
 	}
 	runDecisionSourcesCommand(args[1:])
+}
+
+// printDecisionHelp is smeldr-cli decision --help (T1147): the content verbs
+// on the /decisions route, and sources.
+func printDecisionHelp() {
+	fmt.Print(`smeldr-cli decision: Decisions
+
+Usage:
+  smeldr-cli decision create --from <file>          propose a Decision (title, scope, body from the file)
+  smeldr-cli decision update <slug> --from <file>   update fields (absent fields preserved)
+  smeldr-cli decision get <slug>                    print one Decision as JSON
+  smeldr-cli decision list [--status <s>] [--json]  list Decisions
+  smeldr-cli decision sources <decision> [--set f.json|--clear] [--rev N]
+                                                   a Decision's pinned sources (D148)
+
+A Decision starts proposed; ratifying it is smeldr-cli transition Decision <slug> --to ratified.
+See smeldr-cli decision sources --help for the sources file format.
+`)
 }
 
 // decisionSource is one pinned source as the server returns it.

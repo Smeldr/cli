@@ -78,7 +78,7 @@ func runTokenCreate(args []string) {
 func runTokenList(args []string) {
 	fs := newCommandFlags("token list")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token list")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli token list")
 	}
 	parseCommandFlags(fs, args, 0, "")
 
@@ -126,7 +126,7 @@ func parseTokenRevokeArgs(args []string) (id, reason string, err error) {
 	fs := flag.NewFlagSet("token revoke", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token revoke <id> [--reason <text>]")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli token revoke <id> [--reason <text>]")
 	}
 	fs.StringVar(&reason, "reason", "", "why the token is revoked (never a secret)")
 	pos, err := parseAtMost(fs, args, 1)
@@ -212,8 +212,8 @@ func parseTokenCreateArgs(args []string) (name, role string, ttl int, class, rea
 	fs := flag.NewFlagSet("token create", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human] [--identity <IDN>] [--reason <text>]")
-		fmt.Fprintln(os.Stderr, "The plaintext token is printed once, to stdout; store it now.")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli token create <name> <role> <ttl-days> [--class agent|job|human] [--identity <IDN>] [--reason <text>]")
+		fmt.Fprintln(fs.Output(), "The plaintext token is printed once, to stdout; store it now.")
 	}
 	fs.StringVar(&class, "class", "", "classify the token's actor: agent, job or human (never changes permissions)")
 	fs.StringVar(&reason, "reason", "", "why the token is minted (never a secret)")

@@ -26,6 +26,11 @@ func runMediaCommand(args []string) {
 		printMediaUsage(os.Stderr)
 		os.Exit(1)
 	}
+	// Help needs no server (T1147).
+	if wantsHelp(args[:1]) {
+		printMediaUsage(os.Stdout)
+		return
+	}
 	cfg, err := loadConfig()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
@@ -38,8 +43,6 @@ func runMediaCommand(args []string) {
 		runMediaList(cfg, args[1:])
 	case "delete":
 		runMediaDelete(cfg, args[1:])
-	case "-h", "--help", "help":
-		printMediaUsage(os.Stdout)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown media subcommand %q\n", args[0])
 		printMediaUsage(os.Stderr)
@@ -164,32 +167,54 @@ func runMediaList(cfg Config, args []string) {
 		os.Exit(1)
 	}
 
-	var records []map[string]any
-	if err := json.Unmarshal(raw, &records); err != nil {
+	if err := printMediaList(os.Stdout, raw); err != nil {
 		fmt.Fprintln(os.Stderr, "error decoding response:", err)
 		os.Exit(1)
 	}
+}
 
-	if len(records) == 0 {
-		fmt.Println("no media records found")
-		return
-	}
+// mediaListKeys are the keys of one GET /media row, as smeldr.dev/media
+// sends them (its MediaRecord's Go field names) and in snake_case, the form
+// its upload response uses (T1149).
+var mediaListKeys = map[string][2]string{
+	"id":       {"ID", "id"},
+	"type":     {"MediaType", "media_type"},
+	"original": {"OriginalFilename", "original_filename"},
+	"uploaded": {"UploadedAt", "uploaded_at"},
+	"url":      {"URL", "url"},
+}
 
-	// Print a simple table.
-	fmt.Printf("%-22s  %-10s  %-20s  %s\n", "ID", "Type", "Uploaded", "URL")
-	fmt.Println(strings.Repeat("-", 80))
-	for _, r := range records {
-		id, _ := r["id"].(string)
-		mt, _ := r["media_type"].(string)
-		rawURL, _ := r["url"].(string)
-		uploadedAt, _ := r["uploaded_at"].(string)
-
-		uploaded := uploadedAt
-		if t, err := time.Parse(time.RFC3339, uploadedAt); err == nil {
-			uploaded = t.Format("2006-01-02 15:04")
+// mediaField returns row's string value for the key named field, in either
+// form.
+func mediaField(row map[string]any, field string) string {
+	for _, k := range mediaListKeys[field] {
+		if v, ok := row[k].(string); ok {
+			return v
 		}
-		fmt.Printf("%-22s  %-10s  %-20s  %s\n", id, mt, uploaded, rawURL)
 	}
+	return ""
+}
+
+// printMediaList prints the GET /media body raw as a table.
+func printMediaList(w io.Writer, raw []byte) error {
+	var records []map[string]any
+	if err := json.Unmarshal(raw, &records); err != nil {
+		return err
+	}
+	if len(records) == 0 {
+		fmt.Fprintln(w, "no media records found")
+		return nil
+	}
+	fmt.Fprintf(w, "%-22s  %-10s  %-16s  %-24s  %s\n", "ID", "Type", "Uploaded", "Original", "URL")
+	fmt.Fprintln(w, strings.Repeat("-", 100))
+	for _, r := range records {
+		uploaded := mediaField(r, "uploaded")
+		if t, err := time.Parse(time.RFC3339, uploaded); err == nil {
+			uploaded = t.UTC().Format("2006-01-02 15:04")
+		}
+		fmt.Fprintf(w, "%-22s  %-10s  %-16s  %-24s  %s\n", mediaField(r, "id"), mediaField(r, "type"), uploaded, mediaField(r, "original"), mediaField(r, "url"))
+	}
+	return nil
 }
 
 // ─── delete ───────────────────────────────────────────────────────────────────
@@ -230,7 +255,7 @@ Subcommands:
             --description / -d is required for image files (WCAG 1.1.1).
             Prints the URL of the uploaded file on success.
   list      List all media records. Optional --type / -t filter.
-            Prints a table of ID, Type, Uploaded, URL.
+            Prints a table of ID, Type, Uploaded, Original, URL.
   delete    Permanently delete a media record by ID.
 
 Environment:

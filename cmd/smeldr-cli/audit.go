@@ -63,7 +63,7 @@ func runAuditList(args []string) {
 	typeFlag := fs.String("type", "", "filter by content type")
 	actorFlag := fs.String("actor", "", "filter by actor ID")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli audit list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli audit list [--from RFC3339] [--to RFC3339] [--type TYPE] [--actor ACTOR]")
 	}
 	parseCommandFlags(fs, args, 0, "")
 

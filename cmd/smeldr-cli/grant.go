@@ -234,7 +234,7 @@ func parseGrantArgs(args []string) (tool string, params map[string]any, err erro
 func parseGrantFlags(name string, args []string, want int, withScope bool) (pos []string, reason string, scopes stringsFlag, anchor, days string, err error) {
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.Usage = func() { fmt.Fprint(os.Stderr, grantUsage) }
+	fs.Usage = func() { fmt.Fprint(fs.Output(), grantUsage) }
 	fs.StringVar(&reason, "reason", "", "why (never a secret)")
 	if withScope {
 		fs.Var(&scopes, "scope", `static scope pattern "type:id" or "type:*" (repeatable)`)

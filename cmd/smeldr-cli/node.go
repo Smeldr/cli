@@ -76,7 +76,7 @@ func runNodeCreate(args []string) {
 	fields := fieldFlag{}
 	fs.Var(fields, "field", "a field as Key=Value, repeatable (keys are case-sensitive PascalCase)")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node create --type <type_name> [--field K=V ...] [--fields <json>]")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli block node create --type <type_name> [--field K=V ...] [--fields <json>]")
 		fs.PrintDefaults()
 	}
 	parseCommandFlags(fs, args, 0, "")
@@ -109,7 +109,7 @@ func runNodeUpdate(args []string) {
 	fields := fieldFlag{}
 	fs.Var(fields, "field", "a field as Key=Value, repeatable")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node update <id> [--field K=V ...] [--fields <json>]")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli block node update <id> [--field K=V ...] [--fields <json>]")
 		fs.PrintDefaults()
 	}
 	id := parseCommandFlags(fs, args, 1, "block node update requires <id> (smeldr-cli block node update <id> [--field K=V ...] [--fields <json>])")[0]
@@ -159,7 +159,7 @@ func runNodeList(args []string) {
 	status := fs.String("status", "", "filter by status (draft|scheduled|published|archived)")
 	asJSON := fs.Bool("json", false, "output raw JSON instead of a table")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: smeldr-cli block node list [--type <type_name>] [--status <s>] [--json]")
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli block node list [--type <type_name>] [--status <s>] [--json]")
 		fs.PrintDefaults()
 	}
 	parseCommandFlags(fs, args, 0, "")

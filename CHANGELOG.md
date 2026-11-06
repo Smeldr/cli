@@ -9,6 +9,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`smeldr-cli` answers `--help` on stdout for every command (T1147).** Several commands printed their help to stderr, and `media --help` and `oauth --help` failed without `SMELDR_URL` and `SMELDR_TOKEN` because they loaded config first. `decision` had no help text of its own. Every top-level command now answers `--help` and `-h` on stdout and exits 0, with no config needed. An unknown flag still prints its error and usage to stderr and exits 1. `decision` has its own help, and `smeldr-cli --help` lists `media`, `oauth`, `history`, `reachability` and `relation` in its Usage block.
+- **`smeldr-cli media list` shows its columns (T1149).** smeldr.dev/media sends Go field names as keys (`ID`, `MediaType`, `OriginalFilename`, `UploadedAt`, `URL`), and the cli read other keys, so the table printed empty columns. `media list` now reads those keys and the snake_case keys (`id`, `media_type`, `original_filename`, `uploaded_at`, `url`), so it keeps working when media moves to snake_case. The table gained an `Original` column for the uploaded file's original name, and `Uploaded` is shown as `YYYY-MM-DD HH:MM` UTC.
+
 ---
 
 ## [0.37.1] - 2026-11-05

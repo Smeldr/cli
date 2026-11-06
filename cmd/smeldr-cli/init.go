@@ -33,9 +33,9 @@ func runInit(args []string) {
 	force := fs.Bool("force", false, "Overwrite existing .smeldr-cli.env")
 	noApprover := fs.Bool("no-approver", false, "grant admin only: the token cannot ratify Decisions")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: SMELDR_BOOTSTRAP_TOKEN=... smeldr-cli init [--url URL] [--name NAME] [--days N] [--force] [--no-approver]")
-		fmt.Fprintln(os.Stderr, "   or: smeldr-cli init --bootstrap-token-stdin [...] < token.txt")
-		fmt.Fprintln(os.Stderr, "Creates your token (class human, admin and approver: it can ratify Decisions) and writes .smeldr-cli.env.")
+		fmt.Fprintln(fs.Output(), "Usage: SMELDR_BOOTSTRAP_TOKEN=... smeldr-cli init [--url URL] [--name NAME] [--days N] [--force] [--no-approver]")
+		fmt.Fprintln(fs.Output(), "   or: smeldr-cli init --bootstrap-token-stdin [...] < token.txt")
+		fmt.Fprintln(fs.Output(), "Creates your token (class human, admin and approver: it can ratify Decisions) and writes .smeldr-cli.env.")
 		fs.PrintDefaults()
 	}
 	parseCommandFlags(fs, args, 0, "")

@@ -67,7 +67,7 @@ func runCreate(typePath string, args []string) {
 	fs := newCommandFlags("create")
 	from := fs.String("from", "", "frontmatter file (use - for stdin)")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s create --from <file>\n", typePath)
+		fmt.Fprintf(fs.Output(), "Usage: smeldr-cli %s create --from <file>\n", typePath)
 		fs.PrintDefaults()
 	}
 	parseCommandFlags(fs, args, 0, "")
@@ -113,7 +113,7 @@ func runUpdate(typePath string, args []string) {
 	fs := newCommandFlags("update")
 	from := fs.String("from", "", "frontmatter file (use - for stdin)")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s update <slug> --from <file>\n", typePath)
+		fmt.Fprintf(fs.Output(), "Usage: smeldr-cli %s update <slug> --from <file>\n", typePath)
 		fs.PrintDefaults()
 	}
 	slug := parseCommandFlags(fs, args, 1, "update requires a slug argument")[0]
@@ -167,7 +167,7 @@ func runUpdate(typePath string, args []string) {
 func runLifecycle(typePath, verb string, args []string) {
 	fs := newCommandFlags(verb)
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s %s <slug>\n", typePath, verb)
+		fmt.Fprintf(fs.Output(), "Usage: smeldr-cli %s %s <slug>\n", typePath, verb)
 	}
 	slug := parseCommandFlags(fs, args, 1, verb+" requires a slug argument")[0]
 
@@ -215,7 +215,7 @@ func runLifecycle(typePath, verb string, args []string) {
 func runDelete(typePath string, args []string) {
 	fs := newCommandFlags("delete")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s delete <slug>\n", typePath)
+		fmt.Fprintf(fs.Output(), "Usage: smeldr-cli %s delete <slug>\n", typePath)
 	}
 	slug := parseCommandFlags(fs, args, 1, "delete requires a slug argument")[0]
 
@@ -250,7 +250,7 @@ func runList(typePath string, args []string) {
 	jsonFlag := fs.Bool("json", false, "print raw JSON instead of a table")
 	fieldsFlag := fs.String("fields", "", "comma-separated custom columns (case-insensitive), e.g. --fields slug,title,status")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s list [--status <status>] [--json] [--fields <a,b,c>]\n", typePath)
+		fmt.Fprintf(fs.Output(), "Usage: smeldr-cli %s list [--status <status>] [--json] [--fields <a,b,c>]\n", typePath)
 		fs.PrintDefaults()
 	}
 	parseCommandFlags(fs, args, 0, "")
@@ -308,7 +308,7 @@ func runList(typePath string, args []string) {
 func runGet(typePath string, args []string) {
 	fs := newCommandFlags("get")
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: smeldr-cli %s get <slug>\n", typePath)
+		fmt.Fprintf(fs.Output(), "Usage: smeldr-cli %s get <slug>\n", typePath)
 	}
 	slug := parseCommandFlags(fs, args, 1, "get requires a slug argument")[0]
 
