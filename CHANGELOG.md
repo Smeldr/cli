@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.37.2] - 2026-11-06
+
 ### Fixed
 
 - **`smeldr-cli` answers `--help` on stdout for every command (T1147).** Several commands printed their help to stderr, and `media --help` and `oauth --help` failed without `SMELDR_URL` and `SMELDR_TOKEN` because they loaded config first. `decision` had no help text of its own. Every top-level command now answers `--help` and `-h` on stdout and exits 0, with no config needed. An unknown flag still prints its error and usage to stderr and exits 1. `decision` has its own help, and `smeldr-cli --help` lists `media`, `oauth`, `history`, `reachability` and `relation` in its Usage block.
