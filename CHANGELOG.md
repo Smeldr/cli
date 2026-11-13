@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.37.3] - 2026-11-13
+
 ### Security
 
 - **`smeldr-cli` now builds with Go 1.26.11, which fixes a net/http vulnerability (T1197).** govulncheck reported GO-2026-6859 in the standard library's net/http for the cli. The toolchain line in go.mod now names go1.26.11 instead of go1.26.10, and the release binaries of this version are built with it. The `go 1.26.5` line is unchanged: a Go command older than go1.26.11 that builds from source fetches go1.26.11 by itself, unless `GOTOOLCHAIN=local` is set, and then Go 1.26.5 or later still builds it. There is no code change.
