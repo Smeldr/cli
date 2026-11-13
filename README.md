@@ -497,6 +497,15 @@ smeldr-cli decision sources D148 [--json]
 smeldr-cli decision sources D148 --set sources.json   # or --set - for stdin, or --clear
 ```
 
+Replacing a Decision, or taking one out of force (core T1187, D189; `supersede_decision`, `retire_decision`, `repair_superseded` over MCP). Each act is one write; without `--rev` the cli shows the Decision with its rev and asks first. Use these, not `transition --to superseded`, which is deprecated when no replacement is recorded:
+
+```bash
+smeldr-cli decision supersede D186 --by D188 --reason "D188 states it more clearly"
+smeldr-cli decision supersede D186 --new --from replacement.md --reason "..."   # title, scope and sources (optional), the basis as body
+smeldr-cli decision retire D172 --reason "a throwaway"
+smeldr-cli decision repair D186 --by D188 --reason "..."    # or --retire: one superseded with no replacement recorded
+```
+
 The pull request check (core T918; `check_change`, `record_merge`, `answer_change_check`, `get_change_check`, `list_change_checks` over MCP). `change` and `merge` are for the host's adapter or an operator; `answer` counts when you hold approve-change over the Area:
 
 ```bash

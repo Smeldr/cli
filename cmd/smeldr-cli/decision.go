@@ -17,11 +17,23 @@ func runDecisionCommand(args []string) {
 		printDecisionHelp()
 		return
 	}
-	if len(args) == 0 || args[0] != "sources" {
-		runContentCommand("decisions", args)
-		return
+	if len(args) > 0 {
+		switch args[0] {
+		case "sources":
+			runDecisionSourcesCommand(args[1:])
+			return
+		case "supersede":
+			runDecisionSupersedeCommand(args[1:])
+			return
+		case "retire":
+			runDecisionRetireCommand(args[1:])
+			return
+		case "repair":
+			runDecisionRepairCommand(args[1:])
+			return
+		}
 	}
-	runDecisionSourcesCommand(args[1:])
+	runContentCommand("decisions", args)
 }
 
 // printDecisionHelp is smeldr-cli decision --help (T1147): the content verbs
@@ -36,8 +48,15 @@ Usage:
   smeldr-cli decision list [--status <s>] [--json]  list Decisions
   smeldr-cli decision sources <decision> [--set f.json|--clear] [--rev N]
                                                    a Decision's pinned sources (D148)
+  smeldr-cli decision supersede <decision> (--by <d> | --new --from <file>) --reason <text> [--rev N]
+                                                   replace it in one act (D189)
+  smeldr-cli decision retire <decision> --reason <text> [--rev N]
+                                                   take it out of force, no replacement
+  smeldr-cli decision repair <decision> (--by <d> | --retire) --reason <text> [--rev N]
+                                                   repair one superseded with no replacement
 
 A Decision starts proposed; ratifying it is smeldr-cli transition Decision <slug> --to ratified.
+Replace it with decision supersede, never with transition --to superseded.
 See smeldr-cli decision sources --help for the sources file format.
 `)
 }

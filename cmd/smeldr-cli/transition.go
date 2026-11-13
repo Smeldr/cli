@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 // runTransitionCommand moves an item — dynamic content or a compiled type
@@ -69,6 +70,11 @@ func runTransitionCommand(args []string) {
 		}
 	}
 	text := writeCall(cfg, "transition_item", callArgs, onConflict)
+	// core D189: the warning (printed by writeCall, with the server's date)
+	// gets the way instead.
+	if strings.Contains(text, "decision.supersede_without_replacement") {
+		fmt.Fprintln(os.Stderr, "use smeldr-cli decision supersede to record the replacement, or decision retire")
+	}
 	if err := printJSON([]byte(text)); err != nil {
 		fatal("%v", err)
 	}

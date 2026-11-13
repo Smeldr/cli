@@ -9,6 +9,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **New `smeldr-cli decision supersede` replaces a Decision in one act (core T1187, D189).** Use `decision supersede <decision> --by <replacement> --reason <text> [--rev N]` for an existing replacement, or `decision supersede <decision> --new --from <file> --reason <text> [--rev N]` for a new one. The file has a title, an optional scope and the basis as body, and optionally a `sources` line: a JSON array of sources on that line, or the path of a JSON file in the format of `decision sources --set`. The sources are sent as the new Decision's `sources`; a sources line that is not valid is refused before any request. Both forms run over `supersede_decision`. Without `--rev`, the cli shows the Decision with its rev and asks before writing. With `--new`, it also says the new Decision will be created, placed where the replaced one is, and ratified in this one act.
+- **New `smeldr-cli decision retire` moves a Decision out of force (core T1187, D189).** Use `decision retire <decision> --reason <text> [--rev N]`. It runs over `retire_decision`.
+- **New `smeldr-cli decision repair` names a replacement or retires a Decision (core T1187, D189).** Use `decision repair <decision> (--by <replacement> | --retire) --reason <text> [--rev N]`. It runs over `repair_superseded`.
+- **Local refusals before any request (core T1187, D189).** A missing `--reason`, both replacement options at once, or neither is refused locally, before any request is sent.
+- **`transition --to superseded` prints core's warning (core T1187, D189).** When the server warns that no replacement is recorded, the cli prints the warning with the date core's warning names. It also prints a line naming `decision supersede` and `decision retire`.
+
 ---
 
 ## [0.37.3] - 2026-11-13
