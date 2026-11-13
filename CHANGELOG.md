@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.38.0] - 2026-11-13
+
 ### Added
 
 - **New `smeldr-cli decision supersede` replaces a Decision in one act (core T1187, D189).** Use `decision supersede <decision> --by <replacement> --reason <text> [--rev N]` for an existing replacement, or `decision supersede <decision> --new --from <file> --reason <text> [--rev N]` for a new one. The file has a title, an optional scope and the basis as body, and optionally a `sources` line: a JSON array of sources on that line, or the path of a JSON file in the format of `decision sources --set`. The sources are sent as the new Decision's `sources`; a sources line that is not valid is refused before any request. Both forms run over `supersede_decision`. Without `--rev`, the cli shows the Decision with its rev and asks before writing. With `--new`, it also says the new Decision will be created, placed where the replaced one is, and ratified in this one act.
