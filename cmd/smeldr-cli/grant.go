@@ -14,7 +14,7 @@ import (
 const grantUsage = `smeldr-cli grant: governance role grants (Admin role required)
 
 Usage:
-  grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>] [--rev <n>]
+  grant <token-id> <role> [--scope type:id ...] [--anchor <address|slug|id>] [--expires-in-days N] [--reason <text>] [--rev <n>]
                                      grant a role to a token
   grant revoke <grant-id> [--reason <text>] [--rev <n>]
                                      revoke a grant by its own id
@@ -22,7 +22,9 @@ Usage:
 
 <token-id> is the token's JWT user id (token_id from "token create"), not the
 fingerprint "token list" shows. --scope may repeat (static scope patterns,
-"type:id" or "type:*"); --anchor is the anchor item id for a dynamic scope.
+"type:id" or "type:*"); --anchor is the anchor item of a dynamic scope, by its
+address, slug or id (a server before core v1.193.2 stores it as given, so give
+the id there).
 --expires-in-days makes the grant time-boxed (a positive number of days): when
 it expires it stops authorizing, with no revoke needed, and "grant list" still
 shows it.
@@ -238,7 +240,7 @@ func parseGrantFlags(name string, args []string, want int, withScope bool) (pos 
 	fs.StringVar(&reason, "reason", "", "why (never a secret)")
 	if withScope {
 		fs.Var(&scopes, "scope", `static scope pattern "type:id" or "type:*" (repeatable)`)
-		fs.StringVar(&anchor, "anchor", "", "anchor item id for a dynamic scope")
+		fs.StringVar(&anchor, "anchor", "", "anchor item of a dynamic scope: its address, slug or id")
 		fs.StringVar(&days, "expires-in-days", "", "time-box the grant: expires after this many days")
 	}
 	if pos, err = parseAtMost(fs, args, want); err != nil {

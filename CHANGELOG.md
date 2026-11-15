@@ -9,6 +9,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **`grant --anchor` takes an address, slug or ID (core T1213).** The usage, flag help and README now read `--anchor <address|slug|id>`: the anchor item of a dynamic scope, by its address, slug or ID. A server before core v1.193.2 stores the anchor as given, so pass the ID there. No code change: the value is passed through as `scope_anchor_id`.
+
 ---
 
 ## [0.38.0] - 2026-11-13

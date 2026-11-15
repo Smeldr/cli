@@ -199,12 +199,12 @@ Revocation is permanent and takes effect immediately. Optional
 Governance role grants over MCP (`grant_role`, `revoke_grant`, `list_grants`; Admin role required; v0.23.0):
 
 ```bash
-smeldr-cli grant <token-id> <role> [--scope type:id ...] [--anchor <id>] [--expires-in-days N] [--reason <text>] [--rev <n>]
+smeldr-cli grant <token-id> <role> [--scope type:id ...] [--anchor <address|slug|id>] [--expires-in-days N] [--reason <text>] [--rev <n>]
 smeldr-cli grant revoke <grant-id> [--reason <text>] [--rev <n>]
 smeldr-cli grant list [<token-id>]
 ```
 
-`<token-id>` is the token's JWT user id (`token_id` from `token create`), not the fingerprint `token list` shows. `--scope` may repeat (static scope patterns `type:id` or `type:*`); `--anchor` is the anchor item id of a dynamic scope. `--reason` is stored with the act and shown by `grant list`: free text that people read, never a token value or other secret. Flags may come before or after the arguments; a missing argument is an error before any request. `--expires-in-days N` makes the grant time-boxed: when it expires it stops authorizing, with no revoke needed, and `grant list` still shows it with its `ExpiresAt`.
+`<token-id>` is the token's JWT user id (`token_id` from `token create`), not the fingerprint `token list` shows. `--scope` may repeat (static scope patterns `type:id` or `type:*`); `--anchor` is the anchor item of a dynamic scope, by its address (`--anchor ARE1`), slug or id; core resolves it and stores the id from v1.193.2 (an older server stores it as given, so give the id there). `--reason` is stored with the act and shown by `grant list`: free text that people read, never a token value or other secret. Flags may come before or after the arguments; a missing argument is an error before any request. `--expires-in-days N` makes the grant time-boxed: when it expires it stops authorizing, with no revoke needed, and `grant list` still shows it with its `ExpiresAt`.
 
 ## Content-type commands
 

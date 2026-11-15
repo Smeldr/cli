@@ -139,3 +139,17 @@ func TestParseGrantArgs_ExpiresInDays(t *testing.T) {
 		t.Errorf("sent %q %v; want expires_in_days 7", tool, args)
 	}
 }
+
+// core T1213: the usage names the address form of --anchor, and an address
+// is passed through unchanged (core resolves it).
+func TestGrant_AnchorAddress(t *testing.T) {
+	if !strings.Contains(grantUsage, "--anchor <address|slug|id>") || !strings.Contains(grantUsage, "before core v1.193.2") {
+		t.Errorf("usage does not name the address form and the older-server line:\n%s", grantUsage)
+	}
+	tool, args, _ := mockMCP(t, map[string]any{"id": "g-1"}, func() {
+		runGrantCommand([]string{"tok-1", "area-reader", "--anchor", "ARE1", "--rev", "1"})
+	})
+	if tool != "grant_role" || args["scope_anchor_id"] != "ARE1" {
+		t.Errorf("tool %q args %v; want scope_anchor_id ARE1 as given", tool, args)
+	}
+}
