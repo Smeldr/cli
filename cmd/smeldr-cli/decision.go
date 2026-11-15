@@ -47,9 +47,9 @@ Usage:
   smeldr-cli decision get <slug>                    print one Decision as JSON
   smeldr-cli decision list [--status <s>] [--json]  list Decisions
   smeldr-cli decision sources <decision> [--set f.json|--clear] [--rev N]
-                                                   a Decision's pinned sources (D148)
+                                                   a Decision's pinned sources
   smeldr-cli decision supersede <decision> (--by <d> | --new --from <file>) --reason <text> [--rev N]
-                                                   replace it in one act (D189)
+                                                   replace it in one act
   smeldr-cli decision retire <decision> --reason <text> [--rev N]
                                                    take it out of force, no replacement
   smeldr-cli decision repair <decision> (--by <d> | --retire) --reason <text> [--rev N]
@@ -89,13 +89,13 @@ func runDecisionSourcesCommand(args []string) {
 	asJSON := fs.Bool("json", false, "raw JSON")
 	clearFlag := fs.Bool("clear", false, "remove every source")
 	set := fs.String("set", "", "a JSON file of sources, or - for stdin")
-	pos := parseCommandFlags(fs, args, 1, "decision sources needs a Decision: address (D148), slug or ID")
+	pos := parseCommandFlags(fs, args, 1, "decision sources needs a Decision: address, slug or ID")
 	decision, setFrom, raw, clear := pos[0], *set, *asJSON, *clearFlag
 	if setFlags(fs)["set"] && setFrom == "" {
 		fatal("--set needs a JSON file, or - for stdin")
 	}
 	if decision == "" {
-		fatal("decision sources needs a Decision: address (D148), slug or ID")
+		fatal("decision sources needs a Decision: address, slug or ID")
 	}
 	if clear && setFrom != "" {
 		fatal("use --set or --clear, not both")
@@ -157,7 +157,7 @@ func runDecisionSourcesCommand(args []string) {
 }
 
 func printDecisionSourcesHelp() {
-	fmt.Print(`smeldr-cli decision sources: a Decision's pinned external sources (D148)
+	fmt.Print(`smeldr-cli decision sources: a Decision's pinned external sources
 
 Usage:
   smeldr-cli decision sources <decision> [--json]
@@ -169,6 +169,6 @@ a branch), path: one file, anchor: optional, role: source|evidence|implementatio
 hash: optional sha256:<64 hex>}; at most 20. --set replaces the whole list.
 Sources are set while the Decision is proposed: a ratified Decision is locked,
 so to re-pin it, propose a Decision that supersedes it. Needs smeldr.dev/core
-with Decision sources (T914) on the server.
+with Decision sources on the server.
 `)
 }

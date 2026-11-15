@@ -97,6 +97,6 @@ standing-drift, ...), subject (its address, or type:id), when last seen, and
 the message. You see a finding only when you may read its subject. Findings
 resolve when their detector stops firing; nothing here dismisses one.
 --limit is 1 to 500 (default 100). Needs smeldr.dev/mcp with list_findings
-(core T953) on the server.
+on the server.
 `)
 }

@@ -46,8 +46,7 @@ Event names follow the pattern <type>.<lifecycle>, e.g.:
   post.scheduled  post.archived  post.deleted  post.transitioned
 
 <type>.updated is a content edit; <type>.transitioned fires once for every
-status change, with from_state, to_state, reason and the actor (needs a core
-release with D107 on the server).
+status change, with from_state, to_state, reason and the actor.
 
 The MCP endpoint is used for webhook operations (SMELDR_MCP_URL).
 `)

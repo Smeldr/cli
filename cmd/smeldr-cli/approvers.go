@@ -73,6 +73,6 @@ Usage:
 Lists every approver, the domain-approvers of the place's Domain and, for an
 Area, its area-approvers: token name, role, class and the anchor's address
 ("-" when you may not read it). Only for a place you can read. Author role;
-needs smeldr.dev/mcp with approvers_of (core T911) on the server.
+needs smeldr.dev/mcp with approvers_of on the server.
 `)
 }

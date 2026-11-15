@@ -324,7 +324,7 @@ func runCheckList(args []string) {
 }
 
 func printCheckHelp() {
-	fmt.Print(`smeldr-cli check: the pull request check (core T918)
+	fmt.Print(`smeldr-cli check: the pull request check
 
 Usage:
   smeldr-cli check change --repo owner/name --number N --head SHA [--files-total N] [--stdin] [--json] [<path>...]

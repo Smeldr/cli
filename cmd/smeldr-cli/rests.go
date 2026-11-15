@@ -73,7 +73,7 @@ func runRestsCommand(args []string) {
 // runRestsStored prints the stored counts of items given as <type>:<item>.
 func runRestsStored(cfg Config, refs []string, raw bool) {
 	if len(refs) == 0 {
-		fatal("rests --stored needs items as <type>:<item>, for example Decision:D12")
+		fatal("rests --stored needs items as <type>:<item>, for example Decision:D1")
 	}
 	items := make([]any, 0, len(refs))
 	for _, r := range refs {
@@ -122,7 +122,7 @@ func runRestsStored(cfg Config, refs []string, raw bool) {
 }
 
 func printRestsHelp() {
-	fmt.Print(`smeldr-cli rests: what rests on an item, and what it rests on (core T919)
+	fmt.Print(`smeldr-cli rests: what rests on an item, and what it rests on
 
 Usage:
   smeldr-cli rests <type> <item> [--json]
@@ -188,7 +188,7 @@ func runPremiseCommand(args []string) {
 }
 
 func printPremiseHelp() {
-	fmt.Print(`smeldr-cli premise: a Decision resting on one that is not in force (core D149)
+	fmt.Print(`smeldr-cli premise: a Decision resting on one that is not in force
 
 Usage:
   smeldr-cli premise confirm <condition> --reason "why" --rev <n>

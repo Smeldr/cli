@@ -38,7 +38,7 @@ func printTokenHelp() {
 Verbs:
   create <name> <role> <ttl-days> [--class agent|job|human] [--identity <IDN>] [--reason <text>]
                                      issue a new named token; --class classifies its actor;
-                                     --identity mints it for that identity (it joins it, D165)
+                                     --identity mints it for that identity (it joins it)
   list                               list all tokens (incl. revoked/expired)
   revoke <id> [--reason <text>]      revoke a token by fingerprint ID
 

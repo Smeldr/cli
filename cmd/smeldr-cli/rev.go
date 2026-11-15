@@ -136,7 +136,7 @@ func readAndConfirm(cfg Config, write, action, getTool string, getArgs map[strin
 	}
 	rev, ok := revOf(text)
 	if !ok {
-		fatal("%s returned no rev: the server predates core T1010; pass --rev", getTool)
+		fatal("%s returned no rev: the server predates core v1.186.0; pass --rev", getTool)
 	}
 	confirmRev(action, describeRecord(text, rev, withBody), rev)
 	return rev

@@ -181,7 +181,7 @@ func runDecisionRepairCommand(args []string) {
 }
 
 func printDecisionSupersedeHelp() {
-	fmt.Print(`smeldr-cli decision supersede: replace a Decision in one act (core D189)
+	fmt.Print(`smeldr-cli decision supersede: replace a Decision in one act
 
 Usage:
   smeldr-cli decision supersede <decision> --by <replacement> --reason <text> [--rev N]
@@ -207,7 +207,7 @@ Without --rev, on a terminal, cli shows the Decision and asks before it writes.
 }
 
 func printDecisionRetireHelp() {
-	fmt.Print(`smeldr-cli decision retire: take a Decision out of force without a replacement (core D189)
+	fmt.Print(`smeldr-cli decision retire: take a Decision out of force without a replacement
 
 Usage:
   smeldr-cli decision retire <decision> --reason <text> [--rev N]
@@ -219,7 +219,7 @@ Decision and asks before it writes.
 }
 
 func printDecisionRepairHelp() {
-	fmt.Print(`smeldr-cli decision repair: repair a Decision superseded with no replacement recorded (core D189)
+	fmt.Print(`smeldr-cli decision repair: repair a Decision superseded with no replacement recorded
 
 Usage:
   smeldr-cli decision repair <decision> --by <replacement> --reason <text> [--rev N]

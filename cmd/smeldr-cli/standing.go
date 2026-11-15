@@ -53,7 +53,7 @@ func runStandingCommand(args []string) {
 }
 
 func printStandingHelp() {
-	fmt.Print(`smeldr-cli standing: show whether an item's claim is in force (D100)
+	fmt.Print(`smeldr-cli standing: show whether an item's claim is in force
 
 Usage:
   smeldr-cli standing <type_name> <slug> [--json]

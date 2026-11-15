@@ -104,31 +104,31 @@ Usage:
   smeldr-cli webhook <verb> [args]                        webhook management
   smeldr-cli media <upload|list|delete> [args]            media library: upload, list, delete files
   smeldr-cli oauth revoke <token>                         revoke an OAuth token (Admin role required)
-  smeldr-cli history <type> <slug> [--limit n]            one item's history, newest first (D101)
+  smeldr-cli history <type> <slug> [--limit n]            one item's history, newest first
   smeldr-cli reachability <type> <id> [--kind k]          what is reachable from one item in the relation graph
   smeldr-cli relation <list|withdraw> [args]              list relations, or end one on purpose
   smeldr-cli preview <prefix> <slug>                      generate draft preview URL
   smeldr-cli social <subcommand> [args]                   social post, credential, and platform management
-  smeldr-cli block <node|section|item> <verb> [args]      block system: nodes + composition (T32)
+  smeldr-cli block <node|section|item> <verb> [args]      block system: nodes + composition
   smeldr-cli nav <verb> [args]                            navigation tree management (Editor role required)
   smeldr-cli redirect <verb> [args]                       redirect rule management (Editor role required)
   smeldr-cli audit <subcommand> [args]                    audit trail (Editor role required)
   smeldr-cli transition <type> <slug> --to <state> [--reason <text>]   move an item via its registered StateFlow
-  smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
+  smeldr-cli standing <type> <slug> [--json]                      show whether an item holds
   smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]   find records across every type you may read
   smeldr-cli decisions-for-paths --repo owner/name [--stdin] [<path>...]   which Decisions apply to these files
   smeldr-cli hook pre-edit --repo owner/name                      Claude Code hook: show the Decisions for a file before its first edit
   smeldr-cli approvers <place> [--json]                           who approves an Organization, Domain or Area
   smeldr-cli administrators [--json]                              who administers this instance
   smeldr-cli findings [--detector D] [--type T] [--limit N] [--json]  what the detectors found
-  smeldr-cli rests <type> <item> | --stored <type>:<item>...      what rests on an item, and what it rests on (D150)
-  smeldr-cli premise confirm <decision> <premise> --reason "why" [--rev <n>]  a Decision still holds although its premise is not in force (D149)
+  smeldr-cli rests <type> <item> | --stored <type>:<item>...      what rests on an item, and what it rests on
+  smeldr-cli premise confirm <decision> <premise> --reason "why" [--rev <n>]  a Decision still holds although its premise is not in force
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
-  smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources (D148)
-  smeldr-cli check change|merge|answer|show|list ...               the pull request check (core T918)
-  smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (D110; dry run unless --apply; Admin)
-  smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions (D116)
-  smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request (D115)
+  smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources
+  smeldr-cli check change|merge|answer|show|list ...               the pull request check
+  smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (dry run unless --apply; Admin)
+  smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions
+  smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request
   smeldr-cli watch [--subscription <address> | --channel <names>] [--after <id>]   print the event stream
   smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
   smeldr-cli status                                       connectivity check
@@ -174,7 +174,7 @@ Social subcommands:
   credential delete <id>
   platform configure --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
 
-Block subcommands (T32 — Fields keys are case-sensitive PascalCase):
+Block subcommands (Fields keys are case-sensitive PascalCase):
   node create  --type <type_name> [--field K=V ...] [--fields <json>]   (Author)
   node update <id> [--field K=V ...] [--fields <json>]                  (Author)
   node get|publish|archive <id>                                         (Author)
@@ -205,19 +205,19 @@ Search (Author role required; needs smeldr.dev/mcp v1.65.0+ on the server):
 
 Coverage (needs smeldr.dev/mcp with core's coverage rules on the server):
   decisions-for-paths --repo owner/name [--stdin] [--no-organization] [--json] [<path>...]   (Author)
-  hook pre-edit --repo owner/name [--root d] [--on-error deny|allow]   Claude Code PreToolUse hook (Author; core T1207)
-  approvers <place> [--json]   who approves a place you can read (Author; core T911)
-  administrators [--json]      who administers this instance (any token; core T944)
-  findings [--detector D] ...  what the detectors found, filtered by your reads (core T953)
-  rests <type> <item> [--json]   live rest counts (core T919); --stored <type>:<item>... the swept ones
-  premise confirm <decision> <premise> --reason "why" [--rev <n>]   (ratify over the Decision's place; core D149)
+  hook pre-edit --repo owner/name [--root d] [--on-error deny|allow]   Claude Code PreToolUse hook (Author)
+  approvers <place> [--json]   who approves a place you can read (Author)
+  administrators [--json]      who administers this instance (any token)
+  findings [--detector D] ...  what the detectors found, filtered by your reads
+  rests <type> <item> [--json]   live rest counts; --stored <type>:<item>... the swept ones
+  premise confirm <decision> <premise> --reason "why" [--rev <n>]   (ratify over the Decision's place)
   coverage check --repo owner/name [--stdin] [--json] [<path>...]   (Editor)
   paths as arguments or one per line with --stdin, for example from git diff --name-only.
 
 History (Editor role required; needs smeldr.dev/mcp v1.49.0+ on the server):
   history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]
   prints one item's history, newest first, as JSON; the actor is on every
-  entry for members (D101), only on gated transitions with --view gated.
+  entry for members, only on gated transitions with --view gated.
 
 Reachability (Author role required; needs smeldr.dev/mcp v1.50.0+ on the server):
   reachability <type_name> <id> [--kind k] [--direction incoming|outgoing|both]

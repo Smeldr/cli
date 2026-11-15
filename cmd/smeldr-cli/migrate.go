@@ -155,7 +155,7 @@ func writeReport(path string, raw []byte) error {
 }
 
 func printMigrateAddressesHelp() {
-	fmt.Print(`smeldr-cli migrate-addresses: give every record without an address its address (D110)
+	fmt.Print(`smeldr-cli migrate-addresses: give every record without an address its address
 
 Usage:
   smeldr-cli migrate-addresses [--apply] [--report <path>]

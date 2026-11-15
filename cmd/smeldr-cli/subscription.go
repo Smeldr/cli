@@ -10,7 +10,7 @@ import (
 )
 
 // subscriptionUsage is the help for the subscription commands.
-const subscriptionUsage = `smeldr-cli subscription: your event subscriptions (D116, Author role)
+const subscriptionUsage = `smeldr-cli subscription: your event subscriptions (Author role)
 
 Usage:
   subscription list [--owner <user-id>]          your subscriptions, the three defaults included
@@ -30,13 +30,13 @@ The MCP endpoint is used (SMELDR_MCP_URL). Needs smeldr.dev/mcp v1.64.0 or later
 `
 
 // signalUsage is the help for the signal commands.
-const signalUsage = `smeldr-cli signal: answer or withdraw an open request (D115, Author role)
+const signalUsage = `smeldr-cli signal: answer or withdraw an open request (Author role)
 
 Usage:
   signal answer <address> --text <answer> [--ref <Type:ident>]
   signal withdraw <address> --reason <text>
 
---ref names the change the answer made, such as Task:T42.
+--ref names the change the answer made, such as Task:T4.
 The MCP endpoint is used (SMELDR_MCP_URL). Needs smeldr.dev/mcp v1.64.0 or later.
 `
 

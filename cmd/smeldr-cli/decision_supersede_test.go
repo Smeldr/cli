@@ -67,7 +67,7 @@ func TestDecisionRetireAndRepair(t *testing.T) {
 	}
 	for _, sub := range []string{"supersede", "retire", "repair"} {
 		_, _, out := mockMCP(t, map[string]any{}, func() { runDecisionCommand([]string{sub, "--help"}) })
-		if !strings.Contains(out, "D189") {
+		if !strings.Contains(out, "smeldr-cli decision "+sub+":") || textAddress.MatchString(out) {
 			t.Errorf("%s --help:\n%s", sub, out)
 		}
 	}

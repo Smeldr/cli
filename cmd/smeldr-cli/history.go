@@ -79,7 +79,7 @@ func parseHistoryArgs(args []string) (map[string]any, error) {
 }
 
 func printHistoryHelp() {
-	fmt.Print(`smeldr-cli history: show one item's history, newest first (D101)
+	fmt.Print(`smeldr-cli history: show one item's history, newest first
 
 Usage:
   smeldr-cli history <type_name> <slug> [--limit n] [--offset n] [--view members|gated]

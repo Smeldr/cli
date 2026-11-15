@@ -66,6 +66,6 @@ Usage:
 Lists who administers the instance: token name and class (human, agent, job,
 unclassified), nothing else. Ask one of them for a grant, a token or a change
 to the instance's setup. Any authenticated token may ask, also one with no
-grant yet; needs smeldr.dev/mcp with administrators (core T944) on the server.
+grant yet; needs smeldr.dev/mcp with administrators on the server.
 `)
 }

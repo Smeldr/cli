@@ -25,7 +25,7 @@ Usage:
 
 --subscription delivers one of your subscriptions ("smeldr-cli subscription
 list"); without --after it resumes from the subscription's saved cursor.
---channel routes as before (D97). With neither, you get all your
+--channel routes as before. With neither, you get all your
 subscriptions.
 
 Each event is printed to stdout as it arrives, so the command works as a
