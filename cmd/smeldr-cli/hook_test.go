@@ -308,7 +308,7 @@ func TestPreEditHook_NewAreaShowsAgain(t *testing.T) {
 	args := []string{"--repo", "acme/app", "--root", root}
 	call := editCall("s", root, filepath.Join(root, "a.go"))
 	o, _ := runHook(t, args, call)
-	if o.HookSpecificOutput.PermissionDecision != "deny" || !strings.Contains(o.HookSpecificOutput.PermissionDecisionReason, "No Decision is in force") {
+	if o.HookSpecificOutput.PermissionDecision != "deny" || !strings.Contains(o.HookSpecificOutput.PermissionDecisionReason, "Smeldr named no Decision in force for this file to this token") {
 		t.Fatalf("an Area with no Decision: %+v", o)
 	}
 	h.answer = `{"areas":[{"address":"ARE1","name":"Billing","approval_mode":"comment-only"},{"address":"ARE2","name":"Ledger","approval_mode":"comment-only"}],"decisions":[],"uncovered":[]}`

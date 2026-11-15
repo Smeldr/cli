@@ -161,6 +161,66 @@ func TestPreEditHook_BOMOnStdin(t *testing.T) {
 	}
 }
 
+// T1270: a covered file is denied, never "outside the root", when the root
+// is missing or relative; v0.39.0 allowed these edits.
+func TestPreEditHook_RootIsAlwaysAbsolute(t *testing.T) {
+	root := t.TempDir()
+	file := filepath.Join(root, "internal", "billing", "a.go")
+	old := hookGetwd
+	t.Cleanup(func() { hookGetwd = old })
+	hookGetwd = func() (string, error) { return root, nil }
+	for name, c := range map[string]struct {
+		args []string
+		env  string
+		cwd  string
+	}{
+		"no root from anywhere":         {nil, "", ""},
+		"--root .":                      {[]string{"--root", "."}, "", ""},
+		"a relative CLAUDE_PROJECT_DIR": {nil, ".", ""},
+	} {
+		t.Run(name, func(t *testing.T) {
+			h := &hookServer{answer: coveredAnswer}
+			hookEnv(t, h.start(t).URL)
+			t.Setenv("CLAUDE_PROJECT_DIR", c.env)
+			args := append([]string{"--repo", "acme/app"}, c.args...)
+			o, _ := runHook(t, args, editCall("s-"+name, c.cwd, file))
+			if o.HookSpecificOutput.PermissionDecision != "deny" || fmt.Sprint(h.paths) != "[internal/billing/a.go]" {
+				t.Errorf("%+v, paths %v", o, h.paths)
+			}
+		})
+	}
+	// A file outside an absolute root is still an allow.
+	h := &hookServer{answer: coveredAnswer}
+	hookEnv(t, h.start(t).URL)
+	o, _ := runHook(t, []string{"--repo", "acme/app", "--root", root}, editCall("s", "", filepath.Join(t.TempDir(), "x.go")))
+	if o.HookSpecificOutput.PermissionDecision != "allow" || !strings.Contains(o.HookSpecificOutput.AdditionalContext, "outside the repository root") {
+		t.Errorf("outside: %+v", o)
+	}
+	// No working directory to fall back on: the error path, a deny.
+	hookGetwd = func() (string, error) { return "", fmt.Errorf("gone") }
+	for _, args := range [][]string{{"--repo", "acme/app"}, {"--repo", "acme/app", "--root", "."}} {
+		o, _ := runHook(t, args, editCall("s", "", file))
+		if o.HookSpecificOutput.PermissionDecision != "deny" || !strings.Contains(o.HookSpecificOutput.PermissionDecisionReason, "could not") {
+			t.Errorf("%v: %+v", args, o)
+		}
+	}
+}
+
+// T1270: a token that reads an Area but not its Domain or the Organization
+// is told what it saw, not that no Decision is in force.
+func TestPreEditHook_SaysWhatTheTokenSaw(t *testing.T) {
+	h := &hookServer{answer: `{"areas":[{"address":"ARE2","name":"Ledger","approval_mode":"comment-only"}],"decisions":[],"uncovered":[]}`}
+	hookEnv(t, h.start(t).URL)
+	root := t.TempDir()
+	o, _ := runHook(t, []string{"--repo", "acme/app", "--root", root}, editCall("s", root, filepath.Join(root, "a.go")))
+	r := o.HookSpecificOutput.PermissionDecisionReason
+	if !strings.Contains(r, "Smeldr named no Decision in force for this file to this token.") ||
+		!strings.Contains(r, "A place this token may not read is left out, with its Decisions.") ||
+		strings.Contains(r, "No Decision is in force") {
+		t.Errorf("reason:\n%s", r)
+	}
+}
+
 // T1238 point 3: relation list shows the rev withdraw needs, and the help of
 // every command that takes --rev names it.
 func TestRevShownAndNamed(t *testing.T) {

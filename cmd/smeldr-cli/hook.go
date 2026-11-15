@@ -36,6 +36,10 @@ const hookStateMaxAge = 7 * 24 * time.Hour
 // hookNow is the clock the state file's pruning reads; tests replace it.
 var hookNow = time.Now
 
+// hookGetwd is the working directory a missing or relative root resolves
+// against; tests replace it.
+var hookGetwd = os.Getwd
+
 // preToolUseInput is the part of Claude Code's PreToolUse input the hook reads.
 type preToolUseInput struct {
 	SessionID string `json:"session_id"`
@@ -173,12 +177,32 @@ func runPreEditHook(args []string, in io.Reader, out io.Writer) {
 		failed(fmt.Errorf("the %s call names no file", input.ToolName))
 		return
 	}
+	// The root is --root, else $CLAUDE_PROJECT_DIR, else the session's cwd,
+	// else the hook's own working directory, made absolute (T1270). A root
+	// that cannot be found takes the error path: "outside the root" is an
+	// allow, so it must only ever mean a file outside a real, absolute root.
 	root := opts.root
 	if root == "" {
 		root = os.Getenv("CLAUDE_PROJECT_DIR")
 	}
 	if root == "" {
 		root = input.Cwd
+	}
+	if root == "" {
+		wd, err := hookGetwd()
+		if err != nil {
+			failed(fmt.Errorf("the hook could not find the project's root (no --root, $CLAUDE_PROJECT_DIR or cwd, and no working directory: %v)", err))
+			return
+		}
+		root = wd
+	}
+	if !isAbsSlash(slashPath(root)) {
+		wd, err := hookGetwd()
+		if err != nil {
+			failed(fmt.Errorf("the hook could not resolve the root %q: %v", root, err))
+			return
+		}
+		root = filepath.Join(wd, root)
 	}
 	rel, inside := repoRelative(root, file, input.Cwd)
 	if !inside {
@@ -319,7 +343,7 @@ func hookDecision(ans hookAnswer, repo, rel, session, url string, body func(ref 
 		fmt.Fprintf(&b, "Area %s %s (approval: %s)\n", firstNonEmpty(a.Address, a.ID), a.Name, a.ApprovalMode)
 	}
 	if len(ans.Decisions) == 0 {
-		b.WriteString("No Decision is in force in these places.\n")
+		b.WriteString("Smeldr named no Decision in force for this file to this token.\n")
 	}
 	outOfTime := false
 	for i, d := range ans.Decisions {
@@ -350,7 +374,8 @@ func hookDecision(ans hookAnswer, repo, rel, session, url string, body func(ref 
 	if ans.Truncated || ans.Next != "" {
 		fmt.Fprintf(&b, "The list is not complete: run smeldr-cli decisions-for-paths --repo %s %s for all of it.\n", repo, rel)
 	}
-	b.WriteString("These are the Decisions in force for this file. If your change keeps to them, make the same edit again now: this hook lets it through. If it would go against one, stop and ask the user instead. This hook does not check the change against them.")
+	b.WriteString("A place this token may not read is left out, with its Decisions.\n")
+	b.WriteString("These are the Decisions in force for this file that this token may read. If your change keeps to them, make the same edit again now: this hook lets it through. If it would go against one, stop and ask the user instead. This hook does not check the change against them.")
 	o.HookSpecificOutput.PermissionDecision = "deny"
 	o.HookSpecificOutput.PermissionDecisionReason = b.String()
 	return o, commit
