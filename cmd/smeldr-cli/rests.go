@@ -191,12 +191,17 @@ func printPremiseHelp() {
 	fmt.Print(`smeldr-cli premise: a Decision resting on one that is not in force (core D149)
 
 Usage:
-  smeldr-cli premise confirm <condition> --reason "why"
-  smeldr-cli premise confirm <decision> <premise> --reason "why"
+  smeldr-cli premise confirm <condition> --reason "why" --rev <n>
+  smeldr-cli premise confirm <decision> <premise> --reason "why" [--rev <n>]
 
 Resolves the premise-flagged condition: the Decision still holds. Name the
 condition (its Signal address) when you may not read the premise.
 It stays closed until the premise's state changes. Needs ratify over the
 Decision's place; agents never confirm.
+
+--rev is the rev of the Decision resting on the premise, as you read it
+(get_decision, or "smeldr-cli decision get <slug>"). With <decision> <premise>
+and no --rev, at a terminal, cli shows the Decision and asks; with a
+condition, --rev is needed.
 `)
 }

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
@@ -16,13 +15,13 @@ func parseFrontmatterFile(path string) (map[string]any, string, error) {
 	var data []byte
 	if path == "-" {
 		var err error
-		data, err = io.ReadAll(os.Stdin)
+		data, err = io.ReadAll(stdinReader())
 		if err != nil {
 			return nil, "", fmt.Errorf("read stdin: %w", err)
 		}
 	} else {
 		var err error
-		data, err = os.ReadFile(path)
+		data, err = readFileNoBOM(path)
 		if err != nil {
 			return nil, "", fmt.Errorf("read %q: %w", path, err)
 		}

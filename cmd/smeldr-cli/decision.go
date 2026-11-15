@@ -109,9 +109,9 @@ func runDecisionSourcesCommand(args []string) {
 		if setFrom != "" {
 			var data []byte
 			if setFrom == "-" {
-				data, err = io.ReadAll(stdin)
+				data, err = io.ReadAll(stdinReader())
 			} else {
-				data, err = os.ReadFile(setFrom)
+				data, err = readFileNoBOM(setFrom)
 			}
 			if err != nil {
 				fatal("read sources: %v", err)

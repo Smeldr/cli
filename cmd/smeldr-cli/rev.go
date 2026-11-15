@@ -118,7 +118,7 @@ func needTerminal(write, where string) {
 // exits 1 with nothing written.
 func confirmRev(action, shown string, rev int) {
 	fmt.Fprintf(os.Stderr, "%s:\n  %s\nProceed with rev %d? [y/N] ", action, shown, rev)
-	line, _ := bufio.NewReader(stdin).ReadString('\n')
+	line, _ := bufio.NewReader(stdinReader()).ReadString('\n')
 	switch strings.ToLower(strings.TrimSpace(line)) {
 	case "y", "yes":
 		return

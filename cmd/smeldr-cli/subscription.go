@@ -147,7 +147,7 @@ func boolFlag(name, v string) (bool, error) {
 func readFilter(v string) (map[string]any, error) {
 	raw := []byte(v)
 	if path, ok := strings.CutPrefix(v, "@"); ok {
-		b, err := os.ReadFile(path)
+		b, err := readFileNoBOM(path)
 		if err != nil {
 			return nil, fmt.Errorf("--filter: %w", err)
 		}

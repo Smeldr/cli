@@ -35,7 +35,7 @@ The MCP endpoint is used (SMELDR_MCP_URL).
 
 // runContentTypeCommand dispatches the content-type commands.
 func runContentTypeCommand(args []string) {
-	tool, params, err := parseContentTypeArgs(args, os.ReadFile)
+	tool, params, err := parseContentTypeArgs(args, readFileNoBOM)
 	if errors.Is(err, flag.ErrHelp) {
 		fmt.Fprint(os.Stdout, contentTypeUsage)
 		return

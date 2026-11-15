@@ -64,6 +64,13 @@ smeldr-cli init --url https://mysite.com --bootstrap-token-stdin < bootstrap.txt
 `--bootstrap-token <token>` still works but is deprecated and warns. `init`
 writes the file with mode 600, also over an existing file with `--force`.
 
+A secret from its variable or from stdin may have white space around it (a
+blank last line, a tab copied from the log): the cli trims it, the same for
+every secret it reads. Whatever the cli reads on stdin, and a file it reads with
+`--from`, `--set` or `--filter @file`, may also start with a UTF-8 byte order
+mark, which Windows PowerShell 5.1 adds when its console is at code page 65001
+or when `Set-Content -Encoding utf8` writes a file: the cli drops it.
+
 **`init` creates a ratifier.** The token it writes is yours, the person
 founding this server: class `human`, with the `admin` and `approver`
 roles, both granted with the reason "founder of the organization". It
@@ -474,7 +481,7 @@ git ls-files | smeldr-cli coverage check --repo acme/app --stdin [--json]
 
 For each Edit, Write, MultiEdit or NotebookEdit call, the hook asks `decisions_for_paths` about the file, with the path relative to the project. The project is `--root`, or else `$CLAUDE_PROJECT_DIR`, or else the session's directory. What happens next:
 
-- **The file is in an Area.** The first edit of it in the session is denied. The reason lists the Areas and the Decisions in force there, with each Decision's text: the first 600 characters, for the first 10 Decisions (read with `get_decision`). So the agent has read them without tools of its own. A text the token may not read, or one not read before `--timeout` ran out, is marked as such on its line, so a title is never taken for the whole rule. The reason tells the agent to make the same edit again if its change keeps to them, and to stop and ask if it would go against one. The same edit again is allowed. A new Area or Decision on the file denies once more.
+- **The file is in an Area.** The first edit of it in the session is denied. The reason lists the Areas and the Decisions in force there, with each Decision's text: the first 600 characters, for the first 10 Decisions (read with `get_decision`). So the agent has read them without tools of its own. A text that could not be read, or one not read before `--timeout` ran out, is marked as such on its line, so a title is never taken for the whole rule. The reason tells the agent to make the same edit again if its change keeps to them, and to stop and ask if it would go against one. The same edit again is allowed. A new Area or Decision on the file denies once more.
 - **No Area is named for the file to this token.** The edit is allowed, and the agent is told so. An Area the token may not read is left out, so a narrow token sees less.
 - **No answer.** This covers no config, the server not answering within `--timeout` (default 10s, the budget of the whole run, below the 30 s the settings give the hook), a refusal, and an answer the hook does not know the shape of (from a newer server, for example). An answer with no Area and no Decision counts as "no Area" only when it lists the file as uncovered. Any other such answer is one the hook cannot read. The edit is denied with the reason (`--on-error deny`, the default). To edit anyway, change the command to `--on-error allow`: the edit is then let through with a warning to the agent.
 

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 )
@@ -37,7 +38,7 @@ func runRelationCommand(args []string) {
 	}
 	// The rev of the edge the person read (core T1010): "relation list" shows it.
 	if rev == nil {
-		fatal("relation withdraw needs --rev <n>, the rev of the relation as you read it in \"relation list\"")
+		fatal("relation withdraw needs --rev <n>, the rev of the relation as you read it: the REV column of \"relation list\"")
 		return
 	}
 	params["rev"] = *rev
@@ -170,14 +171,14 @@ func fetchRelationPages(call func(string, map[string]any) (string, error), param
 // printRelationTable writes the edges as a table.
 func printRelationTable(w io.Writer, p relationListPage) {
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tKIND\tSOURCE\tTARGET\tCLASS\tENDED")
+	fmt.Fprintln(tw, "ID\tREV\tKIND\tSOURCE\tTARGET\tCLASS\tENDED")
 	for _, e := range p.Edges {
 		ended := ""
 		if end, ok := e["ended"].(map[string]any); ok {
 			ended = fmt.Sprint(end["cause"])
 		}
-		fmt.Fprintf(tw, "%v\t%v\t%v/%v\t%v/%v\t%v\t%s\n",
-			e["id"], e["relation_kind"], e["source_type"], e["source_id"], e["target_type"], e["target_id"], e["edge_class"], ended)
+		fmt.Fprintf(tw, "%v\t%v\t%v\t%v/%v\t%v/%v\t%v\t%s\n",
+			e["id"], revCell(e["rev"]), e["relation_kind"], e["source_type"], e["source_id"], e["target_type"], e["target_id"], e["edge_class"], ended)
 	}
 	tw.Flush()
 	fmt.Fprintf(w, "%d of %d edges, as of %s\n", len(p.Edges), p.Total, p.AsOf)
@@ -224,7 +225,7 @@ Usage:
   smeldr-cli relation list [--kind K] [--source-type T] [--target-type T]
                            [--include-ended] [--as-of RFC3339]
                            [--limit N] [--offset N] [--all] [--json]
-  smeldr-cli relation withdraw <id> --reason <text>
+  smeldr-cli relation withdraw <id> --rev <n> --reason <text>
 
 list pages through every relation on the instance (list_relations), ordered
 by created_at then id. The first page fixes as_of; --all pages on with it to
@@ -239,5 +240,21 @@ with you as the actor and your reason (cause "withdrawn"). Asserting the same
 relation again later starts a new row. A relation that has already ended is
 refused. There is no delete for relations. Requires Author role (operation
 archive). Needs smeldr.dev/mcp v1.51.0 or later on the server.
+
+--rev is the rev of the relation as you read it: the REV column of
+"relation list" (or "rev" in its --json). A withdraw on a relation that
+changed since is refused, so read it again.
 `, "\n"))
+}
+
+// revCell is the REV column's value: the edge's rev, or "-" when the server
+// sends none.
+func revCell(v any) string {
+	if v == nil {
+		return "-"
+	}
+	if f, ok := v.(float64); ok {
+		return strconv.FormatFloat(f, 'f', -1, 64)
+	}
+	return fmt.Sprint(v)
 }

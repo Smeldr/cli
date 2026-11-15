@@ -159,6 +159,7 @@ func runPreEditHook(args []string, in io.Reader, out io.Writer) {
 		failed(fmt.Errorf("could not read the tool call from stdin"))
 		return
 	}
+	raw = trimBOM(raw)
 	var input preToolUseInput
 	if err := json.Unmarshal(raw, &input); err != nil {
 		failed(fmt.Errorf("the tool call on stdin is not Claude Code's PreToolUse JSON: %v", err))

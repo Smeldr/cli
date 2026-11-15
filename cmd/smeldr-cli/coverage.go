@@ -41,7 +41,7 @@ func pathArgs(name string, args []string, extra func(flag string) bool) (repo st
 		fatal("%s needs --repo owner/name", name)
 	}
 	if fromStdin {
-		paths = append(paths, readLines(stdin)...)
+		paths = append(paths, readLines(stdinReader())...)
 	}
 	if len(paths) == 0 {
 		fatal("%s needs paths: as arguments, or one per line with --stdin", name)

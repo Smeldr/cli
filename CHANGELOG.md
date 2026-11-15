@@ -9,6 +9,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Stdin from a Windows PowerShell console at code page 65001 works (core T1238).** Windows PowerShell 5.1 puts a UTF-8 byte order mark in front of what it pipes to a program when its console is at code page 65001, and two when `$OutputEncoding` is UTF-8 too (measured: `ef bb bf`, then `ef bb bf ef bb bf`). The cli sent it on as part of the input, so `Get-Content bootstrap.txt | smeldr-cli init --bootstrap-token-stdin` got a 401. Every stdin read now drops leading byte order marks: every `--*-stdin` secret, `decisions-for-paths`, `coverage check` and `check change --stdin`, `--from -`, `--set -`, the `[y/N]` confirmation and `hook pre-edit`. The same goes for a file read with `--from`, `--set`, `--filter @file` or `content-type --fields`, since `Set-Content -Encoding utf8` writes one.
+- **A secret from its variable is trimmed (core T1238).** `$SMELDR_BOOTSTRAP_TOKEN` and every other secret variable lose white space around them, as the stdin value always did. In PowerShell, `$env:X = Get-Content file` keeps a blank last line as a trailing space. A value that is empty after trimming is still refused, and no error or warning shows the secret.
+
+### Changed
+
+- **`relation list` has a `REV` column (core T1238).** It is the rev `relation withdraw --rev` needs, shown without `--json` (`-` when the server sends none). It is the second column, so a script that reads the table by column position must move one place on. `--json` is unchanged.
+- **`--rev` is named in the help of `relation withdraw`, `check answer` and `premise confirm`**, with where to read the rev. The refusal of `relation withdraw` points to the REV column.
+- The README's hook section says "a text that could not be read" (core T1207's run on the release found that a listed Decision's text is readable by any token that may list it).
+
 ---
 
 ## [0.39.0] - 2026-11-15

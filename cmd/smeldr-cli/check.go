@@ -150,7 +150,7 @@ func parseCheckChange(args []string) (checkCall, error) {
 		return checkCall{}, err
 	}
 	if *fromStdin {
-		paths = append(paths, readLines(stdin)...)
+		paths = append(paths, readLines(stdinReader())...)
 	}
 	if *repo == "" || *number <= 0 || *head == "" || len(paths) == 0 {
 		return checkCall{}, errors.New("check change needs --repo, --number, --head and paths (arguments or --stdin)")
@@ -329,7 +329,7 @@ func printCheckHelp() {
 Usage:
   smeldr-cli check change --repo owner/name --number N --head SHA [--files-total N] [--stdin] [--json] [<path>...]
   smeldr-cli check merge  --repo owner/name --number N --head SHA --merge SHA [--json]
-  smeldr-cli check answer <check> <area> --approve | --not-approved --reason "why" [--json]
+  smeldr-cli check answer <check> <area> --approve | --not-approved --reason "why" [--rev <n>] [--json]
   smeldr-cli check show   <check> [--json]
   smeldr-cli check list   [--repo owner/name [--number N]] [--area A] [--decision D] [--status S] [--limit N] [--json]
 
@@ -340,5 +340,9 @@ change and merge are for the host's adapter or an operator (check_change
 capability). answer counts when you hold approve-change over that Area (or
 item-change-approver on the Check). list needs a repository, an Area or a
 Decision: Checks are read by filter.
+
+answer's --rev is the rev of the Check as you read it ("rev" in check show
+--json). Without it, at a terminal, cli shows the Check and asks; without a
+terminal it refuses.
 `)
 }

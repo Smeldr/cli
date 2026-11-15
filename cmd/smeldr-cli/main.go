@@ -122,7 +122,7 @@ Usage:
   smeldr-cli administrators [--json]                              who administers this instance
   smeldr-cli findings [--detector D] [--type T] [--limit N] [--json]  what the detectors found
   smeldr-cli rests <type> <item> | --stored <type>:<item>...      what rests on an item, and what it rests on (D150)
-  smeldr-cli premise confirm <decision> <premise> --reason "why"  a Decision still holds although its premise is not in force (D149)
+  smeldr-cli premise confirm <decision> <premise> --reason "why" [--rev <n>]  a Decision still holds although its premise is not in force (D149)
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
   smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources (D148)
   smeldr-cli check change|merge|answer|show|list ...               the pull request check (core T918)
@@ -210,7 +210,7 @@ Coverage (needs smeldr.dev/mcp with core's coverage rules on the server):
   administrators [--json]      who administers this instance (any token; core T944)
   findings [--detector D] ...  what the detectors found, filtered by your reads (core T953)
   rests <type> <item> [--json]   live rest counts (core T919); --stored <type>:<item>... the swept ones
-  premise confirm <decision> <premise> --reason "why"   (ratify over the Decision's place; core D149)
+  premise confirm <decision> <premise> --reason "why" [--rev <n>]   (ratify over the Decision's place; core D149)
   coverage check --repo owner/name [--stdin] [--json] [<path>...]   (Editor)
   paths as arguments or one per line with --stdin, for example from git diff --name-only.
 

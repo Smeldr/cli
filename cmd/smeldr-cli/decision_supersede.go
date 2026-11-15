@@ -235,13 +235,13 @@ shows the Decision and asks before it writes.
 // readFromFile reads the file at path, or stdin when path is "-".
 func readFromFile(path string) ([]byte, error) {
 	if path == "-" {
-		data, err := io.ReadAll(os.Stdin)
+		data, err := io.ReadAll(stdinReader())
 		if err != nil {
 			return nil, fmt.Errorf("read stdin: %w", err)
 		}
 		return data, nil
 	}
-	data, err := os.ReadFile(path)
+	data, err := readFileNoBOM(path)
 	if err != nil {
 		return nil, fmt.Errorf("read %q: %w", path, err)
 	}
@@ -273,7 +273,7 @@ func frontmatterSources(content, from string) ([]decisionSource, error) {
 			if !filepath.IsAbs(p) && from != "-" {
 				p = filepath.Join(filepath.Dir(from), p)
 			}
-			data, err := os.ReadFile(p)
+			data, err := readFileNoBOM(p)
 			if err != nil {
 				return nil, fmt.Errorf("sources: read %q: %w", p, err)
 			}

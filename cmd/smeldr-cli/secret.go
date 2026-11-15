@@ -39,7 +39,7 @@ func (s secretSource) read(fs *flag.FlagSet, value string, fromStdin bool) (stri
 	}
 	if fromStdin {
 		got = append(got, "--"+s.stdinFlag)
-		line, err := bufio.NewReader(stdin).ReadString('\n')
+		line, err := bufio.NewReader(stdinReader()).ReadString('\n')
 		if err != nil && line == "" {
 			return "", fmt.Errorf("--%s: nothing on stdin", s.stdinFlag)
 		}
@@ -47,7 +47,10 @@ func (s secretSource) read(fs *flag.FlagSet, value string, fromStdin bool) (stri
 	}
 	if v, ok := os.LookupEnv(s.env); ok {
 		got = append(got, "$"+s.env)
-		secret = v
+		// Trimmed like the stdin value (T1238): Windows PowerShell's
+		// $env:X = Get-Content file keeps a blank last line as a space, and a
+		// line copied from the server's log can start with a tab.
+		secret = strings.TrimSpace(string(trimBOM([]byte(v))))
 	}
 	switch {
 	case len(got) == 0:
