@@ -97,7 +97,8 @@ func TestRev_ConfirmThenWrite(t *testing.T) {
 			map[string]any{"get_decision": revDecision}, 6},
 		{"check answer", "get_change_check", "answer_change_check",
 			func() { runCheckCommand([]string{"answer", "--approve", "CHK3", "ARE1"}) },
-			map[string]any{"get_change_check": map[string]any{"address": "CHK3", "rev": float64(2)}, "answer_change_check": cliCheck}, 2},
+			// get_change_check answers with the Check under "check" (T1283).
+			map[string]any{"get_change_check": map[string]any{"covered": true, "check": map[string]any{"address": "CHK3", "Status": "awaiting-approval", "Rev": float64(2)}, "areas": []any{}}, "answer_change_check": cliCheck}, 2},
 		{"premise confirm", "get_decision", "confirm_premise",
 			func() { runPremiseCommand([]string{"confirm", "D170", "D7", "--reason", "still right"}) },
 			map[string]any{"get_decision": revDecision}, 6},
@@ -325,5 +326,30 @@ func TestRev_Helpers(t *testing.T) {
 	}
 	if !strings.Contains(revTypes(), "coverage_rule") {
 		t.Errorf("revTypes = %s", revTypes())
+	}
+}
+
+// check answer: the prompt names the Check, and an answer with no Check
+// object is the "returned no rev" stop, with nothing written (T1283).
+func TestRev_CheckAnswerNested(t *testing.T) {
+	s := &revServer{results: map[string]any{
+		"get_change_check":    map[string]any{"covered": true, "check": map[string]any{"address": "CHK3", "Status": "awaiting-approval", "Rev": float64(2)}},
+		"answer_change_check": cliCheck,
+	}}
+	s.start(t)
+	withTerminal(t, true, "y\n")
+	_, stderr := runExpectingExit(t, func() { captureStdout(t, func() { runCheckCommand([]string{"answer", "--approve", "CHK3", "ARE1"}) }) })
+	if !strings.Contains(stderr, "CHK3, awaiting-approval, rev 2") {
+		t.Errorf("prompt does not name the Check:\n%s", stderr)
+	}
+	s.results["get_change_check"] = map[string]any{"covered": false, "check": "not an object"}
+	s.calls = nil
+	withTerminal(t, true, "y\n")
+	code, stderr := runExpectingExit(t, func() { runCheckCommand([]string{"answer", "--approve", "CHK3", "ARE1"}) })
+	if code != 1 || !strings.Contains(stderr, "returned no rev") || s.last("answer_change_check") != nil {
+		t.Errorf("no Check object: exit %d, calls %s\n%s", code, s.tools(), stderr)
+	}
+	if recordAt("not json", "check") != "" {
+		t.Error("recordAt on bad JSON")
 	}
 }

@@ -65,6 +65,20 @@ func revOf(text string) (int, bool) {
 	return 0, false
 }
 
+// recordAt returns the object under the top-level field key of a JSON
+// answer, as JSON, or "" when there is none.
+func recordAt(text, key string) string {
+	var m map[string]json.RawMessage
+	if json.Unmarshal([]byte(text), &m) != nil {
+		return ""
+	}
+	raw := m[key]
+	if len(raw) == 0 || raw[0] != '{' {
+		return ""
+	}
+	return string(raw)
+}
+
 // fieldOf reads a string field by name in any case.
 func fieldOf(m map[string]any, name string) string {
 	for k, v := range m {
@@ -129,10 +143,20 @@ func confirmRev(action, shown string, rev int) {
 // readAndConfirm reads the record with getTool and getArgs, shows it and asks,
 // and returns the rev the person confirmed. Used when --rev is not given.
 func readAndConfirm(cfg Config, write, action, getTool string, getArgs map[string]any, withBody bool) int {
+	return readAndConfirmAt(cfg, write, action, getTool, getArgs, withBody, "")
+}
+
+// readAndConfirmAt is readAndConfirm for a tool whose answer holds the record
+// under the top-level field key (get_change_check's "check", core T1283).
+// With key "" the answer is the record.
+func readAndConfirmAt(cfg Config, write, action, getTool string, getArgs map[string]any, withBody bool, key string) int {
 	needTerminal(write, getTool)
 	text, err := mcpCall(cfg, getTool, getArgs)
 	if err != nil {
 		fatal("%v", err)
+	}
+	if key != "" {
+		text = recordAt(text, key)
 	}
 	rev, ok := revOf(text)
 	if !ok {

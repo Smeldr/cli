@@ -246,7 +246,7 @@ func runCheckAnswer(args []string) {
 	}
 	// The rev of the Check the approver read (core T1010).
 	if rev == nil {
-		n := readAndConfirm(cfg, "check answer", "Answer for Area "+fmt.Sprint(c.params["area"])+" on", "get_change_check", map[string]any{"check": c.params["check"]}, false)
+		n := readAndConfirmAt(cfg, "check answer", "Answer for Area "+fmt.Sprint(c.params["area"])+" on", "get_change_check", map[string]any{"check": c.params["check"]}, false, "check")
 		rev = &n
 	}
 	c.params["rev"] = *rev
