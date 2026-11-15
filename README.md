@@ -65,8 +65,8 @@ smeldr-cli init --url https://mysite.com --bootstrap-token-stdin < bootstrap.txt
 writes the file with mode 600, also over an existing file with `--force`.
 
 **`init` creates a ratifier.** The token it writes is yours, the person
-founding this server (D142): class `human`, with the `admin` and `approver`
-roles, both granted with the reason "founder of the organization (D142)". It
+founding this server: class `human`, with the `admin` and `approver`
+roles, both granted with the reason "founder of the organization". It
 can ratify Decisions. `--no-approver` grants `admin` only. If a global
 approver already exists, `init` grants `admin` only and says so. On a server
 without governance it grants nothing (the token's role is enough there). It
@@ -462,6 +462,36 @@ git diff --name-only main | smeldr-cli decisions-for-paths --repo acme/app --std
 # Count what each coverage rule matches; a rule that matches nothing opens a condition (Editor)
 git ls-files | smeldr-cli coverage check --repo acme/app --stdin [--json]
 ```
+
+### Make Claude Code ask before it edits
+
+`smeldr-cli hook pre-edit` (core T1207) is a Claude Code PreToolUse hook. Before the agent's first edit of a file in a session, it shows the agent the Decisions in force for that file. Put it in the project's `.claude/settings.json`:
+
+```json
+{"hooks": {"PreToolUse": [{"matcher": "Edit|Write|MultiEdit|NotebookEdit",
+  "hooks": [{"type": "command", "command": "smeldr-cli hook pre-edit --repo acme/app", "timeout": 30}]}]}}
+```
+
+For each Edit, Write, MultiEdit or NotebookEdit call, the hook asks `decisions_for_paths` about the file, with the path relative to the project. The project is `--root`, or else `$CLAUDE_PROJECT_DIR`, or else the session's directory. What happens next:
+
+- **The file is in an Area.** The first edit of it in the session is denied. The reason lists the Areas and the Decisions in force there, with each Decision's text: the first 600 characters, for the first 10 Decisions (read with `get_decision`). So the agent has read them without tools of its own. A text the token may not read, or one not read before `--timeout` ran out, is marked as such on its line, so a title is never taken for the whole rule. The reason tells the agent to make the same edit again if its change keeps to them, and to stop and ask if it would go against one. The same edit again is allowed. A new Area or Decision on the file denies once more.
+- **No Area is named for the file to this token.** The edit is allowed, and the agent is told so. An Area the token may not read is left out, so a narrow token sees less.
+- **No answer.** This covers no config, the server not answering within `--timeout` (default 10s, the budget of the whole run, below the 30 s the settings give the hook), a refusal, and an answer the hook does not know the shape of (from a newer server, for example). An answer with no Area and no Decision counts as "no Area" only when it lists the file as uncovered. Any other such answer is one the hook cannot read. The edit is denied with the reason (`--on-error deny`, the default). To edit anyway, change the command to `--on-error allow`: the edit is then let through with a warning to the agent.
+
+**What this guarantees, and what not.** Claude Code enforces the hook, not the agent. An edit with Claude Code's edit tools to a file an Area covers is held back until the agent has been shown the Decisions in force for that file in this session. The hook does not check that the change follows them, and it does not see files written through the shell (the Bash tool). An agent that already called `decisions_for_paths` itself still gets one deny per file, because the hook cannot see that call. A subagent's edits go through the hook too, with the session's own ID, so what the session has been shown counts for its subagents. That is what Claude Code 2.1.245 sent in our test.
+
+**The token.** The hook reads `SMELDR_URL` and `SMELDR_TOKEN`, or `.smeldr-cli.env` in the project, which `init` writes. Keep that file out of version control. The token needs the Author role and read on the places that matter. The agent's own editor token from Getting started is enough. The hook always exits 0 with a decision, because Claude Code lets an edit through on any other exit code except 2. What it has shown is kept per session under the user cache directory (`SMELDR_HOOK_STATE_DIR` overrides it) and removed after 7 days.
+
+Ask the agent to plan with it too. A passage for the project's CLAUDE.md:
+
+```markdown
+Before you change a file, ask Smeldr which Decisions apply to it
+(`decisions_for_paths` with this repository and the paths). Read the
+Decisions in force, and say in your plan how the change keeps to them. If a
+change would go against one, stop and ask instead of editing.
+```
+
+The passage is a rule the agent is told to follow. The hook is the part Claude Code enforces.
 
 Ask who approves a place you can read (core T911, D147; `approvers_of` over MCP, Author):
 

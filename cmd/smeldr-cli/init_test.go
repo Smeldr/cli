@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -54,11 +55,19 @@ func TestInit_Founder(t *testing.T) {
 	if create["actor_class"] != "human" {
 		t.Errorf("create_token args = %v, want actor_class human", create)
 	}
-	want := []string{"admin/u-person/founder of the organization (D142)", "approver/u-person/founder of the organization (D142)"}
+	want := []string{"admin/u-person/founder of the organization", "approver/u-person/founder of the organization"}
 	if got := granted(calls); strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Errorf("grants = %v, want %v", got, want)
 	}
-	for _, line := range []string{"class human, admin", "grants: admin, approver (founder of the organization, D142): this token can ratify Decisions", "the new token acts as admin"} {
+	// What init prints and stores names no record of Smeldr's own instance
+	// (core T1222's rule, the same pattern as core's
+	// TestMessagesNameNoRecordAddresses): on the reader's instance such an
+	// address is another record or none.
+	address := regexp.MustCompile(`\b[DTAGSP][0-9]{2,4}\b`)
+	if m := address.FindString(stdout + " " + strings.Join(granted(calls), " ")); m != "" {
+		t.Errorf("init names the record %s:\n%s", m, stdout)
+	}
+	for _, line := range []string{"class human, admin", "grants: admin, approver (founder of the organization): this token can ratify Decisions", "the new token acts as admin"} {
 		if !strings.Contains(stdout, line) {
 			t.Errorf("stdout misses %q:\n%s", line, stdout)
 		}

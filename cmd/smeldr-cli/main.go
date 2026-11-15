@@ -61,6 +61,8 @@ func main() {
 		runSearchCommand(os.Args[2:])
 	case "decisions-for-paths":
 		runDecisionsForPathsCommand(os.Args[2:])
+	case "hook":
+		runHookCommand(os.Args[2:])
 	case "approvers":
 		runApproversCommand(os.Args[2:])
 	case "administrators":
@@ -115,6 +117,7 @@ Usage:
   smeldr-cli standing <type> <slug> [--json]                      show whether an item holds (D100)
   smeldr-cli search [<text>] [--type t] [--state s] [--place p|none]   find records across every type you may read
   smeldr-cli decisions-for-paths --repo owner/name [--stdin] [<path>...]   which Decisions apply to these files
+  smeldr-cli hook pre-edit --repo owner/name                      Claude Code hook: show the Decisions for a file before its first edit
   smeldr-cli approvers <place> [--json]                           who approves an Organization, Domain or Area
   smeldr-cli administrators [--json]                              who administers this instance
   smeldr-cli findings [--detector D] [--type T] [--limit N] [--json]  what the detectors found
@@ -202,6 +205,7 @@ Search (Author role required; needs smeldr.dev/mcp v1.65.0+ on the server):
 
 Coverage (needs smeldr.dev/mcp with core's coverage rules on the server):
   decisions-for-paths --repo owner/name [--stdin] [--no-organization] [--json] [<path>...]   (Author)
+  hook pre-edit --repo owner/name [--root d] [--on-error deny|allow]   Claude Code PreToolUse hook (Author; core T1207)
   approvers <place> [--json]   who approves a place you can read (Author; core T911)
   administrators [--json]      who administers this instance (any token; core T944)
   findings [--detector D] ...  what the detectors found, filtered by your reads (core T953)

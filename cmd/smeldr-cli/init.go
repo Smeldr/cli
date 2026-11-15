@@ -133,7 +133,7 @@ func runInit(args []string) {
 		}
 		switch {
 		case founder:
-			fmt.Println("OK  grants: admin, approver (founder of the organization, D142): this token can ratify Decisions")
+			fmt.Println("OK  grants: admin, approver (founder of the organization): this token can ratify Decisions")
 		case *noApprover:
 			fmt.Println("OK  grants: admin (--no-approver: this token cannot ratify)")
 		default:
@@ -170,7 +170,7 @@ func runInit(args []string) {
 // the founder's (D142 point 6), in core's own words.
 const (
 	initTokenReason   = "created by smeldr-cli init for the person setting up this server"
-	initFounderReason = "founder of the organization (D142)"
+	initFounderReason = "founder of the organization"
 )
 
 // initGovernance reports whether the server has governance (grant_role and

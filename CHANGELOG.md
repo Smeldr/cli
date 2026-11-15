@@ -9,6 +9,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`smeldr-cli hook pre-edit` asks before Claude Code edits a decided file (core T1207).** It is a Claude Code PreToolUse hook: it reads Claude Code's PreToolUse JSON on stdin and writes its decision on stdout. Register it in `.claude/settings.json` with the matcher `Edit|Write|MultiEdit|NotebookEdit`. Usage: `smeldr-cli hook pre-edit --repo owner/name [--root <dir>] [--on-error deny|allow] [--timeout 10s]`. For each edit it asks `decisions_for_paths` about the file, relative to `--root` (default `$CLAUDE_PROJECT_DIR`, else the session's working directory). The first edit in a session to a file an Area covers is denied. The reason names the Areas and the Decisions in force, with each Decision's text (the first 600 characters, for the first 10 Decisions). It tells the agent to make the same edit again if its change keeps to them, and to stop and ask if it would not. The same edit again is allowed. A new Area or Decision denies once more. A file no Area is named for to this token is allowed, and the agent is told so. With no answer (no config, a server that does not answer within `--timeout`, a refusal, or an unknown answer shape) the edit is denied by default, or allowed with a warning under `--on-error allow`. The command always exits 0 with a decision, and the token never appears in its output. What was shown is kept per session under the user cache directory (`SMELDR_HOOK_STATE_DIR` overrides it) and removed after 7 days. Claude Code enforces the hook. It does not check the change against the Decisions, and it does not see files written through the shell. The README has a section "Make Claude Code ask before it edits", with a CLAUDE.md passage.
+
+### Changed
+
+- **`init` no longer names a record address in its grants line or in the grants' stored reason (core T1207, by T1222's rule).** The line now reads `OK  grants: admin, approver (founder of the organization): this token can ratify Decisions`, and the stored reason is `founder of the organization`. Before, both named D142. That address names a record on smeldr.dev's own instance, which on your instance is another record or none. Grants already stored keep their reason. A test guards that what `init` prints and stores names no record address.
+
 ---
 
 ## [0.38.1] - 2026-11-15
