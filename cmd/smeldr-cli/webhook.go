@@ -39,7 +39,7 @@ Verbs:
   delete <id>                              permanently remove an endpoint
   deliveries --job <job-id>                show delivery logs for a job
   deliveries --endpoint <endpoint-id>      show all jobs for an endpoint
-  retry <job-id>                           re-queue a dead-lettered job
+  retry <job-id>                           send a dead or pending job now (a delivered job is refused)
 
 Event names follow the pattern <type>.<lifecycle>, e.g.:
   post.created  post.updated  post.published  post.unpublished
@@ -159,7 +159,8 @@ func runWebhookDeliveries(args []string) {
 	}
 }
 
-// runWebhookRetry re-queues a dead-lettered webhook job via retry_webhook MCP tool.
+// runWebhookRetry sends a dead or pending webhook job now via the retry_webhook
+// MCP tool. A refusal (a delivered job, an unknown id) is printed by fatal.
 func runWebhookRetry(args []string) {
 	jobID := oneArgument("webhook retry", args, "webhook retry requires a job ID")
 

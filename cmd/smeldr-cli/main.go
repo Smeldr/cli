@@ -161,7 +161,7 @@ Webhook verbs (Admin role required):
   delete <id>                              permanently remove an endpoint
   deliveries --job <job-id>                show delivery logs for a job
   deliveries --endpoint <endpoint-id>      show all jobs for an endpoint
-  retry <job-id>                           re-queue a dead-lettered job
+  retry <job-id>                           send a dead or pending job now (a delivered job is refused)
 
 Preview (Admin role required):
   preview <prefix> <slug>                  generate signed draft preview URL (12 h)
