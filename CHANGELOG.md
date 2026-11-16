@@ -11,6 +11,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`smeldr-cli relation assert <source> <kind> <target> [--rev N] [--json]` (core T1308),** over `assert_relation`. Source and target are `Type:ident` or a core address (`D4`, `ARE1`), whose prefix names the type. It asserts; an observed relation is not made here (there is no `--class`).
+- **`smeldr-cli decision place <decision> (--area | --domain | --organization) <place>` (core T1308):** places a Decision with `belongs_to_area`, `belongs_to_domain` or `belongs_to_organization`, the first thing done with a new Decision before it is ratified. Exactly one place is given.
+- **`smeldr-cli signal list` and `signal get <address>` (core T1308).** `signal list` without `--receiver` and `--sender` lists what is addressed to you: your user ID, the operations you hold (such as `ratify`) and the receivers your subscriptions name, through `list_signals` with `addressed_to_me`. That needs smeldr.dev/mcp with that argument; against an older server the cli says to name `--receiver`. `--state`, `--limit`, `--offset` and `--json` as `list_signals`. `signal get` prints the type, state, receiver, subject, message and answer.
+- **`decision get` takes an address or an ID as well as a slug (core T1308).** A slug the `/decisions` route finds is read there exactly as before; only when the route answers 404 does the cli ask `get_decision`, which takes an address, a slug or an ID.
+
 - **`smeldr-cli check close --repo --number --head [--json]` (core T1294),** over mcp's `record_close`: records a pull request closed without a merge. Its Check's open requests are withdrawn, and a later `check change` for it makes it open again. The server needs core and mcp with `RecordClose` and `record_close`.
 - **`smeldr-cli content <type> <verb>` for items of a runtime-defined type (core T1292).** Before, the content verbs spoke only a compiled module's routes, so a type defined with `content-type define` could not be worked on from the cli. The new command uses the server's `/_content/<type>` routes and the type's name.
   - The verbs are `list`, `get`, `create`, `update`, `publish`, `unpublish` and `archive`.
@@ -23,6 +28,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **A `--from` file is read with LF line endings (core T1308).** CRLF and lone CR become LF before the front matter is parsed, for a file and for `-` (stdin), and for `decision sources --set`. **A body that used to be stored with `\r\n` is now stored with `\n`:** if you compare a stored body with your file, that is why they differ. Records already stored are not touched. A file that is CRLF throughout, refused before with "content must begin with ---", is accepted.
+- **The top-level help lists every command (core T1308):** all `decision` verbs (`create`, `update`, `get`, `list`, `place`, `sources`, `supersede`, `retire`, `repair`), `relation assert`, `signal list` and `signal get`. A test fails when the dispatcher knows a command the help does not name.
+- **`decision create --help` and `decision update --help` (core T1308)** print `smeldr-cli decision create --from <file>` (it printed `decisions`) and the file's form: front matter with `title` and `scope`, then the basis below the closing `---`.
 - **`webhook retry`'s help says it sends a dead or pending job now, and that a delivered job is refused (core T1266).** It said "re-queue a dead-lettered job". From the core release that carries T1266, the server refuses a job that was already delivered and an id that names no job; the cli prints that answer and exits 1, as for any refusal. No code change beyond the help.
 - **The release workflow builds nothing unless `ci.yml` is green on the tagged commit (core T1297).** A first job, `ci-green`, runs `scripts/ci-green.sh` with the workflow's own token (`actions: read`): green passes; red stops; a run still going is waited for up to 45 minutes; no run is waited for up to 10 minutes, then stops. When it stops, nothing is built or attached and the release stays a draft. It reads `ci.yml` only. It gates a tag on a commit that carries it; a tag on an older commit runs that commit's workflow, ungated. A release on a green commit builds the same five binaries, the version check, `SHA256SUMS` and the publish as before.
 

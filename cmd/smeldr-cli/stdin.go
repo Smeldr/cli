@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 )
@@ -37,6 +38,33 @@ func trimBOM(data []byte) []byte {
 		data = data[len(utf8BOM):]
 	}
 	return data
+}
+
+// readFromFile reads a --from file at path, or stdin when path is "-", as
+// text: leading byte order marks are dropped, and CRLF and lone CR line
+// endings become LF, so a file written on Windows parses like any other and
+// no CR reaches the server (core T1308).
+func readFromFile(path string) ([]byte, error) {
+	var data []byte
+	var err error
+	if path == "-" {
+		data, err = io.ReadAll(stdinReader())
+		if err != nil {
+			return nil, fmt.Errorf("read stdin: %w", err)
+		}
+	} else {
+		data, err = readFileNoBOM(path)
+		if err != nil {
+			return nil, fmt.Errorf("read %q: %w", path, err)
+		}
+	}
+	return toLF(data), nil
+}
+
+// toLF turns CRLF and lone CR line endings into LF.
+func toLF(data []byte) []byte {
+	data = bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+	return bytes.ReplaceAll(data, []byte("\r"), []byte("\n"))
 }
 
 // readFileNoBOM reads a file the way the cli reads stdin: a leading UTF-8 byte

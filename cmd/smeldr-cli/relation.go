@@ -19,6 +19,10 @@ func runRelationCommand(args []string) {
 		runRelationList(args[1:])
 		return
 	}
+	if len(args) > 0 && args[0] == "assert" {
+		runRelationAssert(args[1:])
+		return
+	}
 	args, rev, err := takeRev(args)
 	if err != nil {
 		fatal("%v", err)
@@ -58,10 +62,10 @@ func parseRelationArgs(args []string) (map[string]any, error) {
 		}
 	}
 	if len(args) == 0 {
-		return nil, fmt.Errorf("relation requires a verb: withdraw or list")
+		return nil, fmt.Errorf("relation requires a verb: list, assert or withdraw")
 	}
 	if args[0] != "withdraw" {
-		return nil, fmt.Errorf("unknown relation verb %q (want withdraw or list)", args[0])
+		return nil, fmt.Errorf("unknown relation verb %q (want list, assert or withdraw)", args[0])
 	}
 	fs := flag.NewFlagSet("relation withdraw", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -219,9 +223,10 @@ func runRelationList(args []string) {
 
 func printRelationHelp() {
 	fmt.Print(strings.TrimLeft(`
-smeldr-cli relation: list relations, or end one on purpose
+smeldr-cli relation: list relations, assert one, or end one on purpose
 
 Usage:
+  smeldr-cli relation assert <source> <kind> <target> [--rev N] [--json]
   smeldr-cli relation list [--kind K] [--source-type T] [--target-type T]
                            [--include-ended] [--as-of RFC3339]
                            [--limit N] [--offset N] [--all] [--json]
@@ -240,6 +245,9 @@ with you as the actor and your reason (cause "withdrawn"). Asserting the same
 relation again later starts a new row. A relation that has already ended is
 refused. There is no delete for relations. Requires Author role (operation
 archive). Needs smeldr.dev/mcp v1.51.0 or later on the server.
+
+assert asserts a relation (see smeldr-cli relation assert --help); a
+Decision's place is shorter with smeldr-cli decision place.
 
 --rev is the rev of the relation as you read it: the REV column of
 "relation list" (or "rev" in its --json). A withdraw on a relation that

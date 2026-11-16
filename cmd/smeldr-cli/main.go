@@ -113,7 +113,7 @@ Usage:
   smeldr-cli oauth revoke <token>                         revoke an OAuth token (Admin role required)
   smeldr-cli history <type> <slug> [--limit n]            one item's history, newest first
   smeldr-cli reachability <type> <id> [--kind k]          what is reachable from one item in the relation graph
-  smeldr-cli relation <list|withdraw> [args]              list relations, or end one on purpose
+  smeldr-cli relation <list|assert|withdraw> [args]       list relations, assert one, or end one on purpose
   smeldr-cli preview <prefix> <slug>                      generate draft preview URL
   smeldr-cli social <subcommand> [args]                   social post, credential, and platform management
   smeldr-cli block <node|section|item> <verb> [args]      block system: nodes + composition
@@ -131,10 +131,15 @@ Usage:
   smeldr-cli rests <type> <item> | --stored <type>:<item>...      what rests on an item, and what it rests on
   smeldr-cli premise confirm <decision> <premise> --reason "why" [--rev <n>]  a Decision still holds although its premise is not in force
   smeldr-cli coverage check --repo owner/name --stdin              count what each coverage rule matches (Editor)
+  smeldr-cli decision create|update|get|list ...                  Decisions (decision create --help for the file)
+  smeldr-cli decision place <decision> --area|--domain|--organization <place>   put a Decision in its place
   smeldr-cli decision sources <decision> [--set f.json|--clear]   a Decision's pinned sources
+  smeldr-cli decision supersede|retire|repair <decision> ...      replace, retire or repair a Decision
   smeldr-cli check change|merge|answer|show|list ...               the pull request check
   smeldr-cli migrate-addresses [--apply] [--report <path>]        give records their addresses (dry run unless --apply; Admin)
   smeldr-cli subscription <list|get|create|update|pause|resume|delete> [args]   your event subscriptions
+  smeldr-cli signal list [--receiver r | --sender s] [--state s]  the Signals addressed to you, by default
+  smeldr-cli signal get <address>                                 one Signal
   smeldr-cli signal <answer|withdraw> <address> [flags]           answer or withdraw an open request
   smeldr-cli watch [--subscription <address> | --channel <names>] [--after <id>]   print the event stream
   smeldr-cli logs [--level LEVEL] [--limit N] [--since RFC3339] [--json]   live error log (Admin role required)
@@ -237,6 +242,8 @@ Relation (Author role required; needs smeldr.dev/mcp v1.51.0+ on the server, lis
                 [--as-of RFC3339] [--limit n] [--offset n] [--all] [--json]
   pages through every relation on the instance; --all pages to the total at
   the first page's as_of. Prints a table, or JSON with --json.
+  relation assert <source> <kind> <target> [--rev n] [--json]
+  asserts a relation; source and target are Type:ident or an address (D4).
   relation withdraw <id> --reason <text>
   ends a live relation on purpose; its row stays as history with you and the
   reason on record. An ended relation is refused. Relations are never deleted.

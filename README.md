@@ -69,7 +69,10 @@ blank last line, a tab copied from the log): the cli trims it, the same for
 every secret it reads. Whatever the cli reads on stdin, and a file it reads with
 `--from`, `--set` or `--filter @file`, may also start with a UTF-8 byte order
 mark, which Windows PowerShell 5.1 adds when its console is at code page 65001
-or when `Set-Content -Encoding utf8` writes a file: the cli drops it.
+or when `Set-Content -Encoding utf8` writes a file: the cli drops it. A file
+read with `--from` (or `-` for stdin) has its CRLF and lone CR line endings read
+as LF, so a file written on Windows parses like any other and no `\r` reaches
+the server.
 
 **`init` creates a ratifier.** The token it writes is yours, the person
 founding this server: class `human`, with the `admin` and `approver`
@@ -669,14 +672,31 @@ smeldr-cli subscription delete N12
 
 `--filter` is a JSON object (types, events, event_names, from_states, to_states, items, related_to, fields, signal_kinds, addressed_to_me, sent_by_me); the server refuses an unknown key. The three default subscriptions are listed and can be paused, not deleted. `--owner` names another token and needs administer.
 
-## Signal commands
+## Relation assert and decision place
 
-Answer or withdraw an open request (D115), over `answer_signal` and `withdraw_signal`:
+Assert a relation, over MCP (`assert_relation`):
 
 ```bash
+smeldr-cli relation assert D4 grounded_in D2
+smeldr-cli relation assert Decision:money-in-cents contradicts D9 --json
+smeldr-cli decision place D4 --area ARE1        # or --domain DOM1, --organization ORG1
+```
+
+Source and target are `Type:ident` or a core address (`D4`, `ARE1`, `DOM2`), whose prefix names the type; the server resolves the ident (address, slug or ID). The relation is asserted; an observed relation is not made here. Asserting a live relation of a governance kind again needs `--rev`, the rev from `relation list`. `decision place` asserts `belongs_to_area`, `belongs_to_domain` or `belongs_to_organization` from the Decision to the place: a Decision is placed before it is ratified. Prints one line naming the relation and its rev, or the server's JSON with `--json`. Requires Author role.
+
+## Signal commands
+
+Read Signals, and answer or withdraw an open request (D115):
+
+```bash
+smeldr-cli signal list                                   # what is addressed to you
+smeldr-cli signal list --receiver core --state open --limit 20
+smeldr-cli signal get S42 [--json]
 smeldr-cli signal answer S42 --text "Use the second option" [--ref Task:T7]
 smeldr-cli signal withdraw S42 --reason "No longer needed"
 ```
+
+`signal list` without `--receiver` and `--sender` lists the Signals addressed to you: those whose receiver is your user ID, an operation you hold (such as `ratify`) or a receiver your subscriptions name (your band). So you list the conditions you can act on without knowing those words. It needs smeldr.dev/mcp with `list_signals` `addressed_to_me`; against an older server the cli says to name a `--receiver`. `--state` defaults to what awaits action (open and pending), newest first. `signal get` prints the type, state, receiver, subject, message and, for an answered request, the answer. A Signal about a record you cannot read is not listed.
 
 ## Watch command
 

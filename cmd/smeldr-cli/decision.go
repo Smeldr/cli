@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"text/tabwriter"
 )
@@ -31,9 +32,77 @@ func runDecisionCommand(args []string) {
 		case "repair":
 			runDecisionRepairCommand(args[1:])
 			return
+		case "place":
+			runDecisionPlace(args[1:])
+			return
+		case "get":
+			runDecisionGet(args[1:])
+			return
+		case "create", "update":
+			if wantsHelp(args[1:]) {
+				printDecisionFileHelp(args[0])
+				return
+			}
 		}
 	}
 	runContentCommand("decisions", args)
+}
+
+// printDecisionFileHelp is decision create --help and decision update --help:
+// the command as it is typed, and the file's form.
+func printDecisionFileHelp(verb string) {
+	usage := "smeldr-cli decision create --from <file>"
+	if verb == "update" {
+		usage = "smeldr-cli decision update <slug> --from <file>"
+	}
+	fmt.Printf(`Usage: %s
+
+The file (or - for stdin) is front matter, then the basis as the body:
+
+  ---
+  title: Money is stored in cents
+  scope: billing
+  ---
+  Why: the reasons, in Markdown, below the closing ---.
+
+title is required on create (one line, at most 120 characters); scope is
+optional. On update, fields the file leaves out keep their stored value.
+CRLF and lone CR line endings are read as LF.
+`, usage)
+}
+
+// runDecisionGet prints one Decision. A slug the /decisions route finds is
+// read there, as before, so every call that works today answers the same; an
+// address or an ID, which the route does not find, is read with get_decision.
+func runDecisionGet(args []string) {
+	fs := newCommandFlags("decision get")
+	fs.Usage = func() {
+		fmt.Fprintln(fs.Output(), "Usage: smeldr-cli decision get <decision>   (an address such as D4, a slug or an ID)")
+	}
+	ident := parseCommandFlags(fs, args, 1, "decision get requires a Decision: address, slug or ID")[0]
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal("%v", err)
+	}
+	raw, code, err := request(cfg, http.MethodGet, cfg.ForgeURL+"/decisions/"+url.PathEscape(ident), nil)
+	if err != nil {
+		fatal("%v", err)
+	}
+	if code == http.StatusNotFound {
+		text, err := mcpCall(cfg, "get_decision", map[string]any{"slug": ident})
+		if err != nil {
+			fatal("decision %s: /decisions did not find it, and get_decision answered: %v", ident, err)
+			return
+		}
+		raw, code = []byte(text), http.StatusOK
+	}
+	if code >= 400 {
+		prefixFailure("decisions", "get", code, raw)
+		return
+	}
+	if err := printJSON(raw); err != nil {
+		fatal("%v", err)
+	}
 }
 
 // printDecisionHelp is smeldr-cli decision --help (T1147): the content verbs
@@ -44,8 +113,10 @@ func printDecisionHelp() {
 Usage:
   smeldr-cli decision create --from <file>          propose a Decision (title, scope, body from the file)
   smeldr-cli decision update <slug> --from <file>   update fields (absent fields preserved)
-  smeldr-cli decision get <slug>                    print one Decision as JSON
+  smeldr-cli decision get <decision>                print one Decision as JSON (address, slug or ID)
   smeldr-cli decision list [--status <s>] [--json]  list Decisions
+  smeldr-cli decision place <decision> (--area <a> | --domain <d> | --organization <o>) [--rev N]
+                                                   put it in its place
   smeldr-cli decision sources <decision> [--set f.json|--clear] [--rev N]
                                                    a Decision's pinned sources
   smeldr-cli decision supersede <decision> (--by <d> | --new --from <file>) --reason <text> [--rev N]
@@ -55,9 +126,11 @@ Usage:
   smeldr-cli decision repair <decision> (--by <d> | --retire) --reason <text> [--rev N]
                                                    repair one superseded with no replacement
 
-A Decision starts proposed; ratifying it is smeldr-cli transition Decision <slug> --to ratified.
+A Decision starts proposed and is placed before it is ratified; ratifying it is
+smeldr-cli transition Decision <slug> --to ratified.
 Replace it with decision supersede, never with transition --to superseded.
-See smeldr-cli decision sources --help for the sources file format.
+See smeldr-cli decision create --help for the file, and decision sources --help
+for the sources file format.
 `)
 }
 
@@ -107,12 +180,7 @@ func runDecisionSourcesCommand(args []string) {
 	if clear || setFrom != "" {
 		sources := []decisionSource{}
 		if setFrom != "" {
-			var data []byte
-			if setFrom == "-" {
-				data, err = io.ReadAll(stdinReader())
-			} else {
-				data, err = readFileNoBOM(setFrom)
-			}
+			data, err := readFromFile(setFrom)
 			if err != nil {
 				fatal("read sources: %v", err)
 			}

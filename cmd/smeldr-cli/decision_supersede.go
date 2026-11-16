@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -230,22 +229,6 @@ Usage:
 findings (detector decision-replacement). Without --rev, on a terminal, cli
 shows the Decision and asks before it writes.
 `)
-}
-
-// readFromFile reads the file at path, or stdin when path is "-".
-func readFromFile(path string) ([]byte, error) {
-	if path == "-" {
-		data, err := io.ReadAll(stdinReader())
-		if err != nil {
-			return nil, fmt.Errorf("read stdin: %w", err)
-		}
-		return data, nil
-	}
-	data, err := readFileNoBOM(path)
-	if err != nil {
-		return nil, fmt.Errorf("read %q: %w", path, err)
-	}
-	return data, nil
 }
 
 // frontmatterSources reads the sources line of a Decision file's front

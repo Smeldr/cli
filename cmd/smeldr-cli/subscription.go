@@ -30,14 +30,26 @@ The MCP endpoint is used (SMELDR_MCP_URL). Needs smeldr.dev/mcp v1.64.0 or later
 `
 
 // signalUsage is the help for the signal commands.
-const signalUsage = `smeldr-cli signal: answer or withdraw an open request (Author role)
+const signalUsage = `smeldr-cli signal: read Signals, answer or withdraw an open request
 
 Usage:
+  signal list [--receiver r | --sender s] [--state s] [--limit n] [--offset n] [--json]
+  signal get <address> [--json]
   signal answer <address> --text <answer> [--ref <Type:ident>]
   signal withdraw <address> --reason <text>
 
---ref names the change the answer made, such as Task:T4.
-The MCP endpoint is used (SMELDR_MCP_URL). Needs smeldr.dev/mcp v1.64.0 or later.
+list without --receiver and --sender lists what is addressed to you: the
+Signals whose receiver is your user ID, an operation you hold (such as
+ratify) or a receiver your subscriptions name (your band). You do not need
+to know those words. --state defaults to what awaits action (open and
+pending); newest first. That needs smeldr.dev/mcp with list_signals
+addressed_to_me; an older server is told to name a --receiver.
+get prints one Signal: its type, state, receiver, subject, message and, for
+an answered request, the answer. Reading a Signal follows the read rules:
+one about a record you cannot read is not listed.
+--ref names the change the answer made, such as Task:T4. answer and
+withdraw need Author role and smeldr.dev/mcp v1.64.0 or later.
+The MCP endpoint is used (SMELDR_MCP_URL).
 `
 
 // runSubscriptionCommand dispatches the subscription commands.
@@ -47,6 +59,16 @@ func runSubscriptionCommand(args []string) {
 
 // runSignalCommand dispatches the signal commands.
 func runSignalCommand(args []string) {
+	if len(args) > 0 {
+		switch args[0] {
+		case "get":
+			runSignalGet(args[1:])
+			return
+		case "list":
+			runSignalList(args[1:])
+			return
+		}
+	}
 	runToolCommand(args, signalUsage, parseSignalArgs)
 }
 
@@ -278,7 +300,7 @@ func parseSubscriptionArgs(args []string) (string, map[string]any, error) {
 // withdraw_signal and its arguments.
 func parseSignalArgs(args []string) (string, map[string]any, error) {
 	if len(args) == 0 {
-		return "", nil, fmt.Errorf("signal requires a verb: answer or withdraw")
+		return "", nil, fmt.Errorf("signal requires a verb: list, get, answer or withdraw")
 	}
 	verb := args[0]
 	if verb == "help" || verb == "-h" || verb == "--help" {
@@ -319,5 +341,5 @@ func parseSignalArgs(args []string) (string, map[string]any, error) {
 		}
 		return "withdraw_signal", map[string]any{"signal": addr, "reason": c.flags["reason"]}, nil
 	}
-	return "", nil, fmt.Errorf("unknown signal verb %q: answer or withdraw", verb)
+	return "", nil, fmt.Errorf("unknown signal verb %q: list, get, answer or withdraw", verb)
 }

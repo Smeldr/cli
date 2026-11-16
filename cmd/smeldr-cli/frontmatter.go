@@ -3,28 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"strings"
 )
 
-// parseFrontmatterFile reads the file at path (or stdin when path is "-"),
-// parses the YAML-subset frontmatter, and returns the field map and body.
+// parseFrontmatterFile reads the file at path (or stdin when path is "-")
+// with [readFromFile], so its line endings are LF, parses the YAML-subset
+// frontmatter, and returns the field map and body.
 //
 // See [parseFrontmatter] for the supported format.
 func parseFrontmatterFile(path string) (map[string]any, string, error) {
-	var data []byte
-	if path == "-" {
-		var err error
-		data, err = io.ReadAll(stdinReader())
-		if err != nil {
-			return nil, "", fmt.Errorf("read stdin: %w", err)
-		}
-	} else {
-		var err error
-		data, err = readFileNoBOM(path)
-		if err != nil {
-			return nil, "", fmt.Errorf("read %q: %w", path, err)
-		}
+	data, err := readFromFile(path)
+	if err != nil {
+		return nil, "", err
 	}
 	return parseFrontmatter(string(data))
 }
@@ -44,10 +34,12 @@ func parseFrontmatterFile(path string) (map[string]any, string, error) {
 //   - Lists:  [a, b, c] → []string (split on comma; inner whitespace trimmed)
 //   - String: everything else (value trimmed of leading/trailing whitespace)
 //
-// The function returns an error if the content does not begin with "---\n".
+// CRLF and lone CR line endings are read as LF first. The function returns
+// an error if the content does not begin with "---\n".
 // When a body section is present after the closing "---", it is returned as
 // bodyStr. The caller decides which field name to use for the body.
 func parseFrontmatter(content string) (map[string]any, string, error) {
+	content = string(toLF([]byte(content)))
 	if !strings.HasPrefix(content, "---\n") {
 		return nil, "", fmt.Errorf("content must begin with ---")
 	}
