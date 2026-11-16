@@ -85,6 +85,9 @@ func TestCheckFlagOrder(t *testing.T) {
 		{"answer, misspelled", parseCheckAnswer, []string{"CHK1", "ARE1", "--aprove"}, nil, false, "-aprove"},
 		{"merge, flags after a stray", parseCheckMerge, cat([]string{"x"}, repo, []string{"--merge", cliHead}), nil, false, `check merge: unexpected argument "x"`},
 		{"merge", parseCheckMerge, cat(repo, []string{"--merge", cliHead, "--json"}), map[string]any{"merge_commit": cliHead}, true, ""},
+		{"close", parseCheckClose, cat(repo, []string{"--json"}), map[string]any{"head_commit": cliHead, "number": "7"}, true, ""},
+		{"close, a stray", parseCheckClose, cat([]string{"x"}, repo), nil, false, `check close: unexpected argument "x"`},
+		{"close, no head", parseCheckClose, []string{"--repo", "acme/app", "--number", "7"}, nil, false, "check close needs --repo, --number and --head"},
 		{"list, flags", parseCheckList, []string{"--repo", "acme/app", "--number", "2"}, map[string]any{"number": "2"}, false, ""},
 		{"list, a stray", parseCheckList, []string{"--repo", "acme/app", "extra"}, nil, false, `check list: unexpected argument "extra"`},
 		{"show, flag before", parseCheckShow, []string{"--json", "CHK1"}, map[string]any{"check": "CHK1"}, true, ""},
@@ -135,6 +138,19 @@ func TestCheckMergeAnswerShowList(t *testing.T) {
 	})
 	if !strings.Contains(out, `"opened"`) {
 		t.Errorf("merge --json:\n%s", out)
+	}
+	closeArgs := []string{"close", "--repo", "acme/app", "--number", "7", "--head", cliHead}
+	tool, args, out = mockMCP(t, map[string]any{"covered": true, "check": map[string]any{"address": "CHK3"}}, func() { runCheckCommand(closeArgs) })
+	if tool != "record_close" || args["head_commit"] != cliHead || !strings.Contains(out, "acme/app#7: the close is recorded; the open requests of CHK3 were withdrawn") {
+		t.Errorf("close: %q %v\n%s", tool, args, out)
+	}
+	_, _, out = mockMCP(t, map[string]any{"covered": false}, func() { runCheckCommand(closeArgs) })
+	if !strings.Contains(out, "acme/app#7: the close is recorded; it has no Check") {
+		t.Errorf("close, no Check:\n%s", out)
+	}
+	_, _, out = mockMCP(t, map[string]any{"covered": false}, func() { runCheckCommand(append(closeArgs, "--json")) })
+	if !strings.Contains(out, `"covered"`) {
+		t.Errorf("close --json:\n%s", out)
 	}
 	tool, args, _ = mockMCP(t, cliCheck, func() {
 		runCheckCommand([]string{"answer", "--not-approved", "--reason", "breaks the rule", "CHK3", "ARE1", "--rev", "3"})

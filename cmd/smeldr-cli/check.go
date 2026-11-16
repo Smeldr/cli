@@ -23,6 +23,8 @@ func runCheckCommand(args []string) {
 		runCheckChange(rest)
 	case "merge":
 		runCheckMerge(rest)
+	case "close":
+		runCheckClose(rest)
 	case "answer":
 		runCheckAnswer(rest)
 	case "show":
@@ -30,7 +32,7 @@ func runCheckCommand(args []string) {
 	case "list":
 		runCheckList(rest)
 	default:
-		fatal("unknown check command %q: change, merge, answer, show or list", sub)
+		fatal("unknown check command %q: change, merge, close, answer, show or list", sub)
 	}
 }
 
@@ -213,6 +215,53 @@ func runCheckMerge(args []string) {
 	}
 }
 
+func parseCheckClose(args []string) (checkCall, error) {
+	fs := newCheckFlags("check close")
+	repo := fs.String("repo", "", "repository, owner/name")
+	number := fs.Int("number", 0, "pull request number")
+	head := fs.String("head", "", "the head commit when it was closed")
+	raw := fs.Bool("json", false, "raw JSON")
+	pos, err := parseInterspersed(fs, args)
+	if err == nil {
+		err = noPositionals("check close", pos)
+	}
+	if err != nil {
+		return checkCall{}, err
+	}
+	if *repo == "" || *number <= 0 || *head == "" {
+		return checkCall{}, errors.New("check close needs --repo, --number and --head")
+	}
+	return checkCall{"record_close", map[string]any{"repository": *repo, "number": *number, "head_commit": *head}, *raw}, nil
+}
+
+// runCheckClose records that a pull request was closed without a merge
+// (record_close): its Check's open requests are withdrawn.
+func runCheckClose(args []string) {
+	c, err := parseCheckClose(args)
+	text := runCheckCall(c, err)
+	if c.raw {
+		if err := printJSON([]byte(text)); err != nil {
+			fatal("%v", err)
+		}
+		return
+	}
+	var res struct {
+		Covered bool `json:"covered"`
+		Check   *struct {
+			Address string `json:"address"`
+		} `json:"check"`
+	}
+	if err := json.Unmarshal([]byte(text), &res); err != nil {
+		fatal("unexpected response: %v", err)
+	}
+	change := fmt.Sprintf("%s#%v", c.params["repository"], c.params["number"])
+	if !res.Covered || res.Check == nil {
+		fmt.Printf("%s: the close is recorded; it has no Check\n", change)
+		return
+	}
+	fmt.Printf("%s: the close is recorded; the open requests of %s were withdrawn\n", change, res.Check.Address)
+}
+
 func parseCheckAnswer(args []string) (checkCall, error) {
 	fs := newCheckFlags("check answer")
 	approve := fs.Bool("approve", false, "approve the change for the Area")
@@ -329,6 +378,7 @@ func printCheckHelp() {
 Usage:
   smeldr-cli check change --repo owner/name --number N --head SHA [--files-total N] [--stdin] [--json] [<path>...]
   smeldr-cli check merge  --repo owner/name --number N --head SHA --merge SHA [--json]
+  smeldr-cli check close  --repo owner/name --number N --head SHA [--json]
   smeldr-cli check answer <check> <area> --approve | --not-approved --reason "why" [--rev <n>] [--json]
   smeldr-cli check show   <check> [--json]
   smeldr-cli check list   [--repo owner/name [--number N]] [--area A] [--decision D] [--status S] [--limit N] [--json]
@@ -336,8 +386,9 @@ Usage:
 Flags may come before or after the arguments; an unknown flag or a stray
 argument is refused.
 
-change and merge are for the host's adapter or an operator (check_change
-capability). answer counts when you hold approve-change over that Area (or
+change, merge and close are for the host's adapter or an operator (check_change
+capability). close records a pull request closed without a merge: its Check's
+open requests are withdrawn, and opening it again (check change) asks again. answer counts when you hold approve-change over that Area (or
 item-change-approver on the Check). list needs a repository, an Area or a
 Decision: Checks are read by filter.
 

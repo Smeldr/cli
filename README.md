@@ -574,17 +574,18 @@ smeldr-cli decision retire D172 --reason "a throwaway"
 smeldr-cli decision repair D186 --by D188 --reason "..."    # or --retire: one superseded with no replacement recorded
 ```
 
-The pull request check (core T918; `check_change`, `record_merge`, `answer_change_check`, `get_change_check`, `list_change_checks` over MCP). `change` and `merge` are for the host's adapter or an operator; `answer` counts when you hold approve-change over the Area:
+The pull request check (core T918; `check_change`, `record_merge`, `record_close`, `answer_change_check`, `get_change_check`, `list_change_checks` over MCP). `change`, `merge` and `close` are for the host's adapter or an operator; `answer` counts when you hold approve-change over the Area:
 
 ```bash
 git diff --name-only main | smeldr-cli check change --repo acme/app --number 7 --head <sha> --stdin
 smeldr-cli check merge --repo acme/app --number 7 --head <sha> --merge <sha>
+smeldr-cli check close --repo acme/app --number 7 --head <sha>   # closed without a merge
 smeldr-cli check answer CHK3 ARE1 --approve        # or --not-approved --reason "why"
 smeldr-cli check show CHK3
 smeldr-cli check list --repo acme/app --number 7   # or --area ARE1, --decision D7
 ```
 
-Flags may come before or after the arguments (`check answer --approve CHK3 ARE1` reads the same). An unknown flag or a stray argument is refused, never ignored; after `--` every argument is a path.
+`check close` records a pull request closed without a merge: its Check's open requests are withdrawn, and a later `check change` for it makes it open again. Flags may come before or after the arguments (`check answer --approve CHK3 ARE1` reads the same). An unknown flag or a stray argument is refused, never ignored; after `--` every argument is a path.
 
 ---
 

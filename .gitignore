@@ -5,3 +5,6 @@ forge-cli
 # Local CLI config — contains a real bearer token; NEVER commit
 .forge-cli.env
 .smeldr-cli.env
+
+# Test coverage profiles (ci.yml runs go test -coverprofile=coverage.out)
+coverage.out

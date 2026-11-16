@@ -11,6 +11,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`smeldr-cli check close --repo --number --head [--json]` (core T1294),** over mcp's `record_close`: records a pull request closed without a merge. Its Check's open requests are withdrawn, and a later `check change` for it makes it open again. The server needs core and mcp with `RecordClose` and `record_close`.
 - **`smeldr-cli content <type> <verb>` for items of a runtime-defined type (core T1292).** Before, the content verbs spoke only a compiled module's routes, so a type defined with `content-type define` could not be worked on from the cli. The new command uses the server's `/_content/<type>` routes and the type's name.
   - The verbs are `list`, `get`, `create`, `update`, `publish`, `unpublish` and `archive`.
   - An item is named by its slug or its ID.
