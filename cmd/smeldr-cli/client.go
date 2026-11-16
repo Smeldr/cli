@@ -109,6 +109,14 @@ func request(cfg Config, method, url string, body any) ([]byte, int, error) {
 	return raw, resp.StatusCode, nil
 }
 
+// statusError is a server's refusal: its status and its body as given.
+type statusError struct {
+	Code int
+	Body string
+}
+
+func (e *statusError) Error() string { return fmt.Sprintf("server returned %d: %s", e.Code, e.Body) }
+
 // getItem GETs url and decodes the JSON response into a map.
 func getItem(cfg Config, url string) (map[string]any, error) {
 	raw, code, err := request(cfg, http.MethodGet, url, nil)
@@ -116,7 +124,7 @@ func getItem(cfg Config, url string) (map[string]any, error) {
 		return nil, err
 	}
 	if code >= 400 {
-		return nil, fmt.Errorf("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		return nil, &statusError{Code: code, Body: strings.TrimSpace(string(raw))}
 	}
 	var item map[string]any
 	if err := json.Unmarshal(raw, &item); err != nil {

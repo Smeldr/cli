@@ -9,7 +9,23 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`smeldr-cli content <type> <verb>` for items of a runtime-defined type (core T1292).** Before, the content verbs spoke only a compiled module's routes, so a type defined with `content-type define` could not be worked on from the cli. The new command uses the server's `/_content/<type>` routes and the type's name.
+  - The verbs are `list`, `get`, `create`, `update`, `publish`, `unpublish` and `archive`.
+  - An item is named by its slug or its ID.
+  - `update` sends only the fields in the file.
+  - There is no `delete`, since the server has none.
+  - A slug is looked up across every item the token may read. If the server ever answers fewer items than its total, the cli says so instead of "no such item".
+  - A type whose name is a verb is reached with `content --type <name> <verb>`.
+- **A leading slash always means a prefix:** `smeldr-cli /<prefix> <verb>`.
+
 ### Fixed
+
+- **`<prefix> list` reads a runtime type's public route (core T1292).** It answers an object with `items`, which the cli refused with "decode list: cannot unmarshal object". Both shapes are read now.
+- **After a 404 or 405, a content verb prints the server's answer, then one line pointing at `smeldr-cli content <type>`**, since the prefix may be a runtime type's (core T1292).
+- **`content-type get` against a server without the schema tools says what to switch on (core T1292):** `ENABLE_DYNAMIC_CONTENT`, `ENABLE_SCHEMA_TOOLS` or `ENABLE_BLOCKS`, after the server's own "unknown tool". The help names them too. From the core release that carries T1292's core part, the release binary lists the schema tools with `ENABLE_DYNAMIC_CONTENT`.
+- **Unchanged on purpose:** `smeldr-cli content <verb>`, with a verb right after `content`, still reaches a module served at `/content`, as before.
 
 - **`check answer` without `--rev` reads the Check's rev and asks (core T1283).** It always stopped with "get_change_check returned no rev": the cli looked for the rev at the top level of the answer, and `get_change_check` puts the Check under `check`. It now reads the Check there, shows its address, status and rev, and asks, as its help says. The other commands that read a rev before a write read the record itself and are unchanged.
 - **What the cli prints and sends names no record of Smeldr's own instance (core T1222).** 25 texts in 17 files cited a record on smeldr.dev's instance: help and usage lines ("replace a Decision in one act (core D189)", "your event subscriptions (D116)", "(Author; core T1207)"), the `decision sources` refusal ("address (D148), slug or ID"), and version notes ("administrators (core T944) on the server"). On a user's own instance that address is another record or none. The citations are gone; an example is a one-digit shape (`Decision:D1`, `Task:T4`); "the server predates core T1010" says "core v1.186.0". Commands, flags and output fields are unchanged. A new test reads every string literal in the command's non-test files and fails on an address.

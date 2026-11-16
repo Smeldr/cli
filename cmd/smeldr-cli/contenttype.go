@@ -18,7 +18,8 @@ Usage:
                                      define a new type (Admin, define-type)
   content-type redefine --type <name> --fields <file.json> [--label L] [--reason R]
                                      change an existing type's schema (Admin, define-type)
-  content-type get <name>            print a type's schema (Author)
+  content-type get <name>            print a type's schema (Author; the server needs
+                                     ENABLE_DYNAMIC_CONTENT, ENABLE_SCHEMA_TOOLS or ENABLE_BLOCKS)
 
 --fields is a JSON file holding the full field list: an array of
 {name, type, required, format, role, description} objects.
@@ -49,7 +50,7 @@ func runContentTypeCommand(args []string) {
 	}
 	text, err := mcpCall(cfg, tool, params)
 	if err != nil {
-		fatal("%v", err)
+		fatal("%v%s", err, schemaToolsHint(tool, err))
 	}
 	if err := printJSON([]byte(text)); err != nil {
 		fatal("%v", err)
@@ -127,4 +128,14 @@ func parseContentTypeArgs(args []string, readFile func(string) ([]byte, error)) 
 		p["reason"] = *reason
 	}
 	return "redefine_content_type", p, nil
+}
+
+// schemaToolsHint is the line added after a server's answer when it does not
+// list the schema tool: what to switch on, for the release binary (T1292).
+// It follows the server's own text, never replaces it.
+func schemaToolsHint(tool string, err error) string {
+	if tool != "get_content_type_schema" || !strings.Contains(err.Error(), "unknown tool") {
+		return ""
+	}
+	return "\nThis server does not list the schema tools: start it with ENABLE_DYNAMIC_CONTENT, ENABLE_SCHEMA_TOOLS or ENABLE_BLOCKS."
 }

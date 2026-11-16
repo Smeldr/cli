@@ -92,8 +92,12 @@ starts with `-`.
 
 ## Content commands
 
-All content commands take the URL path prefix of the content type as the first
-argument (e.g. `posts`, `pages`).
+These commands take the URL path prefix of a compiled module as the first
+argument (e.g. `posts`, `pages`). A leading slash (`smeldr-cli /posts list`)
+always means a prefix, also when the prefix is the name of a command. In Git
+Bash on Windows, set `MSYS_NO_PATHCONV=1` for that form, since Git Bash turns
+`/posts` into a Windows path before the cli sees it. For a
+runtime-defined type, see [Runtime-defined types](#runtime-defined-types).
 
 ### Create a draft
 
@@ -152,6 +156,33 @@ smeldr-cli posts list --fields slug,title,status  # custom columns (case-insensi
 ```bash
 smeldr-cli posts get my-post
 ```
+
+A runtime-defined type's public route (its `url_prefix`) answers `list` and
+`get` too, with its published items only. After a 404 or 405 the cli prints
+the server's answer, then a line pointing at `smeldr-cli content <type>`.
+
+### Runtime-defined types
+
+Items of a type defined with `content-type define` are reached by the type's
+name, over the server's `/_content/<type>` routes, in any state the token may
+read:
+
+```bash
+smeldr-cli content recipe list [--status draft] [--json] [--fields slug,title]
+smeldr-cli content recipe get pasta            # a slug or an ID
+smeldr-cli content recipe create --from recipe.md
+smeldr-cli content recipe update pasta --from changes.md   # only the fields in the file
+smeldr-cli content recipe publish pasta        # also unpublish, archive
+```
+
+The front matter holds the fields; the text below it goes to `body` when the
+file does not set it. The server makes the slug from the field whose `role` is
+`title` (`item` when the type has none), so define one to name items by slug. There is no `delete`: the server has no delete route for
+runtime items, so archive them. A type whose name is a verb (`list`, `get`, ...)
+is reached with `smeldr-cli content --type <name> <verb>`.
+
+`smeldr-cli content <verb>` with a verb right after `content` is still the
+prefix form and reaches a module served at `/content`.
 
 ---
 

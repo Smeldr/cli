@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -100,7 +101,7 @@ func runCreate(typePath string, args []string) {
 		fatal("%v", err)
 	}
 	if code >= 400 {
-		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		prefixFailure(typePath, "create", code, raw)
 	}
 	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
@@ -135,7 +136,7 @@ func runUpdate(typePath string, args []string) {
 	url := cfg.ForgeURL + "/" + typePath + "/" + slug
 	existing, err := getItem(cfg, url)
 	if err != nil {
-		fatal("GET failed: %v", err)
+		getFailure(typePath, "update", err)
 	}
 
 	// Overlay frontmatter fields onto existing item (case-insensitive key match).
@@ -155,7 +156,7 @@ func runUpdate(typePath string, args []string) {
 		fatal("%v", err)
 	}
 	if code >= 400 {
-		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		prefixFailure(typePath, "update", code, raw)
 	}
 	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
@@ -189,7 +190,7 @@ func runLifecycle(typePath, verb string, args []string) {
 	url := cfg.ForgeURL + "/" + typePath + "/" + slug
 	existing, err := getItem(cfg, url)
 	if err != nil {
-		fatal("GET failed: %v", err)
+		getFailure(typePath, verb, err)
 	}
 
 	// Set the Status field using the exact key name from the GET response.
@@ -204,7 +205,7 @@ func runLifecycle(typePath, verb string, args []string) {
 		fatal("%v", err)
 	}
 	if code >= 400 {
-		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		prefixFailure(typePath, verb, code, raw)
 	}
 	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
@@ -230,7 +231,7 @@ func runDelete(typePath string, args []string) {
 		fatal("%v", err)
 	}
 	if code >= 400 {
-		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		prefixFailure(typePath, "delete", code, raw)
 	}
 	// 204 No Content — emit a confirmation.
 	out, _ := json.MarshalIndent(map[string]any{"deleted": true, "slug": slug}, "", "  ")
@@ -265,11 +266,11 @@ func runList(typePath string, args []string) {
 		fatal("%v", err)
 	}
 	if code >= 400 {
-		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		prefixFailure(typePath, "list", code, raw)
 	}
 
-	var items []any
-	if err := json.Unmarshal(raw, &items); err != nil {
+	items, err := decodeListItems(raw)
+	if err != nil {
 		fatal("decode list: %v", err)
 	}
 
@@ -323,7 +324,7 @@ func runGet(typePath string, args []string) {
 		fatal("%v", err)
 	}
 	if code >= 400 {
-		fatal("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+		prefixFailure(typePath, "get", code, raw)
 	}
 	if err := printJSON(raw); err != nil {
 		fatal("%v", err)
@@ -344,4 +345,42 @@ func findKeyIn(m map[string]any, query string) string {
 		}
 	}
 	return ""
+}
+
+// decodeListItems reads a list answer: a JSON array (a compiled module) or an
+// object with items (a runtime-defined type's public route, T1292).
+func decodeListItems(raw []byte) ([]any, error) {
+	var items []any
+	if err := json.Unmarshal(raw, &items); err == nil {
+		return items, nil
+	}
+	var page struct {
+		Items *[]any `json:"items"`
+	}
+	if err := json.Unmarshal(raw, &page); err != nil || page.Items == nil {
+		return nil, fmt.Errorf("want a JSON array or an object with items")
+	}
+	return *page.Items, nil
+}
+
+// prefixFailure ends a prefix-form verb with the server's refusal as given.
+// After a 404 or 405 it adds one hint line, since the prefix may be a
+// runtime-defined type's, whose items have their own command (T1292).
+func prefixFailure(typePath, verb string, code int, raw []byte) {
+	msg := fmt.Sprintf("server returned %d: %s", code, strings.TrimSpace(string(raw)))
+	if code == http.StatusNotFound || code == http.StatusMethodNotAllowed {
+		msg += fmt.Sprintf("\nIf %s is a runtime-defined type or its public route, use: smeldr-cli content <type> %s", typePath, verb)
+	}
+	fatal("%s", msg)
+}
+
+// getFailure is prefixFailure for the GET that update and the state verbs
+// make first.
+func getFailure(typePath, verb string, err error) {
+	var se *statusError
+	if errors.As(err, &se) {
+		prefixFailure(typePath, verb, se.Code, []byte(se.Body))
+		return
+	}
+	fatal("GET failed: %v", err)
 }

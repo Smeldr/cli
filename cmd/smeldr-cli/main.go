@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 const cliVersion = "0.39.0"
@@ -87,8 +88,12 @@ func main() {
 		runSignalCommand(os.Args[2:])
 	case "watch":
 		runWatchCommand(os.Args[2:])
+	case "content":
+		runContentWord(os.Args[2:])
 	default:
-		runContentCommand(os.Args[1], os.Args[2:])
+		// A leading slash always names a prefix (T1292), so a module served at
+		// /content, or at any name a command takes, stays reachable.
+		runContentCommand(strings.TrimPrefix(os.Args[1], "/"), os.Args[2:])
 	}
 }
 
@@ -97,7 +102,9 @@ func printUsage(w *os.File) {
 
 Usage:
   smeldr-cli init [--url URL] [--bootstrap-token TOKEN]   bootstrap a new instance
-  smeldr-cli <type> <verb> [slug] [flags]                 content operations
+  smeldr-cli <prefix> <verb> [slug] [flags]               items of a module served at /<prefix>
+                                                          (smeldr-cli /<prefix> ... always means a prefix)
+  smeldr-cli content <type> <verb> [args]                 items of a runtime-defined type
   smeldr-cli token <verb> [args]                          token management
   smeldr-cli grant [revoke|list] [args]                   governance role grants (Admin role required)
   smeldr-cli content-type <define|redefine|get> [args]    runtime-defined content types
