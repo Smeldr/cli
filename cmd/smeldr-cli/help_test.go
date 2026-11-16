@@ -37,6 +37,10 @@ func runCLI(t *testing.T, args ...string) (string, string, int) {
 		helpChildEnv + "=1", helpChildEnv + "_ARGS=" + strings.Join(args, " "),
 		"PATH=" + os.Getenv("PATH"), "HOME=" + home, "USERPROFILE=" + home,
 		"SYSTEMROOT=" + os.Getenv("SYSTEMROOT"),
+		// Under go test -coverprofile the binary is built with coverage, and
+		// a child without GOCOVERDIR warns on stderr (T1296): give it a
+		// directory of its own, so stderr is the command's alone.
+		"GOCOVERDIR=" + t.TempDir(),
 	}
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
