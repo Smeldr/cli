@@ -21,6 +21,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - A type whose name is a verb is reached with `content --type <name> <verb>`.
 - **A leading slash always means a prefix:** `smeldr-cli /<prefix> <verb>`.
 
+### Changed
+
+- **The release workflow builds nothing unless `ci.yml` is green on the tagged commit (core T1297).** A first job, `ci-green`, runs `scripts/ci-green.sh` with the workflow's own token (`actions: read`): green passes; red stops; a run still going is waited for up to 45 minutes; no run is waited for up to 10 minutes, then stops. When it stops, nothing is built or attached and the release stays a draft. It reads `ci.yml` only. It gates a tag on a commit that carries it; a tag on an older commit runs that commit's workflow, ungated. A release on a green commit builds the same five binaries, the version check, `SHA256SUMS` and the publish as before.
+
 ### Fixed
 
 - **`<prefix> list` reads a runtime type's public route (core T1292).** It answers an object with `items`, which the cli refused with "decode list: cannot unmarshal object". Both shapes are read now.
